@@ -1,0 +1,18 @@
+---
+// src/pages/tags.astro
+import TagFilter from '../components/Filter/TagFilter';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+import { getCollection } from 'astro:content';
+const allPosts = await getCollection('posts');
+const allTags = [...new Set(allPosts.flatMap(post => post.data.tags || []))].sort();
+const pageTitle = "Search";
+
+
+---
+
+<BaseLayout pageTitle={pageTitle}>
+  <div class="tags-page">
+    <TagFilter client:load />
+  </div>
+</BaseLayout>

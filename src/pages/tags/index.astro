@@ -1,0 +1,248 @@
+---
+// src/pages/tags/index.astro
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+const posts = await getCollection("posts");
+const tagsPosts = new Map();
+
+for (const post of posts) {
+  for (const tag of post.data.tags || []) {
+    tagsPosts.set(tag, [...(tagsPosts.get(tag) || []), post]);
+  }
+}
+
+// 按标签名称排序
+---
+
+<BaseLayout pageTitle="Tags">
+  <div class="tags-page">
+    <header class="page-header">
+      <h1>Tags</h1>
+    </header>
+
+    <div class="tags-container">
+      <div class="tags-grid">
+        {
+          Array.from(tagsPosts.keys()).map((tag) => (
+            <div class="tag-card">
+              <div class="tag-header">
+                <h2 class="tag-title">
+                  <a href={`/tags/${tag}`} class="tag-link">
+                    {tag}
+                  </a>
+                </h2>
+                <span class="post-count">
+                  {tagsPosts.get(tag).length} 篇文章
+                </span>
+              </div>
+
+              <ul class="post-list">
+                {tagsPosts
+                  .get(tag)
+                  .slice(0, 5)
+                  .map((post) => (
+                    <li class="post-item">
+                      <a href={`/posts/${post.id}`} class="post-link">
+                        <span class="post-title">
+                          {post.data.title}
+                          {post.id}
+                        </span>
+                        <span class="post-date">
+                          {new Date(post.data.date).toLocaleDateString()}
+                        </span>
+                      </a>
+                    </li>
+                  ))}
+
+                {tagsPosts.get(tag).length > 5 && (
+                  <li class="view-more">
+                    <a href={`/tags/${tag}`} class="view-more-link">
+                      查看全部 {tagsPosts.get(tag).length} 篇文章 &rarr;
+                    </a>
+                  </li>
+                )}
+              </ul>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+  <style>
+    /* 页面整体样式 */
+    .tags-page {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+
+    /* 页面标题区域 */
+    .page-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .page-header h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .page-header p {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+    }
+
+    /* 标签容器 */
+    .tags-container {
+      width: 100%;
+    }
+
+    /* 标签网格布局 */
+    .tags-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 2rem;
+    }
+
+    /* 单个标签卡片 */
+    .tag-card {
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      transition:
+        transform 0.3s ease,
+        box-shadow 0.3s ease;
+      border: 1px solid var(--border-color);
+    }
+
+    .tag-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    /* 标签头部 */
+    .tag-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .tag-title {
+      margin: 0;
+      font-size: 1.4rem;
+    }
+
+    .tag-link {
+      color: var(--accent-color);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .tag-link:hover {
+      color: var(--accent-hover);
+    }
+
+    .post-count {
+      background: var(--accent-color);
+      color: white;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+    }
+
+    /* 文章列表 */
+    .post-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .post-item {
+      margin-bottom: 0.75rem;
+    }
+
+    .post-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .post-link {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      text-decoration: none;
+      color: var(--text-secondary);
+      padding: 0.5rem;
+      border-radius: 6px;
+      transition: background-color 0.2s ease;
+    }
+
+    .post-link:hover {
+      background-color: var(--bg-tertiary);
+    }
+
+    .post-title {
+      font-weight: 500;
+      flex: 1;
+      margin-right: 1rem;
+    }
+
+    .post-date {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    /* 查看更多链接 */
+    .view-more {
+      margin-top: 1rem;
+      padding-top: 0.75rem;
+      border-top: 1px dashed var(--border-color);
+    }
+
+    .view-more-link {
+      color: var(--accent-color);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      display: block;
+      transition: color 0.2s ease;
+    }
+
+    .view-more-link:hover {
+      color: var(--accent-hover);
+    }
+
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+      .tags-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .tag-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .post-count {
+        margin-top: 0.5rem;
+      }
+
+      .post-link {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .post-date {
+        margin-top: 0.25rem;
+        font-size: 0.8rem;
+      }
+    }
+  </style>
+</BaseLayout>

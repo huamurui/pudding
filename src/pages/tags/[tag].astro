@@ -1,0 +1,53 @@
+---
+import { type CollectionEntry, getCollection } from "astro:content";
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostList from '../../components/PostList/PostList';
+export async function getStaticPaths() {
+  const posts = await getCollection("posts");
+  const tags = new Map();
+
+  for (const post of posts) {
+    for (const tag of post.data.tags || []) {
+      if (!tags.has(tag)) {
+        tags.set(tag, []);
+      }
+      tags.get(tag)!.push(post);
+    }
+  }
+
+  return Array.from(tags.entries()).map(([tag, posts]) => ({
+    params: { tag },
+    props: { tag, posts },
+  }));
+}
+
+type Props = {
+  tag: string;
+  posts: [];
+};
+
+const { tag, posts } = Astro.props;
+---
+
+<BaseLayout title={`Tag ⬝ ${tag}`} description={`Posts tagged with ${tag}`}>
+  <div class="tag">
+    <div class="stat">
+      <div class="stat-title">
+        <h1>{tag}</h1>
+      </div>
+      <div class="stat-desc">
+        <span>Total posts: {posts.length}</span>
+      </div>
+    </div>
+  </div>
+  <PostList posts={()=>posts.map(post => ({
+    id: post.id,
+    title: post.data.title,
+    date: post.data.date,
+    description: post.data.description,
+    tags: post.data.tags || [],
+    url: `/posts/${post.id}/`,
+  }))
+    
+    }/>
+</BaseLayout>

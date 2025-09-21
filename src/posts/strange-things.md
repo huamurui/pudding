@@ -2,11 +2,7 @@
 icon: creative
 date: 2022-10-27
 title: 怪东西
-category:
-  - 日记
-  - 胡说八道
-tag:
-  - 记录
+tags: ['胡说八道','日记']
 ---
 
 ### 封装。

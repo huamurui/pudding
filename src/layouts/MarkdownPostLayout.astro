@@ -1,0 +1,49 @@
+---
+import BaseLayout from "./BaseLayout.astro";
+import "/node_modules/katex/dist/katex.min.css";
+
+const { frontmatter } = Astro.props;
+---
+
+<BaseLayout pageTitle={frontmatter.title}>
+  <slot />
+</BaseLayout>
+
+<style>
+  /* 基础布局样式 */
+  :global(.blog-post-container) {
+    padding-top: 2rem;
+    padding-bottom: 3rem;
+  }
+  
+  :global(.tags) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 1.5rem 0;
+  }
+  
+  :global(.tag) {
+    margin: 0;
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    background-color: var(--bg-tertiary);
+    transition: all 0.2s ease;
+  }
+  
+  :global(.tag:hover) {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+  }
+  
+  :global(.tag a) {
+    color: var(--text-secondary);
+    text-decoration: none;
+  }
+  
+  :global(.tag:hover a) {
+    color: white;
+  }
+</style>

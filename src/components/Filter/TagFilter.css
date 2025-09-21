@@ -1,0 +1,56 @@
+.blog-filter-view {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.loading {
+  text-align: center;
+  padding: 2rem;
+  font-style: italic;
+  color: #666;
+}
+
+/* 筛选器选项卡 */
+.filter-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 1.5rem;
+}
+
+.tab {
+  padding: 0.75rem 1.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--text-secondary);
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.tab:hover {
+  color: var(--text-primary);
+}
+
+.tab.active {
+  color: var(--accent-color);
+  border-bottom-color: var(--accent-color);
+}
+
+/* 筛选器容器 */
+.filter-container {
+  margin-bottom: 2rem;
+}
+
+/* 结果区域 */
+.results {
+  margin-top: 2rem;
+  border-top: 1px solid var(--border-color);
+  padding-top: 2rem;
+}
+
+.results h3 {
+  margin-top: 0;
+  color: var(--text-primary);
+}

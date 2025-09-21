@@ -1,0 +1,348 @@
+---
+import Toc from '../../components/Toc.astro';
+import { getCollection, render } from 'astro:content';
+import MarkdownPostLayout from '../../layouts/MarkdownPostLayout.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('posts');
+  return posts.map(post => ({
+    params: { slug: post.id }, props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content, headings } = await render(post);
+---
+
+<MarkdownPostLayout frontmatter={post.data}>
+  <article class="blog-post-container">
+    <div class="blog-post-content">
+      <header class="post-header">
+        <h1 class="post-title">{post.data.title}</h1>
+        <p class="post-description">{post.data.description}</p>
+        <div class="post-meta">
+          <time class="post-date" datetime={post.data.date.toISOString()}>
+            {new Date(post.data.date).toLocaleDateString('zh-CN', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            })}
+          </time>
+          <span class="meta-separator">•</span>
+          <span class="reading-time">
+            {Math.ceil(post.body.split(' ').length / 200)} 分钟阅读
+          </span>
+        </div>
+        <div class="post-tags">
+          {post.data.tags?.map((tag) => (
+            <a href={`/tags/${tag}`} class="post-tag">
+              #{tag}
+            </a>
+          ))}
+        </div>
+      </header>
+      
+      {post.data.image && (
+        <figure class="post-image">
+          <img 
+            src={post.data.image.url} 
+            alt={post.data.image.alt || post.data.title}
+            loading="lazy"
+          />
+          {post.data.image.alt && <figcaption>{post.data.image.alt}</figcaption>}
+        </figure>
+      )}
+      
+      <div class="post-content">
+        <Content />
+      </div>
+      
+      <footer class="post-footer">
+
+      </footer>
+    </div>
+    
+    {headings && headings.length > 0 && (
+      <aside class="blog-post-sidebar">
+        <Toc headings={headings} />
+      </aside>
+    )}
+  </article>
+</MarkdownPostLayout>
+
+<style>
+  /* 文章容器 */
+  .blog-post-container {
+    display: flex;
+    gap: 3rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+  
+  /* 主要内容区域 */
+  .blog-post-content {
+    flex: 1;
+    min-width: 0;
+    max-width: 800px;
+  }
+  
+  /* 文章头部 */
+  .post-header {
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+  
+  .post-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    line-height: 1.2;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+  }
+  
+  .post-description {
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+  }
+  
+  .post-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+  }
+  
+  .meta-separator {
+    opacity: 0.6;
+  }
+  
+  /* 文章图片 */
+  .post-image {
+    margin: 2rem 0;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .post-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  
+  .post-image figcaption {
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    padding: 0.75rem;
+    background: var(--bg-tertiary);
+  }
+  
+  /* 文章内容样式 */
+  .post-content {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: var(--text-primary);
+  }
+  
+  .post-content h2 {
+    font-size: 1.8rem;
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+  
+  .post-content h3 {
+    font-size: 1.4rem;
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .post-content p {
+    margin-bottom: 1.5rem;
+  }
+  
+  .post-content a {
+    color: var(--accent-color);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  
+  .post-content a:hover {
+    color: var(--accent-hover);
+  }
+  
+  .post-content blockquote {
+    border-left: 4px solid var(--accent-color);
+    padding-left: 1.5rem;
+    margin: 1.5rem 0;
+    font-style: italic;
+    color: var(--text-secondary);
+    background: var(--bg-tertiary);
+    padding: 1.5rem;
+    border-radius: 0 8px 8px 0;
+  }
+  
+  .post-content code {
+    background: var(--bg-tertiary);
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.9em;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  }
+  
+  .post-content pre {
+    background: var(--code-bg);
+    padding: 1.5rem;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 1.5rem 0;
+    line-height: 1.5;
+  }
+  
+  .post-content pre code {
+    background: none;
+    padding: 0;
+  }
+  
+  .post-content ul, 
+  .post-content ol {
+    margin: 1.5rem 0;
+    padding-left: 1.5rem;
+  }
+  
+  .post-content li {
+    margin-bottom: 0.5rem;
+  }
+  
+  .post-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 1.5rem 0;
+  }
+  
+  .post-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+  }
+  
+  .post-content th, 
+  .post-content td {
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+  }
+  
+  .post-content th {
+    background: var(--bg-tertiary);
+    font-weight: 600;
+  }
+  
+  /* 文章底部 */
+  .post-footer {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-color);
+  }
+  
+  .post-tags {
+    margin-top: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .post-tag {
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+  
+  .post-tag:hover {
+    background: var(--accent-color);
+    color: white;
+  }
+  
+  .post-share {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+  }
+  
+  .share-link {
+    font-size: 1.2rem;
+    text-decoration: none;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+  }
+  
+  .share-link:hover {
+    opacity: 1;
+  }
+  
+  /* 侧边栏 */
+  .blog-post-sidebar {
+    width: 280px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 2rem;
+    align-self: flex-start;
+    max-height: calc(100vh - 2rem);
+  }
+  
+  /* 响应式设计 */
+  @media (max-width: 968px) {
+    .blog-post-container {
+      flex-direction: column;
+      gap: 2rem;
+    }
+    
+    .blog-post-sidebar {
+      width: 100%;
+      position: static;
+      order: -1;
+      margin-bottom: 2rem;
+    }
+    
+    .post-title {
+      font-size: 2rem;
+    }
+    
+    .post-description {
+      font-size: 1.1rem;
+    }
+  }
+  
+  @media (max-width: 640px) {
+    .blog-post-container {
+      padding: 1rem 0.5rem;
+    }
+    
+    .post-title {
+      font-size: 1.75rem;
+    }
+    
+    .post-meta {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.25rem;
+    }
+    
+    .meta-separator {
+      display: none;
+    }
+  }
+</style>

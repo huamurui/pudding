@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PostList from '../components/PostList/PostList';
+import { getCollection } from 'astro:content';
+const pageTitle = "Home Page";
+
+const _posts = await getCollection('posts');
+const posts = () => _posts.map(post => ({
+  id: post.id,
+  title: post.data.title,
+  date: post.data.date,
+  description: post.data.description,
+  tags: post.data.tags || [],
+  url: `/posts/${post.id}/`,
+})).sort((a, b) => new Date(b.date) - new Date(a.date));
+
+---
+<BaseLayout pageTitle={pageTitle}>
+  <div
+  style={{
+    maxWidth: '800px',
+    margin: '0 auto',
+    padding: '2rem 1rem',
+  }}
+  >
+    <PostList posts={posts} />
+  </div>
+</BaseLayout>

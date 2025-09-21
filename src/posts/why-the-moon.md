@@ -1,9 +1,8 @@
 ---
 title: 为什么是月亮
 icon: creative
-category:
-  - 记录
 date: 2022-11-27
+tags: ['记录', '胡说八道']
 ---
 
 

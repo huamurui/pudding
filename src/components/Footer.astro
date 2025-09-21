@@ -1,0 +1,269 @@
+---
+// 可以在这里定义链接数据，或者从外部传入
+const footerLinks = {
+  navigation: [
+    { text: "首页", href: "/" },
+    { text: "文章", href: "/posts" },
+    { text: "标签", href: "/tags" },
+    { text: "关于", href: "/about" },
+  ],
+  social: [
+    { name: "GitHub", href: "https://github.com/yourusername", icon: "github" },
+    { name: "Twitter", href: "https://twitter.com/yourusername", icon: "twitter" },
+    { name: "Email", href: "mailto:your.email@example.com", icon: "email" }
+  ]
+};
+
+const currentYear = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="footer-container">
+    {/* 网站信息和链接 */}
+    <div class="footer-section">
+      <h3 class="footer-title">My blog</h3>
+      <p class="footer-description">
+        A blog about programming tech and nonsense.
+      </p>
+      <div class="social-links">
+        {footerLinks.social.map(link => (
+          <a
+            href={link.href}
+            class="social-link"
+            aria-label={link.name}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span class={`social-icon ${link.icon}`}></span>
+          </a>
+        ))}
+      </div>
+    </div>
+
+    {/* 导航链接 */}
+    <div class="footer-section">
+      <h4 class="footer-subtitle">导航</h4>
+      <ul class="footer-links">
+        {footerLinks.navigation.map(link => (
+          <li>
+            <a href={link.href} class="footer-link">{link.text}</a>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    {/* 额外信息 */}
+    <div class="footer-section">
+      <h4 class="footer-subtitle">更多</h4>
+      <ul class="footer-links">
+        <li><a href="/rss.xml" class="footer-link">RSS订阅</a></li>
+        <li><a href="/sitemap.xml" class="footer-link">网站地图</a></li>
+        <li><a href="/privacy" class="footer-link">隐私政策</a></li>
+      </ul>
+    </div>
+  </div>
+
+  {/* 版权信息 */}
+  <div class="footer-bottom">
+    <div class="footer-container">
+      <p class="copyright">
+        &copy; {currentYear} 我的博客. 保留所有权利.
+      </p>
+      <p class="credit">
+        由 <a href="https://astro.build/" target="_blank" rel="noopener">Astro</a> 驱动
+      </p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  /* 内联样式确保即时渲染 */
+  .footer {
+    background-color: var(--bg-secondary);
+    border-top: 1px solid var(--border-color);
+    margin-top: auto; /* 确保footer在页面底部 */
+  }
+  
+  .footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+  
+  .footer-bottom {
+    border-top: 1px solid var(--border-color);
+    padding: 1rem 0;
+  }
+  
+  .footer-bottom .footer-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1rem;
+  }
+  
+  @media (max-width: 768px) {
+    .footer-bottom .footer-container {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+  }
+
+
+
+  /* src/components/Footer/Footer.css */
+.footer {
+  background-color: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  margin-top: auto; /* 确保footer在页面底部 */
+}
+
+.footer-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.footer-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.footer-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+}
+
+.footer-subtitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 1rem 0;
+}
+
+.footer-description {
+  margin: 0 0 1.5rem 0;
+  line-height: 1.5;
+}
+
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-links li {
+  margin-bottom: 0.5rem;
+}
+
+.footer-link {
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footer-link:hover {
+  color: var(--accent-color);
+}
+
+/* 社交媒体链接 */
+.social-links {
+  display: flex;
+  gap: 1rem;
+}
+
+.social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.social-link:hover {
+  background-color: var(--accent-color);
+  color: var(--bg-secondary);
+  transform: translateY(-2px);
+}
+
+/* 使用伪元素模拟图标 (实际项目中可以使用图标字体或SVG) */
+.social-icon.github::before {
+  content: "G";
+}
+
+.social-icon.twitter::before {
+  content: "T";
+}
+
+.social-icon.email::before {
+  content: "✉";
+}
+
+/* 底部版权信息 */
+.footer-bottom {
+  border-top: 1px solid var(--border-color);
+  padding: 1rem 0;
+}
+
+.footer-bottom .footer-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 1rem;
+}
+
+.copyright {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.credit {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.credit a {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+
+.credit a:hover {
+  text-decoration: underline;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .footer-container {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .footer-bottom .footer-container {
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+  }
+}
+
+/* 减少运动偏好 */
+@media (prefers-reduced-motion: reduce) {
+  .social-link {
+    transition: none;
+  }
+  
+  .social-link:hover {
+    transform: none;
+  }
+}
+</style>

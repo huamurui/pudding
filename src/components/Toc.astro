@@ -1,0 +1,210 @@
+---
+// 在Astro组件的前置脚本中处理逻辑
+const { headings = [] } = Astro.props;
+---
+
+<nav class="blog-toc" aria-label="文章目录">
+  <ul class="toc-list" id="toc-list">
+    {headings.map((heading) => (
+      <li class={`toc-item toc-item-depth-${heading.depth}`}>
+        <a
+          href={`#${heading.slug}`}
+          class="toc-link"
+          data-slug={heading.slug}
+        >
+          {heading.text}
+        </a>
+      </li>
+    ))}
+  </ul>
+  <div class="toc-indicator" id="toc-indicator"></div>
+</nav>
+
+<style>
+  .blog-toc {
+    position: sticky;
+    top: 2rem;
+    max-height: calc(100vh - 4rem);
+    overflow-y: auto;
+    /* padding: 1rem; */
+    margin-left: 1rem;
+    /* background-color: var(--bg-secondary); */
+    /* border-left: 1px solid var(--border-color); */
+    position: relative;
+  }
+
+  .toc-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .toc-list {
+    padding: 0.3rem;
+    list-style: none;
+    border-left: 1px solid var(--border-color);
+    margin: 0 0 0 1px;
+
+    position: relative;
+  }
+
+  .toc-item {
+    margin-bottom: 0.1rem;
+    line-height: 1.4;
+    position: relative;
+    transition: all 0.2s ease;
+  }
+  
+  .toc-item-depth-3 {
+    margin-left: 0.7rem;
+    /* font-size: 0.9em; */
+  }
+
+  .toc-link {
+    color: var(--text-secondary);
+    text-decoration: none;
+    display: block;
+    padding: 0.25rem 0.5rem;
+    transition: color 0.2s ease;
+    border-radius: 4px;
+  }
+  
+  .toc-link:hover {
+    color: var(--accent-color);
+    background-color: var(--bg-tertiary);
+  }
+  
+  .toc-item.active > .toc-link {
+    color: var(--accent-color);
+    font-weight: 500;
+  }
+
+  .toc-indicator {
+    position: absolute;
+    left: 0;
+    width: 3px;
+    background: var(--accent-color);
+    border-radius: 2px;
+    transition: top 0.3s ease, height 0.3s ease;
+    z-index: 10;
+    display: none;
+  }
+</style>
+
+<script>
+  // 客户端JavaScript
+  document.addEventListener('DOMContentLoaded', () => {
+
+    const scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
+    // smoth in
+    const indicator = document.getElementById('toc-indicator');
+    const tocLinks = document.querySelectorAll('.toc-link');
+    const headings = Array.from(tocLinks).map(link => {
+      const slug = link.getAttribute('data-slug');
+      return {
+        slug,
+        element: document.getElementById(slug),
+        link
+      };
+    }).filter(item => item.element);
+    
+    let isProgrammaticScroll = false;
+    let activeIndex = -1;
+    // 初始化指示器
+    function initIndicator() {
+      if (headings.length > 0) {
+        const firstLink = headings[0].link;
+        const rect = firstLink.getBoundingClientRect();
+        updateActiveHeading();
+      }
+    }
+    
+    // 更新活动项和指示器
+    function updateActiveHeading() {
+      if (isProgrammaticScroll) return;
+      
+      const scrollPosition = window.scrollY + 100; // 偏移量，使标题在视口中部时激活
+      
+      // 找到当前活动的标题
+      let currentActiveIndex = -1;
+      for (let i = headings.length - 1; i >= 0; i--) {
+        const heading = headings[i];
+        if (heading.element.offsetTop <= scrollPosition) {
+          currentActiveIndex = i;
+          break;
+        }
+      }
+      
+      // 如果活动项发生变化，更新UI
+      if (currentActiveIndex !== activeIndex) {
+        activeIndex = currentActiveIndex;
+        
+        // 移除所有活动类
+        tocLinks.forEach(link => link.parentElement.classList.remove('active'));
+        
+        // 添加活动类到当前项
+        if (activeIndex >= 0) {
+          const activeItem = headings[activeIndex];
+          activeItem.link.parentElement.classList.add('active');
+          
+          // 更新指示器位置
+          const rect = activeItem.link.getBoundingClientRect();
+          indicator.style.display = 'block';
+          indicator.style.height = `${rect.height}px`;
+          indicator.style.top = `${activeItem.link.parentElement.offsetTop}px`;
+          indicator.style.opacity = '1';
+        //   location.hash = `#${activeItem.slug}`; // 更新URL hash
+        }
+      }
+    }
+    
+    // 平滑滚动到指定标题
+    function scrollToHeading(slug) {
+      isProgrammaticScroll = true;
+      const element = document.getElementById(slug);
+      if (element) {
+        element.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'start',
+          inline: 'nearest',
+        });
+        // 更新URL hash
+        if (window.location.hash !== `#${slug}`) {
+          window.history.replaceState(null, '', `#${slug}`);
+        }
+      }
+      
+      // 重置标志
+      setTimeout(() => {
+        isProgrammaticScroll = false;
+      }, 100);
+    }
+    
+    // 初始化
+    initIndicator();
+    
+    // 监听滚动事件
+    window.addEventListener('scroll', updateActiveHeading);
+    window.addEventListener('resize', initIndicator);
+    
+    // 监听链接点击
+    tocLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const slug = link.getAttribute('data-slug');
+        scrollToHeading(slug);
+      });
+    });
+    
+    // 初始检查hash
+    const initialHash = window.location.hash.substring(1);
+    if (initialHash) {
+      const element = document.getElementById(initialHash);
+      if (element) {
+        setTimeout(() => {
+          scrollToHeading(initialHash);
+        }, 100);
+      }
+    }
+  });
+</script>

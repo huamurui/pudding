@@ -1,0 +1,131 @@
+/* PostList.css - 优化样式 */
+.posts-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.post-item {
+  padding: 1.5rem;
+  background-color: var(--bg-secondary);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+
+.post-item:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+  border-color: var(--accent-color);
+  background-color: var(--bg-tertiary);
+}
+
+.post-item:hover::before {
+  opacity: 1;
+}
+
+.post-link {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  text-decoration: none;
+  color: inherit;
+  margin-bottom: 0.75rem;
+  gap: 1rem;
+}
+
+.post-title {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 1.25rem;
+  line-height: 1.4;
+  flex: 1;
+  transition: color 0.2s ease;
+}
+
+.post-item:hover .post-title {
+  color: var(--accent-color);
+}
+
+.post-date {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  padding: 0.25rem 0.5rem;
+  background-color: var(--bg-tertiary);
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.post-item:hover .post-date {
+  background-color: var(--accent-color);
+  color: var(--bg-primary);
+}
+
+.post-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.post-tag {
+  padding: 0.35rem 0.75rem;
+  background-color: var(--bg-tertiary);
+  border-radius: 16px;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+  border: 1px solid var(--border-color);
+}
+
+.post-tag:hover {
+  background-color: var(--accent-color);
+  color: var(--bg-primary);
+  transform: translateY(-1px);
+  border-color: var(--accent-color);
+}
+
+.post-tag.highlighted {
+  background-color: var(--accent-color);
+  color: var(--bg-primary);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-color: var(--accent-color);
+}
+
+.no-results {
+  text-align: center;
+  padding: 3rem 2rem;
+  font-style: italic;
+  color: var(--text-secondary);
+  background-color: var(--bg-secondary);
+  border-radius: 12px;
+  margin: 2rem 0;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .post-link {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .post-date {
+    align-self: flex-start;
+  }
+  
+  .post-item {
+    padding: 1.25rem;
+  }
+  
+  .post-title {
+    font-size: 1.1rem;
+  }
+}

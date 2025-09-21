@@ -1,0 +1,81 @@
+.tag-filter {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.loading {
+  text-align: center;
+  padding: 2rem;
+  font-style: italic;
+  color: var(--bs-secondary);
+}
+
+.mode-selector {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background-color: var(--bg-secondary);
+  border-radius: 8px;
+}
+
+.mode-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.tags-container {
+  margin-bottom: 2rem;
+}
+
+.tags-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.tags-header h3 {
+  margin: 0;
+}
+
+.clear-btn {
+  padding: 0.25rem 0.5rem;
+  background: none;
+  border: 1px solid var(--bs-border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.clear-btn:hover {
+  background-color: var(--bs-light);
+}
+
+.tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tag {
+  padding: 0.5rem 1rem;
+  background-color: var(--bs-light);
+  color: var(--bs-primary);
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tag:hover {
+  background-color: var(--bg-secondary);
+}
+
+.tag.selected {
+  background-color: var(--accent-color);
+  color: var(--bg-primary);
+}
