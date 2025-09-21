@@ -1,6 +1,6 @@
 ---
 // src/pages/tags.astro
-import TagFilter from '../components/Filter/TagFilter';
+import Search from '../components/Search/Search';
 import BaseLayout from '../layouts/BaseLayout.astro';
 
 import { getCollection } from 'astro:content';
@@ -13,6 +13,6 @@ const pageTitle = "Search";
 
 <BaseLayout pageTitle={pageTitle}>
   <div class="tags-page">
-    <TagFilter client:load />
+    <Search client:load />
   </div>
 </BaseLayout>
