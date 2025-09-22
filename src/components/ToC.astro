@@ -1,0 +1,528 @@
+---
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface Props {
+  headings?: Heading[];
+}
+
+const { headings = [] } = Astro.props as Props;
+---
+
+<!-- 主目录（小屏幕也会保留） -->
+<nav class="blog-toc main-toc" aria-label="文章目录">
+  <ul class="toc-list" id="toc-list">
+    {
+      headings.map((heading) => (
+        <li class={`toc-item toc-item-depth-${heading.depth}`} key={heading.slug}>
+          <a
+            href={`#${heading.slug}`}
+            class="toc-link"
+            data-slug={heading.slug}
+          >
+            {heading.text}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+  <div class="toc-indicator" id="toc-indicator"></div>
+</nav>
+
+<!-- 顶部滚动目录（仅小屏幕显示） -->
+<div class="scroll-toc-container">
+  <button 
+    class="scroll-toc-toggle" 
+    id="scroll-toc-toggle" 
+    aria-expanded="false" 
+    aria-label="快速目录"
+  >
+    <span class="toggle-text">当前章节</span>
+    <span class="toggle-icon">▼</span>
+  </button>
+  <nav class="scroll-toc" aria-label="快速导航目录" id="scroll-toc">
+    <ul class="scroll-toc-list">
+      {
+        headings.map((heading) => (
+          <li class={`scroll-toc-item scroll-toc-item-depth-${heading.depth}`} key={heading.slug}>
+            <a
+              href={`#${heading.slug}`}
+              class="scroll-toc-link"
+              data-slug={heading.slug}
+            >
+              {heading.text}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+</div>
+
+<style>
+  .blog-toc {
+    position: sticky;
+    top: 2rem;
+    max-height: calc(100vh - 4rem);
+    overflow-y: auto;
+    margin-left: 1rem;
+    position: relative;
+  }
+
+  .toc-list {
+    padding: 0.3rem;
+    list-style: none;
+    border-left: 1px solid var(--border-color);
+    margin: 0 0 0 1px;
+    position: relative;
+  }
+  
+  .toc-item {
+    margin-bottom: 0.25rem;
+    line-height: 1.4;
+    position: relative;
+    transition: all 0.2s ease;
+  }
+
+  .toc-item-depth-2 {
+    margin-left: 0.5rem;
+  }
+
+  .toc-item-depth-3 {
+    margin-left: 1rem;
+    font-size: 0.9em;
+  }
+
+  .toc-item-depth-4 {
+    margin-left: 1.5rem;
+    font-size: 0.85em;
+  }
+
+  .toc-link {
+    color: var(--text-secondary);
+    text-decoration: none;
+    display: block;
+    padding: 0.4rem 0.75rem;
+    transition: all 0.2s ease;
+    border-radius: 6px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .toc-link:hover {
+    color: var(--theme-color);
+    background-color: var(--bg-tertiary);
+  }
+
+  .toc-item.active > .toc-link {
+    color: var(--theme-color) !important;
+    font-weight: 600;
+    background-color: color-mix(in srgb, var(--theme-color) 10%, transparent);
+  }
+
+  .toc-item.visible > .toc-link {
+    color: var(--text-primary);
+    background-color: color-mix(in srgb, var(--theme-color) 5%, transparent);
+  }
+
+  .toc-indicator {
+    position: absolute;
+    left: 0;
+    width: 3px;
+    background: linear-gradient(
+      to bottom,
+      var(--theme-color),
+      color-mix(in srgb, var(--theme-color) 70%, transparent)
+    );
+    border-radius: 2px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1;
+    opacity: 0;
+  }
+
+  /* 顶部滚动目录样式 */
+  .scroll-toc-container {
+    display: none;
+    position: fixed;
+    top: 60px; /* 导航栏下方 */
+    left: 0;
+    right: 0;
+    z-index: 85;
+    background-color: var(--bg-primary);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transform: translateY(-100%);
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    opacity: 0;
+  }
+
+  .scroll-toc-container.visible {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  .scroll-toc-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0.5rem 1rem;
+    background: none;
+    border: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  .scroll-toc-toggle:hover {
+    background-color: var(--bg-tertiary);
+  }
+
+  .toggle-icon {
+    transition: transform 0.3s ease;
+    font-size: 0.7rem;
+  }
+
+  .scroll-toc-toggle[aria-expanded="true"] .toggle-icon {
+    transform: rotate(180deg);
+  }
+
+  .scroll-toc {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+  }
+
+  .scroll-toc.expanded {
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  .scroll-toc-list {
+    padding: 0.3rem 1rem;
+    list-style: none;
+    margin: 0;
+  }
+
+  .scroll-toc-item {
+    margin-bottom: 0.15rem;
+    line-height: 1.3;
+  }
+
+  .scroll-toc-item-depth-2 {
+    margin-left: 0.75rem;
+    font-size: 0.85em;
+  }
+
+  .scroll-toc-item-depth-3 {
+    margin-left: 1.5rem;
+    font-size: 0.8em;
+  }
+
+  .scroll-toc-item-depth-4 {
+    margin-left: 2.25rem;
+    font-size: 0.75em;
+  }
+
+  .scroll-toc-link {
+    color: var(--text-secondary);
+    text-decoration: none;
+    display: block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+  }
+
+  .scroll-toc-link:hover,
+  .scroll-toc-item.active .scroll-toc-link {
+    color: var(--theme-color);
+    background-color: color-mix(in srgb, var(--theme-color) 10%, transparent);
+  }
+
+  /* 响应式设计 */
+  @media (max-width: 968px) {
+    /* 在小屏幕上显示顶部滚动目录 */
+    .scroll-toc-container {
+      display: block;
+    }
+    
+    /* 调整主目录在小屏幕上的位置 */
+    .main-toc {
+      margin: 1rem 0;
+      max-height: none;
+      position: static;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const indicator = document.getElementById("toc-indicator");
+    const mainTocLinks = document.querySelectorAll<HTMLAnchorElement>(".toc-link");
+    const scrollTocToggle = document.getElementById("scroll-toc-toggle");
+    const scrollToc = document.getElementById("scroll-toc");
+    const scrollTocContainer = document.querySelector(".scroll-toc-container");
+    const scrollTocLinks = document.querySelectorAll<HTMLAnchorElement>(".scroll-toc-link");
+    const toggleText = document.querySelector(".toggle-text");
+
+    // 处理顶部滚动目录的展开/折叠
+    if (scrollTocToggle && scrollToc) {
+      scrollTocToggle.addEventListener("click", () => {
+        const isExpanded = scrollTocToggle.getAttribute("aria-expanded") === "true";
+        scrollTocToggle.setAttribute("aria-expanded", (!isExpanded).toString());
+        scrollToc.classList.toggle("expanded", !isExpanded);
+      });
+    }
+
+    // 合并所有目录链接并去重
+    const allLinks = [...mainTocLinks, ...scrollTocLinks];
+    
+    const headings = Array.from(allLinks)
+      .filter((link, index, self) => 
+        // 只保留每个slug的第一个实例
+        self.findIndex(l => l.getAttribute("data-slug") === link.getAttribute("data-slug")) === index
+      )
+      .map((link, index) => {
+        const slug = link.getAttribute("data-slug");
+        return {
+          slug,
+          element: slug ? document.getElementById(slug) : null,
+          // 获取所有对应同一标题的链接（主目录和滚动目录）
+          links: allLinks.filter(l => l.getAttribute("data-slug") === slug),
+          listItems: allLinks.filter(l => l.getAttribute("data-slug") === slug)
+            .map(l => l.parentElement as HTMLLIElement),
+          index,
+        };
+      })
+      .filter((item) => item.element);
+
+    let isProgrammaticScroll = false;
+    let activeIndex = -1;
+    const visibleHeadings = new Set<number>(); 
+    let lastScrollTop = 0;
+    const scrollThreshold = 100; // 滚动超过这个值才显示顶部目录
+
+    // 监听滚动事件，控制顶部目录的显示/隐藏
+    window.addEventListener('scroll', () => {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      
+      if (scrollTocContainer) {
+        // 当滚动超过阈值且是向下滚动时显示顶部目录
+        if (scrollTop > scrollThreshold && scrollTop > lastScrollTop) {
+          scrollTocContainer.classList.add('visible');
+        } else if (scrollTop <= scrollThreshold) {
+          // 滚动到顶部时隐藏
+          scrollTocContainer.classList.remove('visible');
+        }
+      }
+      
+      lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+    });
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const heading = headings.find((h) => h.element === entry.target);
+          if (!heading) return;
+
+          if (entry.isIntersecting) {
+            visibleHeadings.add(heading.index);
+          } else {
+            visibleHeadings.delete(heading.index);
+          }
+
+          if (!isProgrammaticScroll) {
+            updateActiveHeading();
+          }
+        });
+      },
+      {
+        threshold: 0.01, 
+        rootMargin: "-10% 0px -10% 0px", // 扩展检测范围
+      },
+    );
+
+    headings.forEach((heading) => {
+      heading.element && observer.observe(heading.element);
+    });
+
+    function updateActiveHeading() {
+      // 重置所有可见状态
+      headings.forEach((h) => {
+        h.listItems.forEach(item => item.classList.remove("visible"));
+      });
+
+      const visible = Array.from(visibleHeadings).sort((a, b) => a - b);
+      let newActiveIndex = -1;
+
+      // 标记可见标题
+      visible.forEach((index) => {
+        headings[index].listItems.forEach(item => item.classList.add("visible"));
+      });
+
+      // 确定当前活跃标题
+      if (visible.length > 0) {
+        const fullyVisible = visible.find((index) => {
+          const rect = headings[index].element!.getBoundingClientRect();
+          return rect.top >= 0 && rect.bottom <= window.innerHeight;
+        });
+
+        if (fullyVisible !== undefined) {
+          newActiveIndex = fullyVisible;
+        } else {
+          const viewportThird = window.innerHeight / 3;
+          let closestToThird = visible[0];
+          let minDistance = Math.abs(
+            headings[closestToThird].element!.getBoundingClientRect().top -
+              viewportThird,
+          );
+
+          visible.forEach((index) => {
+            const distance = Math.abs(
+              headings[index].element!.getBoundingClientRect().top -
+                viewportThird,
+            );
+            if (distance < minDistance) {
+              minDistance = distance;
+              closestToThird = index;
+            }
+          });
+
+          newActiveIndex = closestToThird;
+        }
+      } else {
+        const scrollPosition = window.scrollY;
+        const candidates = [...headings]
+          .filter((h) => h.element!.offsetTop <= scrollPosition + 100) 
+          .sort((a, b) => b.element!.offsetTop - a.element!.offsetTop);
+
+        if (candidates.length > 0) {
+          newActiveIndex = candidates[0].index;
+        } else if (headings.length > 0) {
+          newActiveIndex = 0;
+        }
+      }
+
+      // 处理页面底部情况
+      if (
+        window.innerHeight + window.scrollY >=
+          document.body.offsetHeight - 100 &&
+        headings.length > 0
+      ) {
+        newActiveIndex = headings.length - 1;
+      }
+
+      // 更新活跃状态
+      if (newActiveIndex !== -1 && newActiveIndex !== activeIndex) {
+        activeIndex = newActiveIndex;
+        
+        // 移除所有活跃状态
+        headings.forEach((h) => {
+          h.listItems.forEach(item => item.classList.remove("active"));
+        });
+        
+        // 设置新的活跃状态
+        if (activeIndex >= 0 && headings[activeIndex]) {
+          headings[activeIndex].listItems.forEach(item => item.classList.add("active"));
+          
+          // 更新指示器
+          if (indicator && mainTocLinks[activeIndex]) {
+            const activeRect = mainTocLinks[activeIndex].getBoundingClientRect();
+            indicator.style.display = "block";
+            indicator.style.height = `${activeRect.height}px`;
+            indicator.style.top = `${mainTocLinks[activeIndex].parentElement!.offsetTop}px`;
+            indicator.style.opacity = "1";
+          }
+          
+          // 更新顶部目录的当前章节文本
+          if (toggleText && headings[activeIndex]) {
+            toggleText.textContent = headings[activeIndex].element?.textContent || '当前章节';
+          }
+        }
+      }
+    }
+
+    function scrollToHeading(slug: string) {
+      isProgrammaticScroll = true;
+      const element = document.getElementById(slug);
+      
+      if (element) {
+        const headerOffset = 120; // 考虑顶部目录的高度
+        const elementPosition = element.getBoundingClientRect().top;
+        const offsetPosition =
+          elementPosition + window.pageYOffset - headerOffset;
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: "smooth",
+        });
+
+        if (window.location.hash !== `#${slug}`) {
+          window.history.replaceState(null, "", `#${slug}`);
+        }
+
+        // 点击后关闭顶部目录
+        if (scrollToc && scrollTocToggle) {
+          scrollToc.classList.remove("expanded");
+          scrollTocToggle.setAttribute("aria-expanded", "false");
+        }
+      }
+
+      setTimeout(() => {
+        isProgrammaticScroll = false;
+        updateActiveHeading();
+      }, 200);
+    }
+
+    // 初始化活跃标题
+    updateActiveHeading();
+
+    // 处理窗口大小变化
+    window.addEventListener("resize", () => {
+      if (activeIndex !== -1 && headings[activeIndex] && indicator && mainTocLinks[activeIndex]) {
+        const activeRect = mainTocLinks[activeIndex].getBoundingClientRect();
+        indicator.style.height = `${activeRect.height}px`;
+        indicator.style.top = `${mainTocLinks[activeIndex].parentElement!.offsetTop}px`;
+      }
+    });
+
+    // 主目录点击事件
+    mainTocLinks.forEach((link) => {
+      link.addEventListener("click", (e) => {
+        e.preventDefault();
+        const slug = link.getAttribute("data-slug");
+        if (slug) {
+          scrollToHeading(slug);
+        }
+      });
+    });
+
+    // 顶部滚动目录点击事件
+    scrollTocLinks.forEach((link) => {
+      link.addEventListener("click", (e) => {
+        e.preventDefault();
+        const slug = link.getAttribute("data-slug");
+        if (slug) {
+          scrollToHeading(slug);
+        }
+      });
+    });
+
+    // 处理初始哈希
+    const initialHash = window.location.hash.substring(1);
+    if (initialHash) {
+      const element = document.getElementById(initialHash);
+      if (element) {
+        setTimeout(() => {
+          scrollToHeading(initialHash);
+        }, 100);
+      }
+    }
+  });
+</script>
+    
