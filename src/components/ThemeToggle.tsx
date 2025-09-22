@@ -1,9 +1,9 @@
 import { createSignal, onMount } from 'solid-js';
 
-type Theme = 'light' | 'dark';
+type Theme = 'light' | 'dark' | '';
 
 export default function ThemeToggle() {
-  const [theme, setTheme] = createSignal<Theme>('light');
+  const [theme, setTheme] = createSignal<Theme>('');
   
   const getInitialTheme = (): Theme => {
     if (typeof window === 'undefined') return 'light';
