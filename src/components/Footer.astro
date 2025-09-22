@@ -1,5 +1,4 @@
 ---
-// 可以在这里定义链接数据，或者从外部传入
 const footerLinks = {
   navigation: [
     { text: "首页", href: "/" },
@@ -19,7 +18,6 @@ const currentYear = new Date().getFullYear();
 
 <footer class="footer">
   <div class="footer-container">
-    {/* 网站信息和链接 */}
     <div class="footer-section">
       <h3 class="footer-title">My blog</h3>
       <p class="footer-description">
@@ -40,7 +38,6 @@ const currentYear = new Date().getFullYear();
       </div>
     </div>
 
-    {/* 导航链接 */}
     <div class="footer-section">
       <h4 class="footer-subtitle">导航</h4>
       <ul class="footer-links">
@@ -52,7 +49,6 @@ const currentYear = new Date().getFullYear();
       </ul>
     </div>
 
-    {/* 额外信息 */}
     <div class="footer-section">
       <h4 class="footer-subtitle">更多</h4>
       <ul class="footer-links">
@@ -63,7 +59,6 @@ const currentYear = new Date().getFullYear();
     </div>
   </div>
 
-  {/* 版权信息 */}
   <div class="footer-bottom">
     <div class="footer-container">
       <p class="copyright">
@@ -77,11 +72,10 @@ const currentYear = new Date().getFullYear();
 </footer>
 
 <style>
-  /* 内联样式确保即时渲染 */
   .footer {
     background-color: var(--bg-secondary);
     border-top: 1px solid var(--border-color);
-    margin-top: auto; /* 确保footer在页面底部 */
+    margin-top: auto; 
   }
   
   .footer-container {
@@ -108,15 +102,11 @@ const currentYear = new Date().getFullYear();
       gap: 0.5rem;
     }
   }
-
-
-
-  /* src/components/Footer/Footer.css */
 .footer {
   background-color: var(--bg-secondary);
   border-top: 1px solid var(--border-color);
   color: var(--text-secondary);
-  margin-top: auto; /* 确保footer在页面底部 */
+  margin-top: auto; 
 }
 
 .footer-container {
@@ -169,10 +159,9 @@ const currentYear = new Date().getFullYear();
 }
 
 .footer-link:hover {
-  color: var(--accent-color);
+  color: var(--theme-color);
 }
 
-/* 社交媒体链接 */
 .social-links {
   display: flex;
   gap: 1rem;
@@ -192,12 +181,11 @@ const currentYear = new Date().getFullYear();
 }
 
 .social-link:hover {
-  background-color: var(--accent-color);
+  background-color: var(--theme-color);
   color: var(--bg-secondary);
   transform: translateY(-2px);
 }
 
-/* 使用伪元素模拟图标 (实际项目中可以使用图标字体或SVG) */
 .social-icon.github::before {
   content: "G";
 }
@@ -234,7 +222,7 @@ const currentYear = new Date().getFullYear();
 }
 
 .credit a {
-  color: var(--accent-color);
+  color: var(--theme-color);
   text-decoration: none;
 }
 

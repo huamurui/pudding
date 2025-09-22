@@ -1,9 +1,14 @@
 ---
-// src/components/Header/Header.astro
 import ThemeToggle from './ThemeToggle';
 
+// 定义导航项类型
+interface NavItem {
+  href: string;
+  label: string;
+}
+
 // 导航项数据
-const navItems = [
+const navItems: NavItem[] = [
   { href: "/", label: "首页" },
   // { href: "/posts", label: "文章" },
   { href: "/tags", label: "标签" },
@@ -60,25 +65,30 @@ const navItems = [
 <script>
   // 简单的菜单切换逻辑
   (function() {
-    const menuToggle = document.getElementById('menu-toggle');
-    const nav = document.getElementById('nav');
-    const header = document.getElementById('header');
+    // 添加类型注解
+    const menuToggle: HTMLButtonElement | null = document.getElementById('menu-toggle') as HTMLButtonElement | null;
+    const nav: HTMLElement | null = document.getElementById('nav');
+    const header: HTMLElement | null = document.getElementById('header');
     
     if (menuToggle && nav) {
       menuToggle.addEventListener('click', () => {
-        const isExpanded = menuToggle.getAttribute('aria-expanded') === 'true';
-        menuToggle.setAttribute('aria-expanded', !isExpanded);
+        const isExpanded: boolean = menuToggle.getAttribute('aria-expanded') === 'true';
+        menuToggle.setAttribute('aria-expanded', (!isExpanded).toString());
         nav.classList.toggle('nav-open');
-        header.classList.toggle('menu-open');
+        if (header) {
+          header.classList.toggle('menu-open');
+        }
       });
     }
     
     // 滚动时添加阴影效果
-    function handleScroll() {
-      if (window.scrollY > 10) {
-        header.classList.add('scrolled');
-      } else {
-        header.classList.remove('scrolled');
+    function handleScroll(): void {
+      if (header) {
+        if (window.scrollY > 10) {
+          header.classList.add('scrolled');
+        } else {
+          header.classList.remove('scrolled');
+        }
       }
     }
     
@@ -125,7 +135,7 @@ const navItems = [
 }
 
 .logo-link:hover {
-  color: var(--accent-color);
+  color: var(--theme-color);
 }
 
 
@@ -233,4 +243,5 @@ const navItems = [
   .menu-toggle span {
     transition: none;
   }
-}</style>
+}
+</style>

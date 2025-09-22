@@ -3,7 +3,7 @@ import "../styles/global.css";
 import { getCollection } from "astro:content";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
-import FAB from "../components/FAB.jsx";
+import FAB from "../components/FAB.tsx";
 
 const { pageTitle } = Astro.props;
 const items = (await getCollection("posts")).map((post) => ({
@@ -20,9 +20,7 @@ const items = (await getCollection("posts")).map((post) => ({
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
     <title>{pageTitle}</title>
-    <!-- 内联脚本防止页面闪烁 -->
     <script is:inline>
-      // 在页面加载前设置主题，防止闪烁
       (function () {
         try {
           const savedTheme = localStorage.getItem("theme");
@@ -53,6 +51,6 @@ const items = (await getCollection("posts")).map((post) => ({
     </main>
 
     <Footer />
-   <FAB client:only />
+    <FAB client:only />
   </body>
 </html>

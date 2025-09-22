@@ -1,16 +1,22 @@
-import { createSignal, onMount, createEffect } from 'solid-js';
+import { createSignal, onMount } from 'solid-js';
+
+type Theme = 'light' | 'dark';
+
 export default function ThemeToggle() {
-  const [theme, setTheme] = createSignal('');
-  const getInitialTheme = () => {
+  const [theme, setTheme] = createSignal<Theme>('light');
+  
+  const getInitialTheme = (): Theme => {
     if (typeof window === 'undefined') return 'light';
 
     const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) return savedTheme;
+    if (savedTheme && ['light', 'dark'].includes(savedTheme)) {
+      return savedTheme as Theme;
+    }
 
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   };
 
-  const applyTheme = (newTheme) => {
+  const applyTheme = (newTheme: Theme): void => {
     document.documentElement.classList.remove('light', 'dark');
     document.documentElement.classList.add(newTheme);
     document.documentElement.setAttribute('data-theme', newTheme);
@@ -23,7 +29,7 @@ export default function ThemeToggle() {
     applyTheme(initialTheme);
 
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleSystemThemeChange = (e) => {
+    const handleSystemThemeChange = (e: MediaQueryListEvent): void => {
       if (!localStorage.getItem('theme')) {
         const newTheme = e.matches ? 'dark' : 'light';
         setTheme(newTheme);
@@ -38,7 +44,7 @@ export default function ThemeToggle() {
     };
   });
 
-  const toggleTheme = () => {
+  const toggleTheme = (): void => {
     const newTheme = theme() === 'light' ? 'dark' : 'light';
     setTheme(newTheme);
     applyTheme(newTheme);
@@ -55,9 +61,20 @@ export default function ThemeToggle() {
     >
       <span>
         <a 
-          class={theme() === 'light' ? 'nav-link is-active' : 'nav-link'}>Light</a>
+          class={theme() === 'light' ? 'nav-link is-active' : 'nav-link'}
+          href="#"
+          onClick={(e) => e.preventDefault()}
+        >
+          Light
+        </a>
         <span>/</span>
-        <a class={theme() === 'dark' ? 'nav-link is-active' : 'nav-link'}>Dark</a>
+        <a 
+          class={theme() === 'dark' ? 'nav-link is-active' : 'nav-link'}
+          href="#"
+          onClick={(e) => e.preventDefault()}
+        >
+          Dark
+        </a>
         <span class="indicator" style={{
           position: 'absolute',
           bottom: '-3px',

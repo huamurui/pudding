@@ -10,40 +10,278 @@ const { frontmatter } = Astro.props;
 </BaseLayout>
 
 <style>
-  /* 基础布局样式 */
-  :global(.blog-post-container) {
-    padding-top: 2rem;
-    padding-bottom: 3rem;
+
+
+/* Markdown 内容容器 */
+article {
+  line-height: 1.7;
+  font-size: 1.05rem;
+  color: var(--text-primary);
+  max-width: 100%;
+  overflow-wrap: break-word;
+}
+
+/* 标题样式 */
+article h1 {
+  font-size: 2.2rem;
+  margin: 2.5rem 0 1.5rem;
+  padding-bottom: 0.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+article h2 {
+  font-size: 1.8rem;
+  margin: 2.2rem 0 1.2rem;
+  padding-bottom: 0.4rem;
+  font-weight: 650;
+  color: var(--text-primary);
+}
+
+article h3 {
+  font-size: 1.5rem;
+  margin: 1.8rem 0 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+article h4 {
+  font-size: 1.3rem;
+  margin: 1.5rem 0 0.8rem;
+  font-weight: 550;
+  color: var(--text-primary);
+}
+
+article h5 {
+  font-size: 1.15rem;
+  margin: 1.2rem 0 0.6rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+article h6 {
+  font-size: 1.05rem;
+  margin: 1rem 0 0.5rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* 段落样式 */
+article p {
+  margin: 1.2rem 0;
+  line-height: 1.8;
+}
+
+/* 链接样式 */
+article a {
+  color: var(--theme-color);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+article a:hover {
+  color: var(--primary-color);
+}
+
+/* 列表样式 */
+/* article ul, 
+article ol {
+  margin: 1.2rem 0;
+  padding-left: 1.8rem;
+}
+
+article li {
+  margin: 0.5rem 0;
+  line-height: 1.7;
+}
+
+article ul li {
+  list-style-type: disc;
+}
+
+article ol li {
+  list-style-type: decimal;
+}
+
+article li > ul, 
+article li > ol {
+  margin: 0.5rem 0;
+} */
+
+/* 为 
+article details  和 
+article summary 添加样式 */
+ 
+article details  {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+
+article details :hover {
+  border-color: var(--theme-color);
+  box-shadow: var(--shadow);
+}
+
+
+article details [open] {
+  background-color: var(--bg-tertiary);
+}
+
+
+article summary {
+  display: block;
+  padding: 0.21rem 0.2rem 0.2rem 3rem; /* 左侧留出箭头空间 */
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--text-primary);
+  position: relative;
+  list-style: none; /* 隐藏 Firefox 的默认列表样式 */
+  transition: color 0.2s ease;
+}
+
+/* 隐藏所有浏览器的默认详情标记 */
+
+article summary::-webkit-
+article details -marker {
+  display: none; /* Chrome, Safari, Edge */
+}
+
+
+article summary::marker {
+  display: none; /* Firefox */
+  content: "";
+}
+
+/* 使用伪元素创建自定义箭头 */
+
+article summary::before {
+  content: "";
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%) rotate(0deg); /* 初始状态 */
+  width: 0.75rem;
+  height: 0.75rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235e7eff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 18l6-6-6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  transition: transform 0.3s ease;
+}
+
+/* 黑暗主题下的箭头颜色 */
+[data-theme="dark"] 
+article summary::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ff9eb6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 18l6-6-6-6'/%3E%3C/svg%3E");
+}
+
+
+article details[open] 
+article summary::before {
+  transform: translateY(-50%) rotate(90deg); /* 展开时旋转箭头 */
+}
+
+
+article summary:hover {
+  color: var(--theme-color);
+}
+
+/* details 内部的内容样式 */
+article details .details-content {
+  padding: 0 1.5rem 1.5rem 3rem; /* 与 summary 的左侧对齐 */
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+/* 可选的：为 details 内容添加平滑展开动画 */
+article details .details-content {
+  animation: fadeIn 0.3s ease forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
   }
-  
-  :global(.tags) {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin: 1.5rem 0;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
-  
-  :global(.tag) {
-    margin: 0;
-    border: 1px solid var(--border-color);
-    border-radius: 20px;
-    padding: 0.5rem 1rem;
-    font-size: 0.9rem;
-    background-color: var(--bg-tertiary);
-    transition: all 0.2s ease;
-  }
-  
-  :global(.tag:hover) {
-    background-color: var(--accent-color);
-    border-color: var(--accent-color);
-  }
-  
-  :global(.tag a) {
-    color: var(--text-secondary);
-    text-decoration: none;
-  }
-  
-  :global(.tag:hover a) {
-    color: white;
-  }
+}
+
+/* 引用块样式 */
+article blockquote {
+  border-left: 4px solid var(--theme-color);
+  margin:0;
+  padding: 1rem 1.5rem;
+  background-color: var(--bg-secondary);
+  border-radius: 0 0.5rem 0.5rem 0;
+  font-style: italic;
+}
+
+article blockquote p {
+  margin: 0.5rem 0;
+  color: var(--text-secondary);
+}
+
+
+/* 水平线样式 */
+article hr {
+  border: none;
+  height: 2px;
+  background: linear-gradient(to right, transparent, var(--border-color), transparent);
+  margin: 2.5rem 0;
+}
+
+/* 图片样式 */
+article img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin: 1.5rem 0;
+  box-shadow: var(--shadow);
+  display: block;
+}
+
+/* 强调文本样式 */
+article strong {
+  color: var(--text-primary);
+  font-weight: 650;
+}
+
+article em {
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* 键盘按键样式 */
+article kbd {
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.3rem;
+  box-shadow: 0 2px 0 var(--border-color);
+  color: var(--text-primary);
+  display: inline-block;
+  font-family: monospace;
+  font-size: 0.85em;
+  line-height: 1;
+  padding: 0.2rem 0.4rem;
+  white-space: nowrap;
+}
+
+/* 脚注样式 */
+article .footnotes {
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
+  font-size: 0.9em;
+  color: var(--text-secondary);
+}
+
 </style>

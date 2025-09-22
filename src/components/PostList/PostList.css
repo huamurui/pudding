@@ -22,7 +22,7 @@
 .post-item:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow);
-  border-color: var(--accent-color);
+  border-color: var(--theme-color);
   background-color: var(--bg-tertiary);
 }
 
@@ -50,7 +50,7 @@
 }
 
 .post-item:hover .post-title {
-  color: var(--accent-color);
+  color: var(--theme-color);
 }
 
 .post-date {
@@ -64,7 +64,7 @@
 }
 
 .post-item:hover .post-date {
-  background-color: var(--accent-color);
+  background-color: var(--theme-color);
   color: var(--bg-primary);
 }
 
@@ -86,17 +86,17 @@
 }
 
 .post-tag:hover {
-  background-color: var(--accent-color);
+  background-color: var(--theme-color);
   color: var(--bg-primary);
   transform: translateY(-1px);
-  border-color: var(--accent-color);
+  border-color: var(--theme-color);
 }
 
 .post-tag.highlighted {
-  background-color: var(--accent-color);
+  background-color: var(--theme-color);
   color: var(--bg-primary);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  border-color: var(--accent-color);
+  border-color: var(--theme-color);
 }
 
 .no-results {

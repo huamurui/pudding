@@ -1,17 +1,20 @@
 ---
-// src/pages/tags/index.astro
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { getCollection } from "astro:content";
-const posts = await getCollection("posts");
-const tagsPosts = new Map();
+import { getCollection, type CollectionEntry } from "astro:content";
+
+type TagPostsMap = Map<string, CollectionEntry<'posts'>[]>;
+
+const posts: CollectionEntry<'posts'>[] = await getCollection("posts");
+const tagsPosts: TagPostsMap = new Map();
 
 for (const post of posts) {
   for (const tag of post.data.tags || []) {
-    tagsPosts.set(tag, [...(tagsPosts.get(tag) || []), post]);
+    const existingPosts = tagsPosts.get(tag) || [];
+    tagsPosts.set(tag, [...existingPosts, post]);
   }
 }
 
-// 按标签名称排序
+const sortedTags = Array.from(tagsPosts.keys()).sort((a, b) => a.localeCompare(b));
 ---
 
 <BaseLayout pageTitle="Tags">
@@ -23,47 +26,49 @@ for (const post of posts) {
     <div class="tags-container">
       <div class="tags-grid">
         {
-          Array.from(tagsPosts.keys()).map((tag) => (
-            <div class="tag-card">
-              <div class="tag-header">
-                <h2 class="tag-title">
-                  <a href={`/tags/${tag}`} class="tag-link">
-                    {tag}
-                  </a>
-                </h2>
-                <span class="post-count">
-                  {tagsPosts.get(tag).length} 篇文章
-                </span>
-              </div>
+          sortedTags.map((tag: string) => {
+            const tagPosts = tagsPosts.get(tag);
+            if (!tagPosts) return null;
+            
+            return (
+              <div class="tag-card">
+                <div class="tag-header">
+                  <h2 class="tag-title">
+                    <a href={`/tags/${tag}`} class="tag-link">
+                      {tag}
+                    </a>
+                  </h2>
+                  <span class="post-count">
+                    {tagPosts.length} 篇文章
+                  </span>
+                </div>
 
-              <ul class="post-list">
-                {tagsPosts
-                  .get(tag)
-                  .slice(0, 5)
-                  .map((post) => (
-                    <li class="post-item">
-                      <a href={`/posts/${post.id}`} class="post-link">
-                        <span class="post-title">
-                          {post.data.title}
-                          {post.id}
-                        </span>
-                        <span class="post-date">
-                          {new Date(post.data.date).toLocaleDateString()}
-                        </span>
-                      </a>
-                    </li>
-                  ))}
+                <ul class="post-list">
+                  {tagPosts
+                    .slice(0, 5)
+                    .map((post: CollectionEntry<'posts'>) => (
+                      <li class="post-item">
+                        <a href={`/posts/${post.id}`} class="post-link">
+                          <span class="post-title">
+                            {post.data.title}
+                          </span>
+                          <span class="post-date">
+                            {new Date(post.data.date).toLocaleDateString()}
+                          </span>
+                        </a>
+                      </li>
+                    ))}
 
-                {tagsPosts.get(tag).length > 5 && (
+                {tagPosts.length > 5 && (
                   <li class="view-more">
                     <a href={`/tags/${tag}`} class="view-more-link">
-                      查看全部 {tagsPosts.get(tag).length} 篇文章 &rarr;
+                      查看全部 {tagPosts.length} 篇文章 &rarr;
                     </a>
                   </li>
                 )}
               </ul>
-            </div>
-          ))
+            </div>)
+          })
         }
       </div>
     </div>
@@ -139,7 +144,7 @@ for (const post of posts) {
     }
 
     .tag-link {
-      color: var(--accent-color);
+      color: var(--theme-color);
       text-decoration: none;
       transition: color 0.2s ease;
     }
@@ -149,7 +154,7 @@ for (const post of posts) {
     }
 
     .post-count {
-      background: var(--accent-color);
+      background: var(--theme-color);
       color: white;
       font-size: 0.8rem;
       font-weight: 600;
@@ -207,7 +212,7 @@ for (const post of posts) {
     }
 
     .view-more-link {
-      color: var(--accent-color);
+      color: var(--theme-color);
       text-decoration: none;
       font-size: 0.9rem;
       font-weight: 500;

@@ -1,27 +1,54 @@
 ---
-import Toc from '../../components/Toc.astro';
-import { getCollection, render } from 'astro:content';
+import ToC from '../../components/ToC.astro';
+import { getCollection, render, type CollectionEntry } from 'astro:content';
 import MarkdownPostLayout from '../../layouts/MarkdownPostLayout.astro';
 
-export async function getStaticPaths() {
+interface PostImage {
+  url: string;
+  alt?: string;
+}
+
+interface PostFrontmatter {
+  title: string;
+  description?: string;
+  date: string | Date;
+  tags?: string[];
+  image?: PostImage;
+}
+
+type StaticPath = {
+  params: {
+    slug: string;
+  };
+  props: {
+    post: CollectionEntry<'posts'>;
+  };
+};
+
+export async function getStaticPaths(): Promise<StaticPath[]> {
   const posts = await getCollection('posts');
   return posts.map(post => ({
-    params: { slug: post.id }, props: { post },
+    params: { slug: post.id }, 
+    props: { post },
   }));
 }
 
-const { post } = Astro.props;
+interface Props {
+  post: CollectionEntry<'posts'>;
+}
+
+const { post } = Astro.props as Props;
 const { Content, headings } = await render(post);
 ---
 
-<MarkdownPostLayout frontmatter={post.data}>
+<MarkdownPostLayout frontmatter={post.data as PostFrontmatter}>
   <article class="blog-post-container">
     <div class="blog-post-content">
       <header class="post-header">
         <h1 class="post-title">{post.data.title}</h1>
         <p class="post-description">{post.data.description}</p>
         <div class="post-meta">
-          <time class="post-date" datetime={post.data.date.toISOString()}>
+          <time class="post-date" datetime={new Date(post.data.date).toISOString()}>
             {new Date(post.data.date).toLocaleDateString('zh-CN', {
               year: 'numeric',
               month: 'long',
@@ -34,8 +61,8 @@ const { Content, headings } = await render(post);
           </span>
         </div>
         <div class="post-tags">
-          {post.data.tags?.map((tag) => (
-            <a href={`/tags/${tag}`} class="post-tag">
+          {post.data.tags?.map((tag: string) => (
+            <a href={`/tags/${tag}`} class="post-tag" key={tag}>
               #{tag}
             </a>
           ))}
@@ -64,7 +91,7 @@ const { Content, headings } = await render(post);
     
     {headings && headings.length > 0 && (
       <aside class="blog-post-sidebar">
-        <Toc headings={headings} />
+        <ToC headings={headings} />
       </aside>
     )}
   </article>
@@ -143,106 +170,10 @@ const { Content, headings } = await render(post);
     background: var(--bg-tertiary);
   }
   
-  /* 文章内容样式 */
   .post-content {
     font-size: 1.1rem;
     line-height: 1.7;
     color: var(--text-primary);
-  }
-  
-  .post-content h2 {
-    font-size: 1.8rem;
-    margin-top: 2.5rem;
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--border-color);
-  }
-  
-  .post-content h3 {
-    font-size: 1.4rem;
-    margin-top: 2rem;
-    margin-bottom: 0.75rem;
-  }
-  
-  .post-content p {
-    margin-bottom: 1.5rem;
-  }
-  
-  .post-content a {
-    color: var(--accent-color);
-    text-decoration: underline;
-    text-underline-offset: 2px;
-  }
-  
-  .post-content a:hover {
-    color: var(--accent-hover);
-  }
-  
-  .post-content blockquote {
-    border-left: 4px solid var(--accent-color);
-    padding-left: 1.5rem;
-    margin: 1.5rem 0;
-    font-style: italic;
-    color: var(--text-secondary);
-    background: var(--bg-tertiary);
-    padding: 1.5rem;
-    border-radius: 0 8px 8px 0;
-  }
-  
-  .post-content code {
-    background: var(--bg-tertiary);
-    padding: 0.2rem 0.4rem;
-    border-radius: 4px;
-    font-size: 0.9em;
-    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-  }
-  
-  .post-content pre {
-    background: var(--code-bg);
-    padding: 1.5rem;
-    border-radius: 8px;
-    overflow-x: auto;
-    margin: 1.5rem 0;
-    line-height: 1.5;
-  }
-  
-  .post-content pre code {
-    background: none;
-    padding: 0;
-  }
-  
-  .post-content ul, 
-  .post-content ol {
-    margin: 1.5rem 0;
-    padding-left: 1.5rem;
-  }
-  
-  .post-content li {
-    margin-bottom: 0.5rem;
-  }
-  
-  .post-content img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 8px;
-    margin: 1.5rem 0;
-  }
-  
-  .post-content table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 1.5rem 0;
-  }
-  
-  .post-content th, 
-  .post-content td {
-    padding: 0.75rem;
-    border: 1px solid var(--border-color);
-  }
-  
-  .post-content th {
-    background: var(--bg-tertiary);
-    font-weight: 600;
   }
   
   /* 文章底部 */
@@ -274,25 +205,6 @@ const { Content, headings } = await render(post);
     color: white;
   }
   
-  .post-share {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    font-size: 0.9rem;
-    color: var(--text-muted);
-  }
-  
-  .share-link {
-    font-size: 1.2rem;
-    text-decoration: none;
-    opacity: 0.7;
-    transition: opacity 0.2s ease;
-  }
-  
-  .share-link:hover {
-    opacity: 1;
-  }
-  
   /* 侧边栏 */
   .blog-post-sidebar {
     width: 280px;
@@ -300,7 +212,7 @@ const { Content, headings } = await render(post);
     position: sticky;
     top: 2rem;
     align-self: flex-start;
-    max-height: calc(100vh - 2rem);
+    max-height: calc(100vh - 4rem);
   }
   
   /* 响应式设计 */
@@ -324,6 +236,11 @@ const { Content, headings } = await render(post);
     .post-description {
       font-size: 1.1rem;
     }
+    
+    /* 为小屏幕添加顶部间距，避免内容被顶部滚动目录遮挡 */
+    .post-header {
+      margin-top: 2rem;
+    }
   }
   
   @media (max-width: 640px) {
@@ -346,3 +263,4 @@ const { Content, headings } = await render(post);
     }
   }
 </style>
+    

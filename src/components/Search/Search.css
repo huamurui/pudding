@@ -1,12 +1,13 @@
 .tag-search-wrapper {
     width: 100%;
-    max-width: 600px;
     margin: 0 auto;
 }
 
 #tag-search-container {
     display: flex;
     gap: 0;
+    max-width: 600px;
+    margin: auto;
     width: 100%;
 }
 
@@ -22,7 +23,7 @@
 }
 
 .tag-search-wrapper select:focus {
-    border-color: var(--accent-color);
+    border-color: var(--theme-color);
     box-shadow: 0 0 0 2px rgba(94, 126, 255, 0.2);
     z-index: 999;
 }
@@ -49,7 +50,7 @@
 }
 
 .tag-search-wrapper input:focus {
-    border-color: var(--accent-color);
+    border-color: var(--theme-color);
     box-shadow: 0 0 0 2px rgba(94, 126, 255, 0.2);
     z-index: 999;
 }
