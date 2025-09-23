@@ -75,16 +75,7 @@ export default function ThemeToggle() {
         >
           Dark
         </a>
-        <span class="indicator" style={{
-          position: 'absolute',
-          bottom: '-3px',
-          left: theme() === 'light' ? '0' : '50%',
-          width: ['light', 'dark'].includes(theme()) ? '50%' : '0',
-          height: '3px',
-          'border-radius': '3px',
-          background: 'var(--primary-color)',
-          transition: 'all 0.3s ease',
-        }}></span>
+        <span class="indicator theme-toggle"></span>
       </span>
     </div>
   );

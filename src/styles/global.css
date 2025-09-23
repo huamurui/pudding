@@ -1,3 +1,4 @@
+@import url('./md.css');
 /* src/styles/global.css */
 :root {
   /* 亮色主题变量 */
@@ -24,7 +25,6 @@
   --theme-color: #ff9eb6;
   --border-color: #404040;
   --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-
 }
 
 
@@ -34,20 +34,30 @@
   background-color: var(--shiki-dark-bg) !important;
 }
 
+.indicator.theme-toggle {
+  left: 0;
+  position: absolute;
+  bottom: -3px;
+  width: 50%;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--primary-color);
+  transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .indicator.theme-toggle {
+  left: 50%;
+}
+
 .astro-code {
   border: 1px solid var(--border-color);
   border-radius: 0.5rem;
-  /* 圆角 */
   padding: 1.5rem;
-  /* 内间距 */
   background-color: var(--bg-primary);
-  /* 背景色 */
   box-shadow: var(--shadow);
   margin: 1rem 0;
-  /* 外间距 */
 }
 
-/* 应用主题变量 */
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
@@ -105,8 +115,6 @@ body {
   background-color: var(--theme-color);
   transition: width 0.3s ease;
 }
-
-
 
 .tags {
   display: flex;

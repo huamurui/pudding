@@ -13,7 +13,7 @@
 
 .tag-search-wrapper select {
     height: 32px;
-    padding: 8px 12px;
+    padding: 6px 12px;
     background-color: var(--bg-secondary);
     border: 1px solid var(--border-color);
     border-radius: 6px 0 0 6px;
