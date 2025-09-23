@@ -1,5 +1,5 @@
 {
-  "name": "@example/minimal",
+  "name": "@huamurui/blog",
   "type": "module",
   "version": "0.0.1",
   "private": true,
@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.12",
+    "@astrojs/sitemap": "^3.6.0",
     "@astrojs/solid-js": "^5.1.0",
     "astro": "^5.13.5",
     "katex": "^0.16.22",

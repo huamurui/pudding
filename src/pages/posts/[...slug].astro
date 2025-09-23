@@ -1,7 +1,7 @@
 ---
-import ToC from '../../components/ToC.astro';
-import { getCollection, render, type CollectionEntry } from 'astro:content';
-import MarkdownPostLayout from '../../layouts/MarkdownPostLayout.astro';
+import ToC from "../../components/ToC.astro";
+import { getCollection, render, type CollectionEntry } from "astro:content";
+import MarkdownPostLayout from "../../layouts/MarkdownPostLayout.astro";
 
 interface PostImage {
   url: string;
@@ -21,20 +21,20 @@ type StaticPath = {
     slug: string;
   };
   props: {
-    post: CollectionEntry<'posts'>;
+    post: CollectionEntry<"posts">;
   };
 };
 
 export async function getStaticPaths(): Promise<StaticPath[]> {
-  const posts = await getCollection('posts');
-  return posts.map(post => ({
-    params: { slug: post.id }, 
+  const posts = await getCollection("posts");
+  return posts.map((post) => ({
+    params: { slug: post.id },
     props: { post },
   }));
 }
 
 interface Props {
-  post: CollectionEntry<'posts'>;
+  post: CollectionEntry<"posts">;
 }
 
 const { post } = Astro.props as Props;
@@ -48,52 +48,65 @@ const { Content, headings } = await render(post);
         <h1 class="post-title">{post.data.title}</h1>
         <p class="post-description">{post.data.description}</p>
         <div class="post-meta">
-          <time class="post-date" datetime={new Date(post.data.date).toISOString()}>
-            {new Date(post.data.date).toLocaleDateString('zh-CN', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric'
-            })}
+          <time
+            class="post-date"
+            datetime={new Date(post.data.date).toISOString()}
+          >
+            {
+              () => {
+                const date = new Date(post.data.date);
+                const year = date.getFullYear();
+                const month = String(date.getMonth()).padStart(2, "0");
+                const day = String(date.getDate()).padStart(2, "0");
+                return `${year}-${month}-${day}`;
+              }
+            }
           </time>
           <span class="meta-separator">•</span>
           <span class="reading-time">
-            {Math.ceil(post.body.split(' ').length / 200)} 分钟阅读
+            {Math.ceil(post.body.split(" ").length / 200)} 分钟阅读
           </span>
         </div>
         <div class="post-tags">
-          {post.data.tags?.map((tag: string) => (
-            <a href={`/tags/${tag}`} class="post-tag" key={tag}>
-              #{tag}
-            </a>
-          ))}
+          {
+            post.data.tags?.map((tag: string) => (
+              <a href={`/tags/${tag}`} class="post-tag" key={tag}>
+                #{tag}
+              </a>
+            ))
+          }
         </div>
       </header>
-      
-      {post.data.image && (
-        <figure class="post-image">
-          <img 
-            src={post.data.image.url} 
-            alt={post.data.image.alt || post.data.title}
-            loading="lazy"
-          />
-          {post.data.image.alt && <figcaption>{post.data.image.alt}</figcaption>}
-        </figure>
-      )}
-      
+
+      {
+        post.data.image && (
+          <figure class="post-image">
+            <img
+              src={post.data.image.url}
+              alt={post.data.image.alt || post.data.title}
+              loading="lazy"
+            />
+            {post.data.image.alt && (
+              <figcaption>{post.data.image.alt}</figcaption>
+            )}
+          </figure>
+        )
+      }
+
       <div class="post-content">
         <Content />
       </div>
-      
-      <footer class="post-footer">
 
-      </footer>
+      <footer class="post-footer"></footer>
     </div>
-    
-    {headings && headings.length > 0 && (
-      <aside class="blog-post-sidebar">
-        <ToC headings={headings} />
-      </aside>
-    )}
+
+    {
+      headings && headings.length > 0 && (
+        <aside class="blog-post-sidebar">
+          <ToC headings={headings} />
+        </aside>
+      )
+    }
   </article>
 </MarkdownPostLayout>
 
@@ -106,21 +119,21 @@ const { Content, headings } = await render(post);
     margin: 0 auto;
     padding: 2rem 1rem;
   }
-  
+
   /* 主要内容区域 */
   .blog-post-content {
     flex: 1;
     min-width: 0;
     max-width: 800px;
   }
-  
+
   /* 文章头部 */
   .post-header {
     margin-bottom: 2.5rem;
     padding-bottom: 1.5rem;
     border-bottom: 1px solid var(--border-color);
   }
-  
+
   .post-title {
     font-size: 2.5rem;
     font-weight: 800;
@@ -128,14 +141,14 @@ const { Content, headings } = await render(post);
     color: var(--text-primary);
     margin-bottom: 1rem;
   }
-  
+
   .post-description {
     font-size: 1.25rem;
     color: var(--text-secondary);
     line-height: 1.5;
     margin-bottom: 1.5rem;
   }
-  
+
   .post-meta {
     display: flex;
     align-items: center;
@@ -143,11 +156,11 @@ const { Content, headings } = await render(post);
     font-size: 0.9rem;
     color: var(--text-muted);
   }
-  
+
   .meta-separator {
     opacity: 0.6;
   }
-  
+
   /* 文章图片 */
   .post-image {
     margin: 2rem 0;
@@ -155,13 +168,13 @@ const { Content, headings } = await render(post);
     overflow: hidden;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
-  
+
   .post-image img {
     width: 100%;
     height: auto;
     display: block;
   }
-  
+
   .post-image figcaption {
     text-align: center;
     font-size: 0.9rem;
@@ -169,27 +182,27 @@ const { Content, headings } = await render(post);
     padding: 0.75rem;
     background: var(--bg-tertiary);
   }
-  
+
   .post-content {
     font-size: 1.1rem;
     line-height: 1.7;
     color: var(--text-primary);
   }
-  
+
   /* 文章底部 */
   .post-footer {
     margin-top: 3rem;
     padding-top: 2rem;
     border-top: 1px solid var(--border-color);
   }
-  
+
   .post-tags {
     margin-top: 1rem;
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
   }
-  
+
   .post-tag {
     background: var(--bg-tertiary);
     color: var(--text-secondary);
@@ -199,12 +212,12 @@ const { Content, headings } = await render(post);
     text-decoration: none;
     transition: all 0.2s ease;
   }
-  
+
   .post-tag:hover {
     background: var(--accent-color);
     color: white;
   }
-  
+
   /* 侧边栏 */
   .blog-post-sidebar {
     width: 280px;
@@ -214,53 +227,52 @@ const { Content, headings } = await render(post);
     align-self: flex-start;
     max-height: calc(100vh - 4rem);
   }
-  
+
   /* 响应式设计 */
   @media (max-width: 968px) {
     .blog-post-container {
       flex-direction: column;
       gap: 2rem;
     }
-    
+
     .blog-post-sidebar {
       width: 100%;
       position: static;
       order: -1;
       margin-bottom: 2rem;
     }
-    
+
     .post-title {
       font-size: 2rem;
     }
-    
+
     .post-description {
       font-size: 1.1rem;
     }
-    
+
     /* 为小屏幕添加顶部间距，避免内容被顶部滚动目录遮挡 */
     .post-header {
       margin-top: 2rem;
     }
   }
-  
+
   @media (max-width: 640px) {
     .blog-post-container {
       padding: 1rem 0.5rem;
     }
-    
+
     .post-title {
       font-size: 1.75rem;
     }
-    
+
     .post-meta {
       flex-direction: column;
       align-items: flex-start;
       gap: 0.25rem;
     }
-    
+
     .meta-separator {
       display: none;
     }
   }
 </style>
-    

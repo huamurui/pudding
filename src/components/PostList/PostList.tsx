@@ -26,7 +26,15 @@ const PostList = ({ posts, selectedTags = () => null }: PostListProps) => {
               <a href={post.url} class="post-link">
                 <span class="post-title">{post.title}</span>
                 <span class="post-date">
-                  {new Date(post.date).toLocaleDateString()}
+                  {
+                  () => {
+                    const date = new Date(post.date);
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth()).padStart(2, "0");
+                    const day = String(date.getDate()).padStart(2, "0");
+                    return `${year}-${month}-${day}`;
+                  }
+                }
                 </span>
               </a>
               <div class="post-tags">

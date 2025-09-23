@@ -2,9 +2,9 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { getCollection, type CollectionEntry } from "astro:content";
 
-type TagPostsMap = Map<string, CollectionEntry<'posts'>[]>;
+type TagPostsMap = Map<string, CollectionEntry<"posts">[]>;
 
-const posts: CollectionEntry<'posts'>[] = await getCollection("posts");
+const posts: CollectionEntry<"posts">[] = await getCollection("posts");
 const tagsPosts: TagPostsMap = new Map();
 
 for (const post of posts) {
@@ -14,7 +14,9 @@ for (const post of posts) {
   }
 }
 
-const sortedTags = Array.from(tagsPosts.keys()).sort((a, b) => a.localeCompare(b));
+const sortedTags = Array.from(tagsPosts.keys()).sort((a, b) =>
+  a.localeCompare(b),
+);
 ---
 
 <BaseLayout pageTitle="Tags">
@@ -29,7 +31,7 @@ const sortedTags = Array.from(tagsPosts.keys()).sort((a, b) => a.localeCompare(b
           sortedTags.map((tag: string) => {
             const tagPosts = tagsPosts.get(tag);
             if (!tagPosts) return null;
-            
+
             return (
               <div class="tag-card">
                 <div class="tag-header">
@@ -38,36 +40,45 @@ const sortedTags = Array.from(tagsPosts.keys()).sort((a, b) => a.localeCompare(b
                       {tag}
                     </a>
                   </h2>
-                  <span class="post-count">
-                    {tagPosts.length} 篇文章
-                  </span>
+                  <span class="post-count">{tagPosts.length} 篇文章</span>
                 </div>
 
                 <ul class="post-list">
                   {tagPosts
                     .slice(0, 5)
-                    .map((post: CollectionEntry<'posts'>) => (
+                    .map((post: CollectionEntry<"posts">) => (
                       <li class="post-item">
                         <a href={`/posts/${post.id}`} class="post-link">
-                          <span class="post-title">
-                            {post.data.title}
-                          </span>
+                          <span class="post-title">{post.data.title}</span>
                           <span class="post-date">
-                            {new Date(post.data.date).toLocaleDateString()}
+                            {() => {
+                              const date = new Date(post.data.date);
+                              const year = date.getFullYear();
+                              const month = String(date.getMonth()).padStart(
+                                2,
+                                "0",
+                              );
+                              const day = String(date.getDate()).padStart(
+                                2,
+                                "0",
+                              );
+                              return `${year}-${month}-${day}`;
+                            }}{" "}
                           </span>
                         </a>
                       </li>
                     ))}
 
-                {tagPosts.length > 5 && (
-                  <li class="view-more">
-                    <a href={`/tags/${tag}`} class="view-more-link">
-                      查看全部 {tagPosts.length} 篇文章 &rarr;
-                    </a>
-                  </li>
-                )}
-              </ul>
-            </div>)
+                  {tagPosts.length > 5 && (
+                    <li class="view-more">
+                      <a href={`/tags/${tag}`} class="view-more-link">
+                        查看全部 {tagPosts.length} 篇文章 &rarr;
+                      </a>
+                    </li>
+                  )}
+                </ul>
+              </div>
+            );
           })
         }
       </div>

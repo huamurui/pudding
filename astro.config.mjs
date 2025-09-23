@@ -4,13 +4,13 @@ import solid from "@astrojs/solid-js";
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 
+import sitemap from '@astrojs/sitemap';
+
 // https://astro.build/config
 export default defineConfig({
   site: 'https://huamurui.github.io',
   // base: '/',
-  integrations: [
-    solid()
-  ],
+  integrations: [solid(), sitemap()],
   markdown: {
     remarkPlugins: [remarkMath],
     rehypePlugins: [rehypeKatex],
