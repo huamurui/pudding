@@ -12,7 +12,7 @@ const posts = () => _posts.map(post => ({
   description: post.data.description,
   tags: post.data.tags || [],
   url: `/posts/${post.id}/`,
-})).sort((a, b) => new Date(b.date) - new Date(a.date));
+})).sort((a, b) => b.date - a.date);
 
 ---
 <BaseLayout pageTitle={pageTitle}>

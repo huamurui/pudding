@@ -11,7 +11,7 @@ interface PostImage {
 interface PostFrontmatter {
   title: string;
   description?: string;
-  date: string | Date;
+  date: Date;
   tags?: string[];
   image?: PostImage;
 }
@@ -52,25 +52,17 @@ const { Content, headings } = await render(post);
             class="post-date"
             datetime={new Date(post.data.date).toISOString()}
           >
-            {
-              () => {
-                const date = new Date(post.data.date);
-                const year = date.getFullYear();
-                const month = String(date.getMonth()+1).padStart(2, "0");
-                const day = String(date.getDate()).padStart(2, "0");
-                return `${year}-${month}-${day}`;
-              }
-            }
+            { post.data.date.toISOString().split('T')[0] }
           </time>
           <span class="meta-separator">•</span>
           <span class="reading-time">
-            {Math.ceil(post.body.split(" ").length / 200)} 分钟阅读
+            {Math.ceil((post.body || '').split(" ").length / 200)} 分钟阅读
           </span>
         </div>
         <div class="post-tags">
           {
             post.data.tags?.map((tag: string) => (
-              <a href={`/tags/${tag}`} class="post-tag" key={tag}>
+              <a href={`/tags/${tag}`} class="post-tag">
                 #{tag}
               </a>
             ))

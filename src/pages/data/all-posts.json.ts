@@ -4,7 +4,7 @@ import type { APIRoute } from 'astro';
 interface PostData {
   id: string;
   title: string;
-  date?: string;
+  date?: Date;
   description?: string;
   tags: string[];
   url: string;
@@ -44,7 +44,7 @@ export const GET: APIRoute = async () => {
     return {
       id: post.id,
       title: post.data.title,
-      date: post.data.date?.toISOString(),
+      date: post.data.date,
       description: post.data.description,
       tags: tags,
       url: `/posts/${post.id}/`,
