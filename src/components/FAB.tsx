@@ -1,5 +1,5 @@
-import { createSignal, onMount, onCleanup, createEffect } from 'solid-js';
-import styles from './FAB.module.css';
+import { createSignal, onMount, onCleanup } from 'solid-js';
+import './FAB.css'
 interface FABProps {
   showThreshold?: number;
   position?: {
@@ -13,7 +13,7 @@ interface FABProps {
 const FAB = (props: FABProps) => {
   const [scrollPercent, setScrollPercent] = createSignal<number>(0);
   const [isVisible, setIsVisible] = createSignal<boolean>(false);
-  
+
   let progressCircleRef: SVGElement | undefined;
   const circumference = 2 * Math.PI * 30; // 圆环半径为30
   const showThreshold = props.showThreshold || 300; // 默认滚动300px后显示
@@ -23,14 +23,14 @@ const FAB = (props: FABProps) => {
     const scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
     const clientHeight = document.documentElement.clientHeight || document.body.clientHeight;
     const percent = (scrollTop / (scrollHeight - clientHeight)) * 100;
-    
+
     setScrollPercent(Math.round(percent));
-    
+
     if (progressCircleRef) {
       const offset = circumference - (percent / 100) * circumference;
       progressCircleRef.style.strokeDashoffset = offset.toString();
     }
-    
+
     setIsVisible(scrollTop > showThreshold);
   };
 
@@ -45,7 +45,7 @@ const FAB = (props: FABProps) => {
     window.addEventListener("scroll", handleScroll);
     handleScroll();
   });
-  
+
   onCleanup(() => {
     window.removeEventListener("scroll", handleScroll);
   });
@@ -54,28 +54,26 @@ const FAB = (props: FABProps) => {
     bottom: '20px',
     right: '20px'
   };
-  
+
   const fabPosition = { ...defaultPosition, ...props.position };
 
   return (
-    <div 
-      classList={{
-        [styles.floatingActionButton]: true,
-        [styles.visible]: isVisible(),
-        [styles.hidden]: !isVisible()
-      }}
+    <div
+      class={
+        isVisible() ? "floating-action-button visible" : "floating-action-button hidden"
+      }
       style={fabPosition}
       onClick={scrollToTop}
       title="回到顶部"
     >
-      <div class={styles.icon}>{scrollPercent()}%</div>
-      <svg class={styles.progressRing}>
-        <circle 
+      <div class="icon">{scrollPercent()}%</div>
+      <svg class="progress-ring">
+        <circle
           ref={el => progressCircleRef = el}
-          class={styles.progressCircle}
-          cx="31" 
-          cy="31" 
-          r="30" 
+          class="progress-circle"
+          cx="31"
+          cy="31"
+          r="30"
           stroke-dasharray={circumference.toString()}
           stroke-dashoffset={circumference.toString()}
         ></circle>
@@ -85,4 +83,3 @@ const FAB = (props: FABProps) => {
 };
 
 export default FAB;
-    

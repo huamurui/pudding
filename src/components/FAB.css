@@ -1,8 +1,8 @@
-.floatingActionButton {
+.floating-action-button {
   position: fixed;
   width: 50px;
   height: 50px;
-  border-radius: 50%;
+  border-radius: 50px;
   background-color: var(--primary-color);
   color: var(--bg-primary);
   font-weight: bold;
@@ -13,7 +13,6 @@
   user-select: none;
   z-index: 999;
   transition: opacity 0.3s ease, transform 0.3s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .visible {
@@ -32,7 +31,7 @@
   font-size: 16px;
 }
 
-.progressRing {
+.progress-ring {
   position: absolute;
   height: 62px;
   width: 62px;
@@ -40,7 +39,7 @@
   transform: rotate(-90deg);
 }
 
-.progressCircle {
+.progress-circle {
   fill: none;
   stroke: var(--primary-color);
   stroke-width: 2;
@@ -48,7 +47,7 @@
 }
 
 /* 悬停效果 */
-.floatingActionButton:hover {
+.floating-action-button:hover {
   transform: scale(1.05);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
