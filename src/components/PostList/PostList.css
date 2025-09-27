@@ -76,6 +76,7 @@
 }
 
 .post-tag {
+  text-decoration: none;
   padding: 0.35rem 0.75rem;
   background-color: var(--bg-tertiary);
   border-radius: 16px;

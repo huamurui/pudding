@@ -3,7 +3,7 @@ import { glob, file } from 'astro/loaders'; // 不适用于旧版 API
 
 const posts = defineCollection({
   loader: glob({ pattern: "**/*.md", base: "./src/posts/" }),
-//   schema: /* ... */
+  //   schema: /* ... */
 });
 
 // const probes = defineCollection({
@@ -21,4 +21,4 @@ const posts = defineCollection({
 //   }),
 // });
 
-export const collections = {posts  };
+export const collections = { posts };

@@ -1,28 +1,59 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PostList from '../components/PostList/PostList';
-import { getCollection } from 'astro:content';
-const pageTitle = "Home Page";
+import { getCollection, render } from 'astro:content';
+import { experimental_AstroContainer } from "astro/container";
+const container = await experimental_AstroContainer.create();
+
+// 从渲染后的HTML中提取摘要
+const extractExcerptFromRendered = (html: string): string => {
+  // 1. 查找<!-- more -->标记
+  const moreMarker = /<!--\s*more\s*-->/i;
+  if (moreMarker.test(html)) {
+    const [excerptHtml] = html.split(moreMarker);
+    return excerptHtml.trim();
+  }
+
+  // 2. 自动提取第一段（到第一个块级元素结束）
+  const firstParagraphMatch = html.match(/<p>.*?<\/p>|<div>.*?<\/div>|<ul>.*?<\/ul>/s);
+  if (firstParagraphMatch) {
+    return firstParagraphMatch[0];
+  }
+
+  // 3. 兜底处理
+  return html.slice(0, 300).replace(/<[^>]+$/, '') + '...';
+};
 
 const _posts = await getCollection('posts');
-const posts = () => _posts.map(post => ({
-  id: post.id,
-  title: post.data.title,
-  date: post.data.date,
-  description: post.data.description,
-  tags: post.data.tags || [],
-  url: `/posts/${post.id}/`,
-})).sort((a, b) => b.date - a.date);
+const postsWithExcerpt = await Promise.all(
+  _posts.map(async (post) => {
+    const { Content } = await render(post);
+    
+    const html = await container.renderToString(Content);
+    
+    return {
+      id: post.id,
+      title: post.data.title,
+      date: post.data.date,
+      tags: post.data.tags || [],
+      url: `/posts/${post.id}/`,
+      excerptHtml: extractExcerptFromRendered(html)
+    };
+  })
+);
+
+// 排序
+const posts = () => postsWithExcerpt.sort(
+  (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+);
 
 ---
-<BaseLayout pageTitle={pageTitle}>
-  <div
-  style={{
+<BaseLayout pageTitle="Home Page">
+  <div style={{
     maxWidth: '800px',
     margin: '0 auto',
     padding: '2rem 1rem',
-  }}
-  >
+  }}>
     <PostList posts={posts} />
   </div>
 </BaseLayout>

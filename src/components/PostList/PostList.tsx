@@ -1,11 +1,13 @@
 import "./PostList.css";
 
 interface Post {
-  id: string | number;
+  id: string;
   url: string;
   title: string;
   date: string | Date;
   tags: string[];
+  description?: string;
+  excerptHtml: string; // 渲染后的摘要HTML
 }
 
 interface PostListProps {
@@ -14,7 +16,6 @@ interface PostListProps {
 }
 
 const PostList = ({ posts, selectedTags = () => null }: PostListProps) => {
-
   return (
     <>
       {posts().length === 0 ? (
@@ -24,18 +25,23 @@ const PostList = ({ posts, selectedTags = () => null }: PostListProps) => {
           {posts().map(post => (
             <li class="post-item">
               <a href={post.url} class="post-link">
-                <span class="post-title">{post.title}</span>
-                <span class="post-date">
-                  { new Date(post.date).toISOString().split('T')[0] }
-                </span>
+                <h2 class="post-title">{post.title}</h2>
+                <time class="post-date" datetime={new Date(post.date).toISOString()}>
+                  {new Date(post.date).toISOString().split('T')[0]}
+                </time>
               </a>
+              
+              {/* 渲染摘要（复用正文样式） */}
+              <div class="post-excerpt" innerHTML={post.excerptHtml} />
+              
               <div class="post-tags">
                 {post.tags.map(tag => (
-                  <span
+                  <a 
+                    href={`/tags/${tag}`} 
                     class={`post-tag ${selectedTags()?.has(tag) ? 'highlighted' : ''}`}
                   >
-                    {tag}
-                  </span>
+                    #{tag}
+                  </a>
                 ))}
               </div>
             </li>
