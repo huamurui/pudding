@@ -3,9 +3,17 @@ import "../styles/global.css";
 import { getCollection } from "astro:content";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
-import FAB from "../components/FAB.tsx";
+import FAB from "../components/FAB.tsx"; // 修复文件扩展名引用
 
-const { pageTitle } = Astro.props;
+// 从props获取页面标题和描述，添加默认值
+const { 
+  pageTitle = "云苔的blog", 
+  description = "这是一个使用Astro构建的用来放各种乱七八糟东西的网站",
+  ogImage = "/og-default.jpg",
+  canonicalUrl = Astro.url.href
+} = Astro.props;
+
+// 获取文章列表数据
 const items = (await getCollection("posts")).map((post) => ({
   title: post.data.title,
   url: `/posts/${post.id}/`,
@@ -13,14 +21,56 @@ const items = (await getCollection("posts")).map((post) => ({
 }));
 ---
 
-<html lang="en">
+<html lang="zh-CN">
   <head>
     <meta charset="utf-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="generator" content={Astro.generator} />
     <link rel="sitemap" href="/sitemap-index.xml" />
+    
+    <!-- 主要标题和描述 -->
     <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="keywords" content="云苔,芸薹,huamurui,花木瑞,blog,tech,software,nonsense,chattering,碎碎念,web,front-end" />
+
+    <!-- 规范URL - 有助于SEO避免重复内容问题 -->
+    <link rel="canonical" href={canonicalUrl} />
+    
+    <!-- 搜索引擎优化标签 -->
+    <meta name="robots" content="index, follow" />
+    <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    
+    <!-- 社交媒体元标签 (Open Graph) -->
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:site_name" content="云苔的blog" />
+    <meta property="og:locale" content="zh_CN" />
+    
+    <!-- Twitter 卡片 -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <!-- <meta name="twitter:site" content="@yourusername"> 如有Twitter账号可添加 -->
+    
+    <!-- 安全相关头部 -->
+    <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*; font-src 'self' data:;" /> -->
+    <!-- <meta http-equiv="X-XSS-Protection" content="1; mode=block" /> -->
+    <!-- <meta http-equiv="X-Content-Type-Options" content="nosniff" /> -->
+    <!-- <meta name="referrer" content="strict-origin-when-cross-origin" /> -->
+    
+    <!-- 主题颜色 - 影响浏览器地址栏等UI元素 -->
+    <meta name="theme-color" content="#5e7eff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#ff9eb6" media="(prefers-color-scheme: dark)" />
+    
+    <!-- 预加载关键资源 -->
+    <!-- <link rel="preload" href="/fonts/main-font.woff2" as="font" type="font/woff2" crossorigin /> -->
+    
+    <!-- 主题设置脚本 -->
     <script is:inline>
       (function () {
         try {
@@ -43,10 +93,10 @@ const items = (await getCollection("posts")).map((post) => ({
     <!-- <Sidebar items={items}/> -->
     <main
       style="
-      max-width: 1200px; 
-      margin: 0 auto; 
-      padding: 1rem;
-    "
+        max-width: 1200px; 
+        margin: 0 auto; 
+        padding: 1rem;
+      "
     >
       <slot />
     </main>

@@ -64,12 +64,12 @@ const { headings = [] } = Astro.props as Props;
 
 <style>
   .blog-toc {
-    position: sticky;
     top: 2rem;
     max-height: calc(100vh - 4rem);
     overflow-y: auto;
     margin-left: 1rem;
     position: relative;
+    overflow: hidden;
   }
 
   .toc-list {
