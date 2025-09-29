@@ -4,9 +4,9 @@
   /* 亮色主题变量 */
   --bg-primary: #ffffff;
   --bg-secondary: #f8f9fa;
-  --bg-tertiary: #e9ecef;
+  --bg-tertiary: #f1f1f1;
   --text-primary: #212529;
-  --text-secondary: #6c757d;
+  --text-secondary: #5b5b5b;
   --theme-color: #5e7eff;
   --primary-color: #5e7eff;
   --border-color: #dee2e6;
@@ -20,7 +20,7 @@
   --bg-secondary: #1e1e1e;
   --bg-tertiary: #2d2d2d;
   --text-primary: #e9ecef;
-  --text-secondary: #adb5bd;
+  --text-secondary: #cdcdcd;
   --primary-color: #ff9eb6;
   --theme-color: #ff9eb6;
   --border-color: #404040;

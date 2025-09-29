@@ -1,4 +1,3 @@
-
 /* Markdown 内容容器 */
 article {
   line-height: 1.7;
@@ -100,8 +99,8 @@ article li > ol {
 /* 为 
 article details  和 
 article summary 添加样式 */
- 
-article details  {
+
+article details {
   background-color: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: 8px;
@@ -124,25 +123,28 @@ article details [open] {
 
 article summary {
   display: block;
-  padding: 0.21rem 0.2rem 0.2rem 3rem; /* 左侧留出箭头空间 */
+  padding: 0.21rem 0.2rem 0.2rem 3rem;
+  /* 左侧留出箭头空间 */
   cursor: pointer;
   font-weight: 600;
   color: var(--text-primary);
   position: relative;
-  list-style: none; /* 隐藏 Firefox 的默认列表样式 */
+  list-style: none;
+  /* 隐藏 Firefox 的默认列表样式 */
   transition: color 0.2s ease;
 }
 
 /* 隐藏所有浏览器的默认详情标记 */
 
-article summary::-webkit-
-article details -marker {
-  display: none; /* Chrome, Safari, Edge */
+article summary::-webkit- article details -marker {
+  display: none;
+  /* Chrome, Safari, Edge */
 }
 
 
 article summary::marker {
-  display: none; /* Firefox */
+  display: none;
+  /* Firefox */
   content: "";
 }
 
@@ -153,7 +155,8 @@ article summary::before {
   position: absolute;
   left: 1rem;
   top: 50%;
-  transform: translateY(-50%) rotate(0deg); /* 初始状态 */
+  transform: translateY(-50%) rotate(0deg);
+  /* 初始状态 */
   width: 0.75rem;
   height: 0.75rem;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235e7eff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 18l6-6-6-6'/%3E%3C/svg%3E");
@@ -163,15 +166,14 @@ article summary::before {
 }
 
 /* 黑暗主题下的箭头颜色 */
-[data-theme="dark"] 
-article summary::before {
+[data-theme="dark"] article summary::before {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ff9eb6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 18l6-6-6-6'/%3E%3C/svg%3E");
 }
 
 
-article details[open] 
-article summary::before {
-  transform: translateY(-50%) rotate(90deg); /* 展开时旋转箭头 */
+article details[open] article summary::before {
+  transform: translateY(-50%) rotate(90deg);
+  /* 展开时旋转箭头 */
 }
 
 
@@ -181,7 +183,8 @@ article summary:hover {
 
 /* details 内部的内容样式 */
 article details .details-content {
-  padding: 0 1.5rem 1.5rem 3rem; /* 与 summary 的左侧对齐 */
+  padding: 0 1.5rem 1.5rem 3rem;
+  /* 与 summary 的左侧对齐 */
   color: var(--text-primary);
   line-height: 1.6;
 }
@@ -196,6 +199,7 @@ article details .details-content {
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -205,7 +209,7 @@ article details .details-content {
 /* 引用块样式 */
 article blockquote {
   border-left: 4px solid var(--theme-color);
-  margin:0;
+  margin: 0;
   padding: 1rem 1.5rem;
   background-color: var(--bg-secondary);
   border-radius: 0 0.5rem 0.5rem 0;
@@ -216,6 +220,14 @@ article blockquote p {
   margin: 0.5rem 0;
   color: var(--text-secondary);
 }
+
+article p code {
+  background:
+    color-mix(in srgb, var(--theme-color) 15%, transparent);
+  padding: 6px;
+  border-radius: 6px;
+}
+
 
 
 /* 水平线样式 */
