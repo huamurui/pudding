@@ -33,30 +33,58 @@ export async function getStaticPaths(): Promise<StaticPath[]> {
   }));
 }
 
+import { experimental_AstroContainer } from "astro/container";
+const container = await experimental_AstroContainer.create();
+
 interface Props {
   post: CollectionEntry<"posts">;
 }
 
 const { post } = Astro.props as Props;
 const { Content, headings } = await render(post);
+
+const getDescription = (post: string): string => {
+  // 1. 查找<!-- more -->标记
+  const moreMarker = /<!--\s*more\s*-->/i;
+  if (moreMarker.test(post)) {
+    const [excerptHtml] = post.split(moreMarker);
+    return excerptHtml.trim();
+  }
+
+  // 2. 自动提取第一段（到第一个块级元素结束）
+  const firstParagraphMatch = post.match(
+    /<p>.*?<\/p>|<div>.*?<\/div>|<ul>.*?<\/ul>/s,
+  );
+  if (firstParagraphMatch) {
+    return firstParagraphMatch[0];
+  }
+
+  // 3. 兜底处理
+  return post.slice(0, 300).replace(/<[^>]+$/, "") + "...";
+};
+
+const post_str = await container.renderToString(Content);
+const description = getDescription(post_str);
 ---
 
-<MarkdownPostLayout frontmatter={post.data as PostFrontmatter}>
+<MarkdownPostLayout
+  frontmatter={{ ...post.data, description } as PostFrontmatter}
+>
   <article class="blog-post-container">
     <div class="blog-post-content">
       <header class="post-header">
         <h1 class="post-title">{post.data.title}</h1>
-        <p class="post-description">{post.data.description}</p>
+        <!-- <p class="post-description">{post.data.description}</p> -->
         <div class="post-meta">
           <time
             class="post-date"
             datetime={new Date(post.data.date).toISOString()}
           >
-            { post.data.date.toISOString().split('T')[0] }
+            {post.data.date.toISOString().split("T")[0]}
           </time>
           <span class="meta-separator">•</span>
           <span class="reading-time">
-            {Math.ceil((post.body || '').split(" ").length / 200)} 分钟阅读
+            {Math.ceil((post.body || "").split(" ").length / 200)} 分钟阅读
           </span>
         </div>
         <div class="post-tags">

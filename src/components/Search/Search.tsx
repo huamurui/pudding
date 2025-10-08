@@ -3,7 +3,7 @@ import { evaluateExpression } from './Expression'
 import './Search.css'
 import PostList from '../PostList/PostList';
 // 主组件
- const Search = () => {
+const Search = () => {
   // 状态管理
   const [data, setData] = createSignal({ posts: [], tags: [] });
   const [searchMode, setSearchMode] = createSignal('all');
@@ -28,20 +28,20 @@ import PostList from '../PostList/PostList';
 
   // 提取所有标签名称
   const allTagNames = () => data().tags.map((tag: any) => tag.name);
-  
+
   // 处理输入变化
   const handleInputChange = (e: Event) => {
     const input = (e.target as HTMLInputElement).value;
     setSearchInput(input);
     setErrorMessage('');
-    
+
     // 根据当前模式生成不同的建议
     if (searchMode() === 'expression') {
       // 表达式模式下的建议逻辑
       const lastToken = input.split(/[\s&|!()]/).filter(t => t).pop() || '';
       if (lastToken) {
-        const filtered = allTagNames().filter(tag => 
-          tag.toLowerCase().includes(lastToken.toLowerCase()) && 
+        const filtered = allTagNames().filter(tag =>
+          tag.toLowerCase().includes(lastToken.toLowerCase()) &&
           !input.toLowerCase().includes(tag.toLowerCase())
         );
         setSuggestions(filtered);
@@ -52,15 +52,15 @@ import PostList from '../PostList/PostList';
       // 普通模式下的建议逻辑
       const currentTags = input.split(',').map(t => t.trim()).filter(t => t);
       const lastTag = currentTags[currentTags.length - 1] || '';
-      
+
       const filtered = allTagNames()
-        .filter(tag => !currentTags.includes(tag) && 
+        .filter(tag => !currentTags.includes(tag) &&
           tag.toLowerCase().includes(lastTag.toLowerCase())
         );
-      
+
       setSuggestions(filtered);
     }
-    
+
     setShowSuggestions(true);
   };
 
@@ -79,8 +79,8 @@ import PostList from '../PostList/PostList';
       // 表达式模式下插入标签
       const input = searchInput();
       const lastToken = input.split(/[\s&|!()]/).filter(t => t).pop() || '';
-      const newInput = lastToken 
-        ? input.replace(new RegExp(lastToken + '$'), tag) 
+      const newInput = lastToken
+        ? input.replace(new RegExp(lastToken + '$'), tag)
         : input + tag;
       setSearchInput(newInput);
     } else {
@@ -103,18 +103,18 @@ import PostList from '../PostList/PostList';
     const input = searchInput().trim();
     const mode = searchMode();
     const posts = data().posts || [];
-    
+
     if (!input || posts.length === 0) {
       setFilteredPosts(posts);
       return;
     }
-    
+
     try {
       let result = [...posts];
-      
+
       if (mode === 'expression') {
         // 表达式模式
-        result = result.filter((post: any) => 
+        result = result.filter((post: any) =>
           evaluateExpression(input, post.tags, allTagNames())
         );
       } else {
@@ -124,7 +124,7 @@ import PostList from '../PostList/PostList';
           setFilteredPosts(posts);
           return;
         }
-        
+
         // 全部包含或任一包含模式
         result = result.filter((post: any) => {
           const postTags = new Set(post.tags);
@@ -135,7 +135,7 @@ import PostList from '../PostList/PostList';
           }
         });
       }
-      
+
       setFilteredPosts(result);
     } catch (err) {
       if (err instanceof Error) {
@@ -154,7 +154,7 @@ import PostList from '../PostList/PostList';
         setShowSuggestions(false);
       }
     };
-    
+
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   });
@@ -165,7 +165,7 @@ import PostList from '../PostList/PostList';
       setShowSuggestions(false);
       return;
     }
-    
+
     if (e.key === 'Enter') {
       e.preventDefault();
       setShowSuggestions(false);
@@ -176,10 +176,10 @@ import PostList from '../PostList/PostList';
   return (
     <div class="tag-search-wrapper">
 
-      
+
       <div id="tag-search-container">
         {/* 模式选择下拉框 */}
-        <select 
+        <select
           value={searchMode()}
           onInput={handleModeChange}
         >
@@ -187,23 +187,23 @@ import PostList from '../PostList/PostList';
           <option value="any">任一包含</option>
           <option value="expression">表达式</option>
         </select>
-        
+
         {/* 搜索输入框 */}
         <div class="search-input-container">
-          <input 
-            type="text" 
+          <input
+            type="text"
             value={searchInput()}
             onInput={handleInputChange}
             onKeyDown={handleKeyDown}
             placeholder={
-              searchMode() === 'expression' 
-                ? "使用表达式搜索 (例如: web & (astro | 物理模拟))" 
+              searchMode() === 'expression'
+                ? "使用表达式搜索 (例如: web & (astro | 物理模拟))"
                 : "输入标签，用逗号分隔..."
             }
           />
-          
+
           {/* 清除按钮 */}
-          <button 
+          <button
             onClick={clearSearch}
             classList={{
               'clear-button': true,
@@ -215,13 +215,13 @@ import PostList from '../PostList/PostList';
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
           </button>
-          
+
           {/* 建议下拉框 */}
           <Show when={showSuggestions() && suggestions().length > 0}>
             <div class="suggestions-dropdown">
               <For each={suggestions()}>
                 {(tag) => (
-                  <div 
+                  <div
                     onClick={() => handleSuggestionSelect(tag)}
                     class="suggestion-item"
                   >
@@ -236,17 +236,17 @@ import PostList from '../PostList/PostList';
           </Show>
         </div>
       </div>
-      
+
       {/* 错误消息 */}
       <Show when={errorMessage()}>
         <div class="error-message">{errorMessage()}</div>
       </Show>
-      
+
       {/* 搜索结果计数 */}
       <div class="result-count">
         找到 {filteredPosts().length} 篇文章
       </div>
-      
+
       <PostList
         posts={filteredPosts}
       ></PostList>

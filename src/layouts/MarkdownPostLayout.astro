@@ -5,12 +5,8 @@ import "/node_modules/katex/dist/katex.min.css";
 const { frontmatter } = Astro.props;
 ---
 
-<BaseLayout pageTitle={frontmatter.title}>
+<BaseLayout pageTitle={frontmatter.title} description={frontmatter.description}>
   <slot />
 </BaseLayout>
 
-<style>
-
-
-
-</style>
+<style></style>

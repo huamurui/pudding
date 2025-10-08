@@ -62,7 +62,6 @@ article p {
 /* 链接样式 */
 article a {
   color: var(--theme-color);
-  text-decoration: none;
   transition: all 0.2s ease;
   font-weight: 500;
 }
@@ -255,8 +254,17 @@ article strong {
 }
 
 article em {
-  color: var(--text-secondary);
+  color: var(--theme-color);
+  opacity: 0.9;
   font-style: italic;
+}
+
+article sup {
+  vertical-align: super;
+  background: var(--bg-secondary);
+  padding: 2px 4px;
+  border-radius: 2px;
+  line-height: 0;
 }
 
 /* 键盘按键样式 */
