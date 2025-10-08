@@ -146,3 +146,36 @@ body {
 .tag:hover a {
   color: white;
 }
+
+
+.post-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.post-tag {
+  text-decoration: none;
+  padding: 0.35rem 0.75rem;
+  background-color: var(--bg-tertiary);
+  border-radius: 16px;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+  border: 1px solid var(--border-color);
+}
+
+.post-tag:hover {
+  background-color: var(--theme-color);
+  color: var(--bg-primary);
+  transform: translateY(-1px);
+  border-color: var(--theme-color);
+}
+
+.post-tag.highlighted {
+  background-color: var(--theme-color);
+  color: var(--bg-primary);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-color: var(--theme-color);
+}

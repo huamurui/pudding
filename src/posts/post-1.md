@@ -7,7 +7,7 @@ author: "momomomo"
 image:
   url: "https://docs.astro.build/assets/rose.webp"
   alt: "The Astro logo on a dark background with a pink glow."
-tags: ['web',"astro", "blogging"]
+tags: ['web',"astro", "blogging",'编程']
 ---
 
 ## SSG blog 的一些事
@@ -26,6 +26,15 @@ astro 的群岛，也是为了尽量不搞动态，搞动态也要灵活控制�
 ### 抖动
 ... SSG 一个一个页面都是独立的文件，那怎么做到切换的时候看起来很丝滑而不是一闪一闪呢? 
 也有可能是我太杂鱼了才做不到...
+
+<https://docs.astro.build/en/guides/view-transitions/>
+
+<https://developer.chrome.com/docs/web-platform/view-transitions/>
+
+<https://developer.mozilla.org/en-US/docs/Web/API/View_Transition_API>
+
+... 原来有这种东西，那要做的可能就是，尽量让每个页面的 dom 和布局都类似吧...
+但.. 我加了还是有些问题喵，主题切换和页面滚的监听有问题，先放着
 
 ### excerpt 与 description
 
