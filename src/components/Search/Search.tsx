@@ -247,9 +247,14 @@ const Search = () => {
         找到 {filteredPosts().length} 篇文章
       </div>
 
-      <PostList
-        posts={filteredPosts}
-      ></PostList>
+      <div style={{
+        "max-width": "800px",
+        margin: "auto"
+      }}>
+        <PostList
+          posts={filteredPosts}
+        ></PostList>
+      </div>
     </div>
   );
 };

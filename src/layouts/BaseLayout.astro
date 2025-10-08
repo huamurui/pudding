@@ -6,12 +6,18 @@ import Footer from "../components/Footer.astro";
 import FAB from "../components/FAB.tsx"; // 修复文件扩展名引用
 
 // 从props获取页面标题和描述，添加默认值
-const { 
-  pageTitle = "云苔的blog", 
+
+const site = "Cloud Veiled Greenhouse"
+let { 
+  pageTitle = site, 
   description = "这是一个使用Astro构建的用来放各种乱七八糟东西的网站",
   ogImage = "/og-default.jpg",
   canonicalUrl = Astro.url.href
 } = Astro.props;
+
+if (pageTitle != site) {
+  pageTitle += ` | ${site}`;
+}
 
 // 获取文章列表数据
 const items = (await getCollection("posts")).map((post) => ({
