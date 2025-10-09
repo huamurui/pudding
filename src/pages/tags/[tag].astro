@@ -1,7 +1,7 @@
 ---
 import { type CollectionEntry, getCollection } from "astro:content";
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import PostList from '../../components/PostList/PostList';
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PostList from "../../components/PostList/PostList";
 
 // 定义文章数据转换后的类型
 interface PostListItem {
@@ -20,13 +20,13 @@ type StaticPath = {
   };
   props: {
     tag: string;
-    posts: CollectionEntry<'posts'>[];
+    posts: CollectionEntry<"posts">[];
   };
 };
 
 export async function getStaticPaths(): Promise<StaticPath[]> {
   const posts = await getCollection("posts");
-  const tags = new Map<string, CollectionEntry<'posts'>[]>();
+  const tags = new Map<string, CollectionEntry<"posts">[]>();
 
   for (const post of posts) {
     for (const tag of post.data.tags || []) {
@@ -37,22 +37,24 @@ export async function getStaticPaths(): Promise<StaticPath[]> {
     }
   }
 
-  return Array.from(tags.entries()).map(([tag, posts]): StaticPath => ({
-    params: { tag },
-    props: { tag, posts },
-  }));
+  return Array.from(tags.entries()).map(
+    ([tag, posts]): StaticPath => ({
+      params: { tag },
+      props: { tag, posts },
+    }),
+  );
 }
 
 // 定义页面属性类型
 interface Props {
   tag: string;
-  posts: CollectionEntry<'posts'>[];
+  posts: CollectionEntry<"posts">[];
 }
 
 const { tag, posts } = Astro.props as Props;
 ---
 
-<BaseLayout title={`Tag ⬝ ${tag}`} description={`Posts tagged with ${tag}`}>
+<BaseLayout pageTitle={`Tag ⬝ ${tag}`} description={`Posts tagged with ${tag}`}>
   <div class="tag-view">
     <div class="stat">
       <div class="stat-title">
@@ -63,14 +65,15 @@ const { tag, posts } = Astro.props as Props;
       </div>
     </div>
   </div>
-  <PostList 
-    posts={() => posts.map(post => ({
-      id: post.id,
-      title: post.data.title,
-      date: post.data.date,
-      description: post.data.description,
-      tags: post.data.tags || [],
-      url: `/posts/${post.id}/`,
-    })) as PostListItem[]}
+  <PostList
+    posts={() =>
+      posts.map((post) => ({
+        id: post.id,
+        title: post.data.title,
+        date: post.data.date,
+        description: post.data.description,
+        tags: post.data.tags || [],
+        url: `/posts/${post.id}/`,
+      })) as PostListItem[]}
   />
 </BaseLayout>

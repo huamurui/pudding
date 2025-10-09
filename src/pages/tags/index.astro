@@ -115,7 +115,6 @@ const sortedTags = Array.from(tagsPosts.keys()).sort((a, b) =>
       background: var(--bg-secondary);
       border-radius: 12px;
       padding: 1.5rem;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
       transition:
         transform 0.3s ease,
         box-shadow 0.3s ease;
@@ -124,7 +123,8 @@ const sortedTags = Array.from(tagsPosts.keys()).sort((a, b) =>
 
     .tag-card:hover {
       transform: translateY(-5px);
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      border-color: var(--theme-color);
     }
 
     /* 标签头部 */
@@ -143,18 +143,17 @@ const sortedTags = Array.from(tagsPosts.keys()).sort((a, b) =>
     }
 
     .tag-link {
-      color: var(--theme-color);
+      color: var(--accent-hover);
       text-decoration: none;
       transition: color 0.2s ease;
     }
-
+    
     .tag-link:hover {
-      color: var(--accent-hover);
+      color: var(--theme-color);
     }
 
     .post-count {
-      background: var(--theme-color);
-      color: white;
+      background: var(--bg-tertiary);
       font-size: 0.8rem;
       font-weight: 600;
       padding: 0.25rem 0.75rem;

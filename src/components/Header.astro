@@ -1,5 +1,5 @@
 ---
-import ThemeToggle from './ThemeToggle';
+import ThemeToggle from "./ThemeToggle";
 
 // 定义导航项类型
 interface NavItem {
@@ -29,24 +29,26 @@ const navItems: NavItem[] = [
     <!-- 导航菜单 -->
     <nav class="nav" id="nav">
       <ul class="nav-list">
-        {navItems.map(item => (
-          <li class="nav-item">
-            <a 
-              href={item.href} 
-              class="nav-link"
-              class:list={{ "is-active": Astro.url.pathname === item.href }}
-            >
-              {item.label}
-            </a>
-          </li>
-        ))}
+        {
+          navItems.map((item) => (
+            <li class="nav-item">
+              <a
+                href={item.href}
+                class="nav-link"
+                class:list={{ "is-active": Astro.url.pathname === item.href }}
+              >
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
       </ul>
     </nav>
 
     <!-- 右侧功能区 -->
     <div class="header-actions">
       <ThemeToggle client:load />
-      
+
       <!-- 移动端菜单按钮 -->
       <button
         class="menu-toggle"
@@ -64,184 +66,186 @@ const navItems: NavItem[] = [
 
 <script>
   // 简单的菜单切换逻辑
-  (function() {
+  (function () {
     // 添加类型注解
-    const menuToggle: HTMLButtonElement | null = document.getElementById('menu-toggle') as HTMLButtonElement | null;
-    const nav: HTMLElement | null = document.getElementById('nav');
-    const header: HTMLElement | null = document.getElementById('header');
-    
+    const menuToggle: HTMLButtonElement | null = document.getElementById(
+      "menu-toggle",
+    ) as HTMLButtonElement | null;
+    const nav: HTMLElement | null = document.getElementById("nav");
+    const header: HTMLElement | null = document.getElementById("header");
+
     if (menuToggle && nav) {
-      menuToggle.addEventListener('click', () => {
-        const isExpanded: boolean = menuToggle.getAttribute('aria-expanded') === 'true';
-        menuToggle.setAttribute('aria-expanded', (!isExpanded).toString());
-        nav.classList.toggle('nav-open');
+      menuToggle.addEventListener("click", () => {
+        const isExpanded: boolean =
+          menuToggle.getAttribute("aria-expanded") === "true";
+        menuToggle.setAttribute("aria-expanded", (!isExpanded).toString());
+        nav.classList.toggle("nav-open");
         if (header) {
-          header.classList.toggle('menu-open');
+          header.classList.toggle("menu-open");
         }
       });
     }
-    
+
     // 滚动时添加阴影效果
     function handleScroll(): void {
       if (header) {
         if (window.scrollY > 10) {
-          header.classList.add('scrolled');
+          header.classList.add("scrolled");
         } else {
-          header.classList.remove('scrolled');
+          header.classList.remove("scrolled");
         }
       }
     }
-    
-    window.addEventListener('scroll', handleScroll);
+
+    window.addEventListener("scroll", handleScroll);
     handleScroll(); // 初始化
   })();
 </script>
 <style>
-.header {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  background-color: var(--bg-primary);
-  border-bottom: 1px solid var(--border-color);
-  transition: all 0.3s ease;
-}
-
-.header.scrolled {
-  /* box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1); */
-}
-
-.header-container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1.5rem;
-  height: 60px;
-}
-
-/* 品牌标识 */
-.brand {
-  display: flex;
-  align-items: center;
-}
-
-.logo-link {
-  text-decoration: none;
-  color: var(--text-primary);
-  font-weight: 700;
-  font-size: 1.25rem;
-  transition: color 0.2s ease;
-}
-
-.logo-link:hover {
-  color: var(--theme-color);
-}
-
-
-
-/* 右侧功能区 */
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-/* 移动端菜单按钮 */
-.menu-toggle {
-  display: none;
-  flex-direction: column;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-}
-
-.menu-toggle span {
-  display: block;
-  height: 2px;
-  width: 100%;
-  background-color: var(--text-primary);
-  margin: 2px 0;
-  transition: all 0.3s ease;
-  transform-origin: center;
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-  .header-container {
-    padding: 0 1rem;
-  }
-  
-  .menu-toggle {
-    display: flex;
-  }
-  
-  .nav {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
     background-color: var(--bg-primary);
-    border-top: 1px solid var(--border-color);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    height: 0;
-    overflow: hidden;
-    transition: height 0.3s ease;
-  }
-  
-  .nav.nav-open {
-    height: auto;
-    padding: 1rem 0;
-  }
-  
-  .nav-list {
-    flex-direction: column;
-    gap: 0;
-    padding: 0 1rem;
-  }
-  
-  .nav-item {
-    width: 100%;
-  }
-  
-  .nav-link {
-    display: block;
-    padding: 0.75rem 0;
     border-bottom: 1px solid var(--border-color);
+    transition: all 0.3s ease;
   }
-  
-  .nav-link:last-child {
-    border-bottom: none;
-  }
-  
-  .nav-link::after {
-    display: none;
-  }
-  
-  /* 菜单打开时的动画图标 */
-  .menu-toggle[aria-expanded="true"] span:nth-child(1) {
-    transform: translateY(6px) rotate(45deg);
-  }
-  
-  .menu-toggle[aria-expanded="true"] span:nth-child(2) {
-    opacity: 0;
-  }
-  
-  .menu-toggle[aria-expanded="true"] span:nth-child(3) {
-    transform: translateY(-6px) rotate(-45deg);
-  }
-}
 
-/* 减少运动偏好 */
-@media (prefers-reduced-motion: reduce) {
-  .header,
-  .nav-link::after,
-  .menu-toggle span {
-    transition: none;
+  .header.scrolled {
+    /* box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1); */
   }
-}
+
+  .header-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    height: 60px;
+  }
+
+  /* 品牌标识 */
+  .brand {
+    display: flex;
+    align-items: center;
+  }
+
+  .logo-link {
+    text-decoration: none;
+    color: var(--text-primary);
+    font-weight: 700;
+    font-size: 1.25rem;
+    transition: color 0.2s ease;
+  }
+
+  .logo-link:hover {
+    color: var(--theme-color);
+  }
+
+  /* 右侧功能区 */
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  /* 移动端菜单按钮 */
+  .menu-toggle {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .menu-toggle span {
+    display: block;
+    height: 2px;
+    width: 100%;
+    background-color: var(--text-primary);
+    margin: 2px 0;
+    transition: all 0.3s ease;
+    transform-origin: center;
+  }
+
+
+  /* 响应式设计 */
+  @media (max-width: 768px) {
+    .header-container {
+      padding: 0 1rem;
+    }
+
+    .menu-toggle {
+      display: flex;
+    }
+
+    .nav {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background-color: var(--bg-primary);
+      border-top: 1px solid var(--border-color);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      height: 0;
+      overflow: hidden;
+      transition: height 0.3s ease;
+    }
+
+    .nav.nav-open {
+      height: auto;
+      padding: 1rem 0;
+    }
+
+    .nav-list {
+      flex-direction: column;
+      gap: 0;
+      padding: 0 1rem;
+    }
+
+    .nav-item {
+      width: 100%;
+    }
+
+    .nav-link {
+      display: block;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .nav-link:last-child {
+      border-bottom: none;
+    }
+
+    .nav-link::after {
+      display: none;
+    }
+
+    /* 菜单打开时的动画图标 */
+    .menu-toggle[aria-expanded="true"] span:nth-child(1) {
+      transform: translateY(6px) rotate(45deg);
+    }
+
+    .menu-toggle[aria-expanded="true"] span:nth-child(2) {
+      opacity: 0;
+    }
+
+    .menu-toggle[aria-expanded="true"] span:nth-child(3) {
+      transform: translateY(-6px) rotate(-45deg);
+    }
+  }
+
+  /* 减少运动偏好 */
+  @media (prefers-reduced-motion: reduce) {
+    .header,
+    .nav-link::after,
+    .menu-toggle span {
+      transition: none;
+    }
+  }
 </style>

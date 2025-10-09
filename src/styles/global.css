@@ -1,4 +1,5 @@
 @import url('./md.css');
+
 /* src/styles/global.css */
 :root {
   /* 亮色主题变量 */
@@ -83,9 +84,6 @@ body {
   gap: 1.5rem;
 }
 
-.nav-item {
-  margin: 0;
-}
 
 .nav-link {
   color: var(--text-primary);
@@ -178,4 +176,39 @@ body {
   color: var(--bg-primary);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   border-color: var(--theme-color);
+}
+
+
+/* 
+  之前尝试将所以 a 标签都加上类似的 hover 效果... 但直接弄其实不太好。
+*/
+@media (min-width: 768px) {
+  .nav-link {
+    margin: 0;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .nav-link:before {
+    background-color: transparent;
+    border-radius: 2px;
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: calc(100% + 16px);
+    height: 100%;
+    border-radius: 8px;
+    transform: translate(-50%, -50%) scale(0.6);
+    transition:
+      transform 0.3s ease,
+      background-color 0.3s ease;
+    z-index: -1;
+  }
+
+  .nav-link:hover:before {
+    background-color: color-mix(in srgb, var(--theme-color) 10%, transparent);
+    transform: translate(-50%, -50%) scale(1);
+  }
 }
