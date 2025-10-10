@@ -243,7 +243,10 @@ const Search = () => {
       </Show>
 
       {/* 搜索结果计数 */}
-      <div class="result-count">
+      <div style={{
+        "max-width": "800px",
+        margin: "auto"
+      }} class="result-count">
         找到 {filteredPosts().length} 篇文章
       </div>
 

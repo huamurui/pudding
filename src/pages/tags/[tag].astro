@@ -55,25 +55,27 @@ const { tag, posts } = Astro.props as Props;
 ---
 
 <BaseLayout pageTitle={`Tag ⬝ ${tag}`} description={`Posts tagged with ${tag}`}>
-  <div class="tag-view">
-    <div class="stat">
-      <div class="stat-title">
-        <h1>{tag}</h1>
-      </div>
-      <div class="stat-desc">
-        <span>Total posts: {posts.length}</span>
+  <div style={{ "max-width": "800px", margin: "0 auto" }}>
+    <div class="tag-view">
+      <div class="stat">
+        <div class="stat-title">
+          <h1>{tag}</h1>
+        </div>
+        <div class="stat-desc">
+          <span>Total posts: {posts.length}</span>
+        </div>
       </div>
     </div>
+    <PostList
+      posts={() =>
+        posts.map((post) => ({
+          id: post.id,
+          title: post.data.title,
+          date: post.data.date,
+          description: post.data.description,
+          tags: post.data.tags || [],
+          url: `/posts/${post.id}/`,
+        })) as PostListItem[]}
+    />
   </div>
-  <PostList
-    posts={() =>
-      posts.map((post) => ({
-        id: post.id,
-        title: post.data.title,
-        date: post.data.date,
-        description: post.data.description,
-        tags: post.data.tags || [],
-        url: `/posts/${post.id}/`,
-      })) as PostListItem[]}
-  />
 </BaseLayout>

@@ -1,51 +1,51 @@
-/* PostList.css - 优化样式 */
+/* PostList.css */
 .posts-list {
   list-style: none;
   padding: 0;
   margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
 }
 
+/* 文章项 - 移除背景色，减少内边距 */
 .post-item {
-  padding: 1.5rem;
-  background-color: var(--bg-secondary);
-  border-radius: 12px;
-  transition: all 0.3s ease;
-  border: 1px solid transparent;
+  padding: 20px;
+  border-radius: 8px;
+  margin: 20px 0;
+  transition: background-color 0.3s ease;
   position: relative;
-  overflow: hidden;
 }
 
-
+/* 悬停效果 - 仅添加主题色背景 */
 .post-item:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow);
-  border-color: var(--theme-color);
-  background-color: var(--bg-tertiary);
+  background-color: color-mix(in srgb, var(--theme-color) 5%, transparent);
 }
 
-.post-item:hover::before {
-  opacity: 1;
+/* 独立分割线元素 */
+.divider {
+  height: 1px;
+  background-color: var(--border-color);
+  margin: 0;
+  transition: background-color 0.3s ease;
 }
 
+/* 文章链接容器 */
 .post-link {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   text-decoration: none;
   color: inherit;
-  margin-bottom: 0.75rem;
-  gap: 1rem;
+  margin-bottom: 12px;
+  gap: 16px;
 }
 
+/* 标题样式 */
 .post-title {
   font-weight: 600;
   color: var(--text-primary);
-  font-size: 1.25rem;
+  font-size: 20px;
   line-height: 1.4;
   flex: 1;
+  margin: 0;
   transition: color 0.2s ease;
 }
 
@@ -53,30 +53,36 @@
   color: var(--theme-color);
 }
 
+/* 日期样式 - 移除背景色 */
 .post-date {
-  font-size: 0.875rem;
+  font-size: 14px;
   color: var(--text-secondary);
   white-space: nowrap;
-  padding: 0.25rem 0.5rem;
-  background-color: var(--bg-tertiary);
-  border-radius: 6px;
-  transition: all 0.2s ease;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: color 0.2s ease;
 }
 
 .post-item:hover .post-date {
-  background-color: var(--theme-color);
-  color: var(--bg-primary);
+  color: var(--theme-color);
+}
+
+/* 摘要样式 */
+.post-excerpt {
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 0 0 16px 0;
 }
 
 
+/* 无结果样式 - 移除背景色 */
 .no-results {
   text-align: center;
-  padding: 3rem 2rem;
+  padding: 48px 32px;
   font-style: italic;
   color: var(--text-secondary);
-  background-color: var(--bg-secondary);
-  border-radius: 12px;
-  margin: 2rem 0;
+  margin: 32px 0;
 }
 
 /* 响应式设计 */
@@ -84,7 +90,7 @@
   .post-link {
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.5rem;
+    gap: 8px;
   }
   
   .post-date {
@@ -92,10 +98,10 @@
   }
   
   .post-item {
-    padding: 1.25rem;
+    padding: 16px 0;
   }
   
   .post-title {
-    font-size: 1.1rem;
+    font-size: 18px;
   }
 }
