@@ -1,15 +1,11 @@
 ---
 const footerLinks = {
-  navigation: [
-    { text: "首页", href: "/" },
-    { text: "文章", href: "/posts" },
-    { text: "标签", href: "/tags" },
-    { text: "关于", href: "/about" },
-  ],
   social: [
-    { name: "GitHub", href: "https://github.com/huamurui", icon: "github" },
-    { name: "Email", href: "huamurui@outlook.com", icon: "email" }
-  ]
+    { name: "GitHub", href: "https://github.com/huamurui" },
+    { name: "Email", href: "huamurui@outlook.com" },
+    { name: "RSS", href: "/rss.xml" },
+    { name: "Sitemap", href: "/sitemap-index.xml" },
+  ],
 };
 
 const currentYear = new Date().getFullYear();
@@ -17,239 +13,113 @@ const currentYear = new Date().getFullYear();
 
 <footer class="footer">
   <div class="footer-container">
-    <div class="footer-section">
-      <h3 class="footer-title">My blog</h3>
-      <p class="footer-description">
-        A blog about programming tech and nonsense.
-      </p>
-      <div class="social-links">
-        {footerLinks.social.map(link => (
+    <!-- 链接 -->
+    <div class="footer-links">
+      {
+        footerLinks.social.map((link) => (
           <a
             href={link.href}
-            class="social-link"
+            class="nav-link footer-link"
             aria-label={link.name}
             target="_blank"
             rel="noopener noreferrer"
           >
-            <span class={`social-icon ${link.icon}`}></span>
+            <span>{link.name}</span>
           </a>
-        ))}
-      </div>
+        ))
+      }
     </div>
 
-    <div class="footer-section">
-      <h4 class="footer-subtitle">导航</h4>
-      <ul class="footer-links">
-        {footerLinks.navigation.map(link => (
-          <li>
-            <a href={link.href} class="footer-link">{link.text}</a>
-          </li>
-        ))}
-      </ul>
-    </div>
-
-    <div class="footer-section">
-      <h4 class="footer-subtitle">更多</h4>
-      <ul class="footer-links">
-        <li><a href="/rss.xml" class="footer-link">RSS订阅</a></li>
-        <li><a href="/sitemap-index.xml" class="footer-link">网站地图</a></li>
-      </ul>
-    </div>
-  </div>
-
-  <div class="footer-bottom">
-    <div class="footer-container">
+    <!-- 底部版权信息 -->
+    <div class="footer-bottom">
+      <p class="footer-description">
+        A blog about programming tech and nonsense.
+      </p>
       <p class="copyright">
-        &copy; {currentYear} 我的博客. 保留所有权利.
+        &copy; {currentYear} huamurui. All rights reserved.
       </p>
       <p class="credit">
-        由 <a href="https://astro.build/" target="_blank" rel="noopener">Astro</a> 驱动
+        Powered by <a
+          href="https://astro.build/"
+          class="nav-link footer-link"
+          target="_blank"
+          rel="noopener noreferrer">Astro</a
+        >.
       </p>
     </div>
   </div>
 </footer>
 
 <style>
+  /* 基础样式：无背景，弱化分割 */
   .footer {
-    background-color: var(--bg-secondary);
-    border-top: 1px solid var(--border-color);
-    margin-top: auto; 
+    margin-top: 1rem;
   }
-  
+
+  /* 容器：限制宽度+居中 */
   .footer-container {
-    max-width: 1200px;
+    border-top: 1px dashed var(--border-color);
+    max-width: 800px; /* 按要求限制最大宽度 */
     margin: 0 auto;
-    padding: 2rem 1rem;
+    padding: 1rem;
+    text-align: center; /* 整体文字居中 */
   }
-  
-  .footer-bottom {
-    border-top: 1px solid var(--border-color);
-    padding: 1rem 0;
+
+  .footer-description {
+    line-height: 1.5;
+    max-width: 600px;
+    margin: 0.5rem auto;
   }
-  
-  .footer-bottom .footer-container {
+
+  .footer-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 1rem;
-  }
-  
-  @media (max-width: 768px) {
-    .footer-bottom .footer-container {
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-  }
-.footer {
-  background-color: var(--bg-secondary);
-  border-top: 1px solid var(--border-color);
-  color: var(--text-secondary);
-  margin-top: auto; 
-}
-
-.footer-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem 1rem;
-}
-
-.footer-section {
-  display: flex;
-  flex-direction: column;
-}
-
-.footer-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin: 0 0 0.5rem 0;
-}
-
-.footer-subtitle {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin: 0 0 1rem 0;
-}
-
-.footer-description {
-  margin: 0 0 1.5rem 0;
-  line-height: 1.5;
-}
-
-.footer-links {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.footer-links li {
-  margin-bottom: 0.5rem;
-}
-
-.footer-link {
-  color: var(--text-secondary);
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-
-.footer-link:hover {
-  color: var(--theme-color);
-}
-
-.social-links {
-  display: flex;
-  gap: 1rem;
-}
-
-.social-link {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background-color: var(--bg-tertiary);
-  color: var(--text-primary);
-  text-decoration: none;
-  transition: all 0.2s ease;
-}
-
-.social-link:hover {
-  background-color: var(--theme-color);
-  color: var(--bg-secondary);
-  transform: translateY(-2px);
-}
-
-.social-icon.github::before {
-  content: "G";
-}
-
-.social-icon.twitter::before {
-  content: "T";
-}
-
-.social-icon.email::before {
-  content: "✉";
-}
-
-/* 底部版权信息 */
-.footer-bottom {
-  border-top: 1px solid var(--border-color);
-  padding: 1rem 0;
-}
-
-.footer-bottom .footer-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 1rem;
-}
-
-.copyright {
-  margin: 0;
-  font-size: 0.9rem;
-}
-
-.credit {
-  margin: 0;
-  font-size: 0.9rem;
-}
-
-.credit a {
-  color: var(--theme-color);
-  text-decoration: none;
-}
-
-.credit a:hover {
-  text-decoration: underline;
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-  .footer-container {
-    grid-template-columns: 1fr;
+    justify-content: center;
     gap: 1.5rem;
   }
-  
-  .footer-bottom .footer-container {
-    flex-direction: column;
-    gap: 0.5rem;
-    text-align: center;
-  }
-}
 
-/* 减少运动偏好 */
-@media (prefers-reduced-motion: reduce) {
-  .social-link {
-    transition: none;
+  .footer-link {
+    text-decoration: none;
+    transition: color 0.2s ease;
+    text-decoration: underline;
   }
-  
-  .social-link:hover {
-    transform: none;
+
+  /* 底部版权信息 */
+  .footer-bottom {
+    /* padding-top: 1rem; */
+    /* border-top: 1px dashed var(--border-color); */
+     /* 虚线分割，弱化视觉效果 */
   }
-}
+
+  .copyright {
+    margin: 0 0 0.5rem 0;
+  }
+
+  .credit {
+    margin: 0;
+  }
+  /* 响应式调整 */
+  @media (max-width: 600px) {
+    .footer-links {
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .footer-bottom {
+      font-size: 0.8rem;
+    }
+  }
+
+  /* 减少运动偏好 */
+  @media (prefers-reduced-motion: reduce) {
+    .social-link {
+      transition: none;
+    }
+
+    .social-link:hover {
+      transform: none;
+    }
+  }
 </style>
