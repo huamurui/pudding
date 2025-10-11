@@ -43,9 +43,8 @@ const sortedTags = Array.from(tagsPosts.keys()).sort((a, b) =>
         {sortedTags.map((tag) => (
           <a 
             href={`#tag-${tag}`} 
-            class="tag-nav-item"
+            class="post-tag"
             data-tag={tag}
-            key={tag}
           >
             {tag}
             <span class="tag-count">
@@ -63,7 +62,7 @@ const sortedTags = Array.from(tagsPosts.keys()).sort((a, b) =>
         if (!tagPosts || tagPosts.length === 0) return null;
 
         return (
-          <section id={`tag-${tag}`} class="tag-section" key={tag}>
+          <section id={`tag-${tag}`} class="tag-section" >
             <!-- 标签标题 - 带时间线指示器 -->
             <div class="tag-section-header">
               <h3 class="tag-title">
@@ -77,7 +76,7 @@ const sortedTags = Array.from(tagsPosts.keys()).sort((a, b) =>
             <!-- 文章列表 - 时间线样式 -->
             <div class="tag-posts">
               {tagPosts.map((post, index) => (
-                <article class="timeline-post" key={index}>
+                <article class="timeline-post" >
                   <!-- 文章内容 -->
                   <div class="post-content">                    
                     <div class="post-info">
@@ -120,7 +119,7 @@ const sortedTags = Array.from(tagsPosts.keys()).sort((a, b) =>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const tagSections = document.querySelectorAll('.tag-section');
-      const navItems = document.querySelectorAll('.tag-nav-item');
+      const navItems = document.querySelectorAll('.post-tag');
       const tagsContainer = document.querySelector('.tags-container');
       const tagsToggle = document.querySelector('.tags-toggle');
       const toggleIcon = document.querySelector('.toggle-icon');
@@ -160,7 +159,7 @@ const sortedTags = Array.from(tagsPosts.keys()).sort((a, b) =>
       handleScroll();
       
       // 标签点击平滑滚动
-      document.querySelectorAll('.tag-nav-item').forEach(link => {
+      document.querySelectorAll('.post-tag').forEach(link => {
         link.addEventListener('click', (e) => {
           e.preventDefault();
           const targetId = link.getAttribute('href');
@@ -247,25 +246,7 @@ const sortedTags = Array.from(tagsPosts.keys()).sort((a, b) =>
     scrollbar-width: thin;
   }
 
-  .tag-nav-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    background-color: var(--bg-secondary);
-    border-radius: 20px;
-    text-decoration: none;
-    font-size: 14px;
-    color: var(--text-primary);
-    white-space: nowrap;
-    transition: all 0.2s ease;
-  }
 
-  .tag-nav-item:hover,
-  .tag-nav-item.active {
-    background-color: color-mix(in srgb, var(--theme-color) 15%, transparent);
-    color: var(--theme-color);
-  }
 
   .tag-count {
     background-color: var(--bg-tertiary);
@@ -404,27 +385,7 @@ const sortedTags = Array.from(tagsPosts.keys()).sort((a, b) =>
   }
 
   /* 标签样式 */
-  .post-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    justify-content: flex-end;
-    min-width: 120px;
-    margin-top: 0;
-  }
 
-  .inline-tag {
-    font-size: 13px;
-    padding: 2px 8px;
-    color: var(--text-secondary);
-    border-radius: 4px;
-    text-decoration: none;
-    transition: all 0.2s ease;
-  }
-
-  .post-info:hover .inline-tag {
-    color: var(--theme-color);
-  }
 
   /* 响应式调整 - 小屏幕标签折叠 */
   @media (max-width: 600px) {
@@ -448,11 +409,6 @@ const sortedTags = Array.from(tagsPosts.keys()).sort((a, b) =>
       display: flex;
     }
     
-    .tag-nav-item {
-      width: 100%;
-      justify-content: space-between;
-    }
-
     .post-tags {
       display: none;
     }

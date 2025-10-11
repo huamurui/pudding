@@ -38,6 +38,8 @@ const navItems: NavItem[] = [
                 class:list={{ "is-active": Astro.url.pathname === item.href }}
               >
                 {item.label}
+                {/* {Astro.url.pathname} */}
+                {/* {item.href} */}
               </a>
             </li>
           ))

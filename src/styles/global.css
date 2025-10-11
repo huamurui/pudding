@@ -145,30 +145,47 @@ body {
   color: white;
 }
 
+.post-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background-color: var(--bg-secondary);
+  border-radius: 20px;
+  text-decoration: none;
+  font-size: 14px;
+  color: var(--text-primary);
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.post-tag:hover,
+.post-tag.active {
+  background-color: color-mix(in srgb, var(--theme-color) 15%, transparent);
+  color: var(--theme-color);
+}
+
 
 .post-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 0.75rem;
+  gap: 8px;
+  justify-content: flex-end;
+  min-width: 120px;
+  margin-top: 0;
 }
 
-.post-tag {
-  text-decoration: none;
-  padding: 0.35rem 0.75rem;
-  background-color: var(--bg-tertiary);
-  border-radius: 16px;
-  font-size: 0.75rem;
+.inline-tag {
+  font-size: 13px;
+  padding: 2px 8px;
   color: var(--text-secondary);
+  border-radius: 4px;
+  text-decoration: none;
   transition: all 0.2s ease;
-  border: 1px solid var(--border-color);
 }
 
-.post-tag:hover {
-  background-color: var(--theme-color);
-  color: var(--bg-primary);
-  transform: translateY(-1px);
-  border-color: var(--theme-color);
+.post-info:hover .inline-tag {
+  color: var(--theme-color);
 }
 
 .post-tag.highlighted {
