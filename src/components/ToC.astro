@@ -12,7 +12,6 @@ interface Props {
 const { headings = [] } = Astro.props as Props;
 ---
 
-<!-- 主目录（小屏幕也会保留） -->
 <nav class="blog-toc main-toc" aria-label="文章目录">
   <ul class="toc-list" id="toc-list">
     {
@@ -63,6 +62,7 @@ const { headings = [] } = Astro.props as Props;
 </div>
 
 <style>
+  /* 保持原有样式不变 */
   .blog-toc {
     top: 2rem;
     max-height: calc(100vh - 4rem);
@@ -78,6 +78,10 @@ const { headings = [] } = Astro.props as Props;
     border-left: 1px solid var(--border-color);
     margin: 0 0 0 1px;
     position: relative;
+    max-height: calc(100vh - 8rem);
+    overflow-y: auto;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
   }
   
   .toc-item {
@@ -147,7 +151,7 @@ const { headings = [] } = Astro.props as Props;
   .scroll-toc-container {
     display: none;
     position: fixed;
-    top: 60px; /* 导航栏下方 */
+    top: 60px;
     left: 0;
     right: 0;
     z-index: 85;
@@ -196,11 +200,13 @@ const { headings = [] } = Astro.props as Props;
     max-height: 0;
     overflow: hidden;
     transition: max-height 0.3s ease;
+    scroll-behavior: smooth;
   }
 
   .scroll-toc.expanded {
     max-height: 300px;
     overflow-y: auto;
+    scrollbar-width: thin;
   }
 
   .scroll-toc-list {
@@ -244,18 +250,13 @@ const { headings = [] } = Astro.props as Props;
     background-color: color-mix(in srgb, var(--theme-color) 10%, transparent);
   }
 
-  /* 响应式设计 */
   @media (max-width: 968px) {
-    /* 在小屏幕上显示顶部滚动目录 */
     .scroll-toc-container {
       display: block;
     }
     
-    /* 调整主目录在小屏幕上的位置 */
     .main-toc {
-      margin: 1rem 0;
-      max-height: none;
-      position: static;
+      display: none;
     }
   }
 </style>
@@ -269,13 +270,18 @@ const { headings = [] } = Astro.props as Props;
     const scrollTocContainer = document.querySelector(".scroll-toc-container");
     const scrollTocLinks = document.querySelectorAll<HTMLAnchorElement>(".scroll-toc-link");
     const toggleText = document.querySelector(".toggle-text");
+    const tocList = document.getElementById("toc-list"); // 主目录滚动容器
+    const scrollTocList = document.querySelector(".scroll-toc-list");
 
     // 处理顶部滚动目录的展开/折叠
-    if (scrollTocToggle && scrollToc) {
+    if (scrollTocToggle && scrollToc && scrollTocList) {
       scrollTocToggle.addEventListener("click", () => {
         const isExpanded = scrollTocToggle.getAttribute("aria-expanded") === "true";
         scrollTocToggle.setAttribute("aria-expanded", (!isExpanded).toString());
         scrollToc.classList.toggle("expanded", !isExpanded);
+        if (!isExpanded) {
+          adjustScrollTocScroll();
+        }
       });
     }
 
@@ -284,7 +290,6 @@ const { headings = [] } = Astro.props as Props;
     
     const headings = Array.from(allLinks)
       .filter((link, index, self) => 
-        // 只保留每个slug的第一个实例
         self.findIndex(l => l.getAttribute("data-slug") === link.getAttribute("data-slug")) === index
       )
       .map((link, index) => {
@@ -292,7 +297,6 @@ const { headings = [] } = Astro.props as Props;
         return {
           slug,
           element: slug ? document.getElementById(slug) : null,
-          // 获取所有对应同一标题的链接（主目录和滚动目录）
           links: allLinks.filter(l => l.getAttribute("data-slug") === slug),
           listItems: allLinks.filter(l => l.getAttribute("data-slug") === slug)
             .map(l => l.parentElement as HTMLLIElement),
@@ -305,24 +309,29 @@ const { headings = [] } = Astro.props as Props;
     let activeIndex = -1;
     const visibleHeadings = new Set<number>(); 
     let lastScrollTop = 0;
-    const scrollThreshold = 100; // 滚动超过这个值才显示顶部目录
+    const scrollThreshold = 100;
 
-    // 监听滚动事件，控制顶部目录的显示/隐藏
+    // 监听页面滚动
     window.addEventListener('scroll', () => {
       const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
       
       if (scrollTocContainer) {
-        // 当滚动超过阈值且是向下滚动时显示顶部目录
         if (scrollTop > scrollThreshold && scrollTop > lastScrollTop) {
           scrollTocContainer.classList.add('visible');
         } else if (scrollTop <= scrollThreshold) {
-          // 滚动到顶部时隐藏
           scrollTocContainer.classList.remove('visible');
         }
       }
       
       lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
     });
+
+    // 监听主目录容器滚动（新增：用于修正游标位置）
+    if (tocList) {
+      tocList.addEventListener('scroll', () => {
+        updateIndicatorPosition(); // 滚动时实时更新游标
+      });
+    }
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -343,7 +352,7 @@ const { headings = [] } = Astro.props as Props;
       },
       {
         threshold: 0.01, 
-        rootMargin: "-10% 0px -10% 0px", // 扩展检测范围
+        rootMargin: "-10% 0px -10% 0px",
       },
     );
 
@@ -351,8 +360,69 @@ const { headings = [] } = Astro.props as Props;
       heading.element && observer.observe(heading.element);
     });
 
+    // 新增：单独的游标位置更新函数（考虑容器滚动）
+    function updateIndicatorPosition() {
+      if (!indicator || !tocList || window.innerWidth <= 968 || activeIndex === -1) return;
+      
+      const activeLink = mainTocLinks[activeIndex];
+      if (!activeLink) return;
+
+      // 关键修正：计算活跃项位置时减去容器的滚动距离
+      const activeItem = activeLink.parentElement;
+      const activeItemOffsetTop = activeItem?.offsetTop || 0; // 活跃项相对于容器顶部的原始距离
+      const tocListScrollTop = tocList.scrollTop; // 容器已滚动的距离
+      const activeItemHeight = activeItem?.clientHeight || 0;
+
+      // 游标最终位置 = 活跃项原始距离 - 容器滚动距离
+      indicator.style.top = `${activeItemOffsetTop - tocListScrollTop}px`;
+      indicator.style.height = `${activeItemHeight}px`;
+      indicator.style.opacity = "1";
+    }
+
+    // 主目录滚动适配
+    function adjustTocListScroll() {
+      if (!tocList || window.innerWidth <= 968) return;
+      
+      const activeTocItem = tocList.querySelector('.toc-item.active');
+      if (!activeTocItem) return;
+
+      const tocListClientHeight = tocList.clientHeight;
+      const activeItemOffsetTop = activeTocItem.offsetTop;
+      const activeItemHeight = activeTocItem.clientHeight;
+      const tocListScrollHeight = tocList.scrollHeight;
+
+      if (tocListScrollHeight <= tocListClientHeight) return;
+
+      const targetScrollTop = activeItemOffsetTop - (tocListClientHeight - activeItemHeight) * 0.4;
+      tocList.scrollTo({
+        top: Math.max(0, targetScrollTop),
+        behavior: 'smooth'
+      });
+    }
+
+    // 顶部滚动目录适配
+    function adjustScrollTocScroll() {
+      if (!scrollToc || !scrollTocList || window.innerWidth > 968 || !scrollToc.classList.contains('expanded')) return;
+      
+      const activeScrollTocItem = scrollTocList.querySelector('.scroll-toc-item.active');
+      if (!activeScrollTocItem) return;
+
+      const scrollTocClientHeight = scrollToc.clientHeight;
+      const activeItemOffsetTop = activeScrollTocItem.offsetTop;
+      const activeItemHeight = activeScrollTocItem.clientHeight;
+      const scrollTocScrollHeight = scrollTocList.scrollHeight;
+
+      if (scrollTocScrollHeight <= scrollTocClientHeight) return;
+
+      const targetScrollTop = activeItemOffsetTop - (scrollTocClientHeight - activeItemHeight) * 0.4;
+      scrollToc.scrollTo({
+        top: Math.max(0, targetScrollTop),
+        behavior: 'smooth'
+      });
+    }
+
     function updateActiveHeading() {
-      // 重置所有可见状态
+      // 重置可见状态
       headings.forEach((h) => {
         h.listItems.forEach(item => item.classList.remove("visible"));
       });
@@ -365,7 +435,7 @@ const { headings = [] } = Astro.props as Props;
         headings[index].listItems.forEach(item => item.classList.add("visible"));
       });
 
-      // 确定当前活跃标题
+      // 确定活跃标题
       if (visible.length > 0) {
         const fullyVisible = visible.find((index) => {
           const rect = headings[index].element!.getBoundingClientRect();
@@ -408,7 +478,7 @@ const { headings = [] } = Astro.props as Props;
         }
       }
 
-      // 处理页面底部情况
+      // 处理页面底部
       if (
         window.innerHeight + window.scrollY >=
           document.body.offsetHeight - 100 &&
@@ -426,23 +496,20 @@ const { headings = [] } = Astro.props as Props;
           h.listItems.forEach(item => item.classList.remove("active"));
         });
         
-        // 设置新的活跃状态
+        // 设置新活跃状态
         if (activeIndex >= 0 && headings[activeIndex]) {
           headings[activeIndex].listItems.forEach(item => item.classList.add("active"));
           
-          // 更新指示器
-          if (indicator && mainTocLinks[activeIndex]) {
-            const activeRect = mainTocLinks[activeIndex].getBoundingClientRect();
-            indicator.style.display = "block";
-            indicator.style.height = `${activeRect.height}px`;
-            indicator.style.top = `${mainTocLinks[activeIndex].parentElement!.offsetTop}px`;
-            indicator.style.opacity = "1";
-          }
-          
-          // 更新顶部目录的当前章节文本
+          // 更新顶部目录文本
           if (toggleText && headings[activeIndex]) {
             toggleText.textContent = headings[activeIndex].element?.textContent || '当前章节';
           }
+
+          // 修正游标位置（调用专用函数）
+          updateIndicatorPosition();
+          // 调整目录滚动
+          adjustTocListScroll();
+          adjustScrollTocScroll();
         }
       }
     }
@@ -452,7 +519,7 @@ const { headings = [] } = Astro.props as Props;
       const element = document.getElementById(slug);
       
       if (element) {
-        const headerOffset = 120; // 考虑顶部目录的高度
+        const headerOffset = 120;
         const elementPosition = element.getBoundingClientRect().top;
         const offsetPosition =
           elementPosition + window.pageYOffset - headerOffset;
@@ -466,7 +533,6 @@ const { headings = [] } = Astro.props as Props;
           window.history.replaceState(null, "", `#${slug}`);
         }
 
-        // 点击后关闭顶部目录
         if (scrollToc && scrollTocToggle) {
           scrollToc.classList.remove("expanded");
           scrollTocToggle.setAttribute("aria-expanded", "false");
@@ -476,19 +542,19 @@ const { headings = [] } = Astro.props as Props;
       setTimeout(() => {
         isProgrammaticScroll = false;
         updateActiveHeading();
+        adjustTocListScroll();
+        adjustScrollTocScroll();
       }, 200);
     }
 
-    // 初始化活跃标题
+    // 初始化
     updateActiveHeading();
 
-    // 处理窗口大小变化
+    // 窗口大小变化时更新游标
     window.addEventListener("resize", () => {
-      if (activeIndex !== -1 && headings[activeIndex] && indicator && mainTocLinks[activeIndex]) {
-        const activeRect = mainTocLinks[activeIndex].getBoundingClientRect();
-        indicator.style.height = `${activeRect.height}px`;
-        indicator.style.top = `${mainTocLinks[activeIndex].parentElement!.offsetTop}px`;
-      }
+      updateIndicatorPosition(); // 调用专用函数
+      adjustTocListScroll();
+      adjustScrollTocScroll();
     });
 
     // 主目录点击事件
@@ -502,7 +568,7 @@ const { headings = [] } = Astro.props as Props;
       });
     });
 
-    // 顶部滚动目录点击事件
+    // 顶部目录点击事件
     scrollTocLinks.forEach((link) => {
       link.addEventListener("click", (e) => {
         e.preventDefault();
@@ -513,7 +579,7 @@ const { headings = [] } = Astro.props as Props;
       });
     });
 
-    // 处理初始哈希
+    // 初始哈希处理
     const initialHash = window.location.hash.substring(1);
     if (initialHash) {
       const element = document.getElementById(initialHash);
@@ -525,4 +591,3 @@ const { headings = [] } = Astro.props as Props;
     }
   });
 </script>
-    
