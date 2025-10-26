@@ -1,7 +1,8 @@
 ---
 import ToC from "../../components/ToC.astro";
 import { getCollection, render, type CollectionEntry } from "astro:content";
-import MarkdownPostLayout from "../../layouts/MarkdownPostLayout.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import "/node_modules/katex/dist/katex.min.css";
 
 interface PostImage {
   url: string;
@@ -67,9 +68,7 @@ const post_str = await container.renderToString(Content);
 const description = getDescription(post_str);
 ---
 
-<MarkdownPostLayout
-  frontmatter={{ ...post.data, description } as PostFrontmatter}
->
+<BaseLayout frontmatter={{ ...post.data, description } as PostFrontmatter}>
   <article class="blog-post-container">
     <div class="blog-post-content">
       <header class="post-header">
@@ -119,25 +118,18 @@ const description = getDescription(post_str);
 
       <footer class="post-footer"></footer>
     </div>
-
-    {
-      headings && headings.length > 0 && (
-        <aside class="blog-post-sidebar">
-          <ToC headings={headings} />
-        </aside>
-      )
-    }
   </article>
-</MarkdownPostLayout>
+
+  {headings && headings.length > 0 && <ToC slot="aside" headings={headings} />}
+</BaseLayout>
 
 <style>
   /* 文章容器 */
   .blog-post-container {
     display: flex;
     gap: 3rem;
-    max-width: 1200px;
     margin: 0 auto;
-    padding: 2rem 1rem;
+    padding: 1rem;
   }
 
   /* 主要内容区域 */
@@ -214,16 +206,6 @@ const description = getDescription(post_str);
     margin-top: 3rem;
     padding-top: 2rem;
     border-top: 1px solid var(--border-color);
-  }
-
-  /* 侧边栏 */
-  .blog-post-sidebar {
-    width: 280px;
-    flex-shrink: 0;
-    position: sticky;
-    top: 2rem;
-    align-self: flex-start;
-    max-height: calc(100vh - 4rem);
   }
 
   /* 响应式设计 */

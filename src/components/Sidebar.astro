@@ -1,0 +1,77 @@
+---
+import { getCollection, type CollectionEntry } from "astro:content";
+
+interface Props {
+  intro?: string; // 一句话简介（可选）
+}
+
+const { intro = "记录前端技术与生活碎碎念" } = Astro.props;
+
+const allBlogPosts: CollectionEntry<"posts">[] = await getCollection("posts");
+
+// 用于统计标签的Map
+const tagCountMap: Map<string, number> = new Map();
+
+allBlogPosts.map((post) => {
+  // 处理标签，确保是数组格式
+  const tags: string[] = Array.isArray(post.data.tags)
+    ? post.data.tags
+    : post.data.tag
+      ? [post.data.tag]
+      : [];
+
+  // 更新标签计数
+  tags.forEach((tag) => {
+    if (tagCountMap.has(tag)) {
+      tagCountMap.set(tag, tagCountMap.get(tag)! + 1);
+    } else {
+      tagCountMap.set(tag, 1);
+    }
+  });
+});
+---
+
+<div class="profile-sidebar">
+  <!-- 个人信息 -->
+  <div class="profile-avatar">
+    <img src="/avatar.jpg" alt="你的昵称" class="avatar-img" />
+  </div>
+  <h3 class="profile-name">云苔</h3>
+  <p class="profile-intro">{intro}</p>
+
+  <!-- 社交链接 -->
+  <!-- <div class="profile-social">
+    <a href="https://github.com/xxx" aria-label="GitHub">🔗</a>
+    <a href="mailto:xxx@xxx.com" aria-label="邮箱">📧</a>
+  </div> -->
+
+  <!-- 站点统计 -->
+  <div class="profile-stats">
+    <div class="stat-item">📝 {allBlogPosts.length} 篇文章</div>
+    <div class="stat-item">🏷️ {Array.from(tagCountMap).length} 个标签</div>
+    <div class="stat-item">
+      <!-- {new Date().toISOString().replace("T", " ").split('.')[0]}  -->
+      {new Date().toISOString().split("T")[0]}
+      更新
+    </div>
+  </div>
+</div>
+
+<style>
+  /* 只写内容样式，不写定位！定位由父布局控制 */
+  .profile-sidebar {
+    width: 100%;
+    margin: 20px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .avatar-img {
+    width: 80px;
+    height: 80px;
+    border-radius: 80px;
+    object-fit: cover;
+  }
+  /* 其他样式省略... */
+</style>

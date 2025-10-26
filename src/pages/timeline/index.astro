@@ -1,0 +1,253 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getCollection, type CollectionEntry } from "astro:content";
+
+const posts: CollectionEntry<"posts">[] = await getCollection("posts");
+const sortedPosts = [...posts].sort(
+  (a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime(),
+);
+
+const yearPostsMap: Map<string, CollectionEntry<"posts">[]> = new Map();
+for (const post of sortedPosts) {
+  const year = new Date(post.data.date).getFullYear().toString();
+  if (!yearPostsMap.has(year)) {
+    yearPostsMap.set(year, []);
+  }
+  yearPostsMap.get(year)!.push(post);
+}
+
+const sortedYears = Array.from(yearPostsMap.keys()).sort((a, b) =>
+  b.localeCompare(a),
+);
+---
+
+<BaseLayout pageTitle="时间线">
+  <div class="timeline-page">
+    <div class="timeline-container">
+      {
+        sortedYears.map((year) => {
+          const yearPosts = yearPostsMap.get(year);
+          if (!yearPosts || yearPosts.length === 0) return null;
+
+          return (
+            <section id={`year-${year}`} class="year-section">
+              <div class="year-posts">
+                <article class="timeline-post">
+                  <div class="post-content">
+                    <div class="post-info year">
+                      <span class="post-date year">{year}</span>
+                      <div class="timeline-connector year">
+                        <div class="post-marker year" />
+                      </div>
+                      <span class="inline-tag">{yearPosts.length} posts</span>
+                    </div>
+                  </div>
+                </article>
+                {yearPosts.map((post) => (
+                  <article class="timeline-post">
+                    <div class="post-content">
+                      <div class="post-info">
+                        <time class="post-date">
+                          {new Date(post.data.date)
+                            .toISOString()
+                            .split("T")[0]
+                            .split("-")
+                            .slice(1)
+                            .join("-")}
+                        </time>
+
+                        <div class="timeline-connector">
+                          <div class="post-marker" />
+                        </div>
+
+                        <a href={`/posts/${post.id}`} class="post-link">
+                          <h5 class="post-title">{post.data.title}</h5>
+                        </a>
+
+                        <div class="post-tags">
+                          {post.data.tags?.map((t: string) => (
+                            <a href={`/tags/${t}`} class="inline-tag">
+                              #{t}
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </section>
+          );
+        })
+      }
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  /* 页面基础样式 */
+  .timeline-page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 32px 16px;
+    position: relative;
+  }
+
+  /* 页面标题 */
+  .page-header {
+    text-align: center;
+    margin-bottom: 48px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .page-header h1 {
+    font-size: 35px;
+    color: var(--text-primary);
+    margin: 0 0 12px 0;
+  }
+
+  .page-header p {
+    color: var(--text-secondary);
+    font-size: 16px;
+    margin: 0;
+  }
+
+  .timeline-container {
+    position: relative;
+  }
+
+  .timeline-post {
+    position: relative;
+    padding: 0;
+  }
+
+  .post-info {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    height: 40px;
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+  }
+  .post-info.year:hover {
+    background-color: transparent;
+  }
+
+  .post-info:hover {
+    background-color: color-mix(in srgb, var(--theme-color) 5%, transparent);
+  }
+
+  /* 日期样式（左侧固定宽度） */
+  .post-date {
+    font-size: 14px;
+    color: var(--text-secondary);
+    width: 60px;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .post-date.year {
+    font-weight: 600;
+    font-size: 20px;
+    /* color: var(--theme-color); */
+  }
+
+  .timeline-connector {
+    position: relative;
+    flex-shrink: 0;
+    height: 100%;
+    width: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .timeline-connector::before {
+    content: "";
+    position: absolute;
+    width: 10%;
+    height: 100%;
+    left: calc(50% - 1px);
+    border-left: 2px dashed var(--border-color);
+    z-index: -1;
+    pointer-events: none;
+    transition: all 0.3s;
+    transform: translateY(-50%);
+  }
+
+  .timeline-connector.year::before {
+    display: none;
+  }
+
+  .post-marker {
+    width: 6px;
+    height: 6px;
+    border-radius: 6px;
+    background-color: var(--text-secondary);
+    transition: all 0.2s ease;
+  }
+
+  .post-marker.year {
+    transform: scale(1.5);
+    background-color: var(--theme-color);
+  }
+
+  .post-info:hover .post-marker {
+    background-color: var(--theme-color);
+    height: 20px;
+  }
+
+  .post-info:hover .post-marker.year {
+    width: 6px;
+    height: 6px;
+    transform: scale(2);
+    background-color: var(--theme-color);
+  }
+
+  .post-link {
+    text-decoration: none;
+    flex: 1;
+  }
+  .post-title {
+    margin: 0;
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--text-primary);
+    transition:
+      color 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  .post-info:hover .post-title {
+    color: var(--theme-color);
+    transform: translateX(4px);
+  }
+
+  @media (max-width: 600px) {
+    .timeline-container {
+      padding-left: 30px;
+    }
+
+    .year-section::before,
+    .year-marker::before {
+      left: -20px;
+    }
+
+    .post-info {
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .post-date {
+      width: auto;
+      text-align: left;
+      padding-right: 12px;
+    }
+
+    .post-tags {
+      margin-top: 8px;
+      width: 100%;
+    }
+  }
+</style>

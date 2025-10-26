@@ -18,7 +18,7 @@ const navItems: NavItem[] = [
 ];
 
 // 判断是否为文章页面（/posts路径下）
-const isPostsPage = Astro.url.pathname.startsWith('/posts');
+const isPostsPage = Astro.url.pathname.startsWith("/posts");
 ---
 
 <header class="header" id="header">
@@ -33,26 +33,34 @@ const isPostsPage = Astro.url.pathname.startsWith('/posts');
     <!-- 导航菜单 -->
     <nav class="nav" id="nav">
       <ul class="nav-list">
-        {navItems.map((item) => (
-          <li class="nav-item">
-            <a
-              href={item.href}
-              class="nav-link"
-              class:list={{ "is-active": Astro.url.pathname === item.href }}
-            >
-              {item.label}
-            </a>
-          </li>
-        ))}
+        {
+          navItems.map((item) => (
+            <li class="nav-item">
+              <a
+                href={item.href}
+                class="nav-link"
+                class:list={{
+                  "is-active":
+                    Astro.url.pathname.replace("/", "") ===
+                    item.href.replace("/", ""),
+                }}
+              >
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
       </ul>
     </nav>
 
     <!-- 文章页标题（默认隐藏） -->
-    {isPostsPage && (
-      <div class="page-title-display" id="page-title">
-        <span>{pageTitle}</span>
-      </div>
-    )}
+    {
+      isPostsPage && (
+        <div class="page-title-display" id="page-title">
+          <span>{pageTitle}</span>
+        </div>
+      )
+    }
 
     <!-- 右侧功能区 -->
     <div class="header-actions">
@@ -80,11 +88,11 @@ const isPostsPage = Astro.url.pathname.startsWith('/posts');
     const nav = document.getElementById("nav");
     const header = document.getElementById("header");
     const pageTitle = document.getElementById("page-title");
-    const isPostsPage =true; // 从组件Props获取页面类型
+    const isPostsPage = true; // 从组件Props获取页面类型
 
     // 滚动状态变量
     let lastScrollTop = 0; // 上一次滚动位置
-    let currentDirection = 'down'; // 当前滚动方向
+    let currentDirection = "down"; // 当前滚动方向
     let directionChange = false; // 方向是否改变
     let scrollDistance = 0; // 方向改变后的滚动距离
     const threshold = 50; // 触发切换的阈值（px）
@@ -108,7 +116,7 @@ const isPostsPage = Astro.url.pathname.startsWith('/posts');
       header.classList.toggle("scrolled", window.scrollY > 10);
 
       const scrollTop = window.scrollY;
-      const newDirection = scrollTop > lastScrollTop ? 'down' : 'up';
+      const newDirection = scrollTop > lastScrollTop ? "down" : "up";
 
       // 检测滚动方向改变
       if (newDirection !== currentDirection) {
@@ -124,12 +132,12 @@ const isPostsPage = Astro.url.pathname.startsWith('/posts');
 
       // 当滚动距离超过阈值时触发切换
       if (scrollDistance >= threshold) {
-        if (currentDirection === 'down' && isNavVisible) {
+        if (currentDirection === "down" && isNavVisible) {
           // 向下滚动：隐藏导航，显示标题
           isNavVisible = false;
           nav?.classList.add("nav-hidden");
           pageTitle.classList.add("title-visible");
-        } else if (currentDirection === 'up' && !isNavVisible) {
+        } else if (currentDirection === "up" && !isNavVisible) {
           // 向上滚动：显示导航，隐藏标题
           isNavVisible = true;
           nav?.classList.remove("nav-hidden");
@@ -191,7 +199,9 @@ const isPostsPage = Astro.url.pathname.startsWith('/posts');
 
   /* 导航菜单样式 + 切换动画 */
   .nav {
-    transition: opacity 0.3s ease, transform 0.3s ease;
+    transition:
+      opacity 0.3s ease,
+      transform 0.3s ease;
     opacity: 1;
     transform: translateY(0);
   }
@@ -235,7 +245,9 @@ const isPostsPage = Astro.url.pathname.startsWith('/posts');
     transform: translate(-50%, -50%) scale(0.9);
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.3s ease, transform 0.3s ease;
+    transition:
+      opacity 0.3s ease,
+      transform 0.3s ease;
     color: var(--text-primary);
     font-weight: 500;
     white-space: nowrap;
