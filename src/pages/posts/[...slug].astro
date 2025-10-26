@@ -68,7 +68,7 @@ const post_str = await container.renderToString(Content);
 const description = getDescription(post_str);
 ---
 
-<BaseLayout frontmatter={{ ...post.data, description } as PostFrontmatter}>
+<BaseLayout postFrontmatter={{ ...post.data, description } as PostFrontmatter}>
   <article class="blog-post-container">
     <div class="blog-post-content">
       <header class="post-header">
