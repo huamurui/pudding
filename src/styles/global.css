@@ -217,15 +217,24 @@ body {
     width: calc(100% + 16px);
     height: 100%;
     border-radius: 8px;
-    transform: translate(-50%, -50%) scale(0.6);
+    transform: translate(-50%, -50%) scale(0.8);
     transition:
-      transform 0.3s ease,
-      background-color 0.3s ease;
+      transform 0.1s ease,
+      background-color 0.1s ease;
     z-index: -1;
   }
 
   .nav-link:hover:before {
     background-color: color-mix(in srgb, var(--theme-color) 10%, transparent);
     transform: translate(-50%, -50%) scale(1);
+  }
+
+  .nav-link:active:before {
+    transform: translate(-50%, -50%) scale(0.95);
+    background-color: color-mix(in srgb, var(--theme-color) 20%, transparent);
+  }
+
+  .nav-link:active {
+    color: color-mix(in srgb, var(--theme-color) 80%, var(--text-secondary));
   }
 }

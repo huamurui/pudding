@@ -8,7 +8,7 @@ import FAB from "../components/FAB.tsx"; // 修复文件扩展名引用
 
 // 从props获取页面标题和描述，添加默认值
 
-const site = "Cloud-Veiled Greenhouse"
+const site = "Greenhouse between Clouds";
 let { 
   pageTitle = site, 
   description = "这是一个使用Astro构建的用来放各种乱七八糟东西的网站",
@@ -99,7 +99,9 @@ const items = (await getCollection("posts")).map((post) => ({
 
   </head>
   <body>
-    <Header />
+    <Header
+      pageTitle={pageTitle}
+    />
     <!-- <Sidebar items={items}/> -->
     <main
       style="
