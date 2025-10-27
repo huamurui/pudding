@@ -36,6 +36,8 @@ const items = (await getCollection("posts")).map((post) => ({
   url: `/posts/${post.id}/`,
   depth: post.data.url?.split("/").length - 1 || 0,
 }));
+
+const isHome = Astro.url.pathname === "/";
 ---
 
 <html lang="zh-CN">
@@ -95,9 +97,7 @@ const items = (await getCollection("posts")).map((post) => ({
       }
     </style>
     <Header pageTitle={pageTitle} />
-    <!-- <Sidebar items={items}/> -->
-    <!-- 侧边栏（根据页面类型渲染） -->
-    <div class="welcome"></div>
+    {isHome && <div class="welcome" />}
     <div style="" class="content-container">
       <main class="main-content">
         <slot />
@@ -114,7 +114,6 @@ const items = (await getCollection("posts")).map((post) => ({
         </div>
       </aside>
     </div>
-
     <Footer />
     <FAB client:only />
   </body>

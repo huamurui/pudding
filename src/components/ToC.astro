@@ -16,7 +16,7 @@ const { headings = [] } = Astro.props as Props;
   <ul class="toc-list" id="toc-list">
     {
       headings.map((heading) => (
-        <li class={`toc-item toc-item-depth-${heading.depth}`}>
+        <li class={`toc-item toc-item-depth-${heading.depth}`} key={heading.slug}>
           <a
             href={`#${heading.slug}`}
             class="toc-link"
@@ -46,7 +46,7 @@ const { headings = [] } = Astro.props as Props;
     <ul class="scroll-toc-list">
       {
         headings.map((heading) => (
-          <li class={`scroll-toc-item scroll-toc-item-depth-${heading.depth}`}>
+          <li class={`scroll-toc-item scroll-toc-item-depth-${heading.depth}`} key={heading.slug}>
             <a
               href={`#${heading.slug}`}
               class="scroll-toc-link"
@@ -62,7 +62,6 @@ const { headings = [] } = Astro.props as Props;
 </div>
 
 <style>
-  /* 保持原有样式不变 */
   .blog-toc {
     top: 2rem;
     max-height: calc(100vh - 4rem);
@@ -265,361 +264,283 @@ const { headings = [] } = Astro.props as Props;
 
 <script>
   document.addEventListener("DOMContentLoaded", () => {
-    const indicator = document.getElementById("toc-indicator");
-    const mainTocLinks =
-      document.querySelectorAll<HTMLAnchorElement>(".toc-link");
-    const scrollTocToggle = document.getElementById("scroll-toc-toggle");
-    const scrollToc = document.getElementById("scroll-toc");
-    const scrollTocContainer = document.querySelector(".scroll-toc-container");
-    const scrollTocLinks =
-      document.querySelectorAll<HTMLAnchorElement>(".scroll-toc-link");
-    const toggleText = document.querySelector(".toggle-text");
-    const tocList = document.getElementById("toc-list"); // 主目录滚动容器
-    const scrollTocList = document.querySelector(".scroll-toc-list");
+    // 1：DOM
+    const DOM = {
+      indicator: document.getElementById("toc-indicator"),
+      mainTocLinks: document.querySelectorAll<HTMLAnchorElement>(".toc-link"),
+      tocList: document.getElementById("toc-list"),
 
-    // 处理顶部滚动目录的展开/折叠
-    if (scrollTocToggle && scrollToc && scrollTocList) {
-      scrollTocToggle.addEventListener("click", () => {
-        const isExpanded =
-          scrollTocToggle.getAttribute("aria-expanded") === "true";
-        scrollTocToggle.setAttribute("aria-expanded", (!isExpanded).toString());
-        scrollToc.classList.toggle("expanded", !isExpanded);
-        if (!isExpanded) {
-          adjustScrollTocScroll();
-        }
-      });
-    }
+      scrollTocToggle: document.getElementById("scroll-toc-toggle"),
+      scrollToc: document.getElementById("scroll-toc"),
+      scrollTocContainer: document.querySelector(".scroll-toc-container"),
+      scrollTocLinks: document.querySelectorAll<HTMLAnchorElement>(".scroll-toc-link"),
+      scrollTocList: document.querySelector(".scroll-toc-list"),
 
-    // 合并所有目录链接并去重
-    const allLinks = [...mainTocLinks, ...scrollTocLinks];
+      toggleText: document.querySelector(".toggle-text"),
+    };
 
-    const headings = Array.from(allLinks)
-      .filter(
-        (link, index, self) =>
-          self.findIndex(
-            (l) =>
-              l.getAttribute("data-slug") === link.getAttribute("data-slug"),
-          ) === index,
-      )
-      .map((link, index) => {
-        const slug = link.getAttribute("data-slug");
-        return {
-          slug,
-          element: slug ? document.getElementById(slug) : null,
-          links: allLinks.filter((l) => l.getAttribute("data-slug") === slug),
-          listItems: allLinks
-            .filter((l) => l.getAttribute("data-slug") === slug)
-            .map((l) => l.parentElement as HTMLLIElement),
-          index,
-        };
-      })
-      .filter((item) => item.element);
-
-    let isProgrammaticScroll = false;
-    let activeIndex = -1;
-    const visibleHeadings = new Set<number>();
-    let lastScrollTop = 0;
-    const scrollThreshold = 100;
-
-    // 监听页面滚动
-    window.addEventListener("scroll", () => {
-      const scrollTop =
-        window.pageYOffset || document.documentElement.scrollTop;
-
-      if (scrollTocContainer) {
-        if (scrollTop > scrollThreshold && scrollTop > lastScrollTop) {
-          scrollTocContainer.classList.add("visible");
-        } else if (scrollTop <= scrollThreshold) {
-          scrollTocContainer.classList.remove("visible");
-        }
-      }
-
-      lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
-    });
-
-    // 监听主目录容器滚动（新增：用于修正游标位置）
-    if (tocList) {
-      tocList.addEventListener("scroll", () => {
-        updateIndicatorPosition(); // 滚动时实时更新游标
-      });
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          const heading = headings.find((h) => h.element === entry.target);
-          if (!heading) return;
-
-          if (entry.isIntersecting) {
-            visibleHeadings.add(heading.index);
-          } else {
-            visibleHeadings.delete(heading.index);
-          }
-
-          if (!isProgrammaticScroll) {
-            updateActiveHeading();
-          }
-        });
+    // 2. State
+    const state = {
+      headings: [] as Array<{
+        slug: string | null;
+        element: HTMLElement | null;
+        links: HTMLAnchorElement[];
+        listItems: HTMLLIElement[];
+        index: number;
+      }>,
+      isProgrammaticScroll: false, 
+      activeIndex: -1, 
+      visibleHeadings: new Set<number>(), 
+      lastScrollTop: 0,
+      // constant
+      config: {
+        scrollThreshold: 100, 
+        headerOffset: 120,
+        bottomThreshold: 100,
+        scrollRatio: 0.4, 
       },
-      {
+    };
+
+    // 3. Events
+    function bindEvents() {
+      DOM.scrollTocToggle?.addEventListener("click", handleScrollTocToggle);
+
+      window.addEventListener("scroll", handleWindowScroll);
+
+      DOM.tocList?.addEventListener("scroll", updateIndicatorPosition);
+
+      window.addEventListener("resize", handleWindowResize);
+
+      DOM.mainTocLinks.forEach(link => link.addEventListener("click", (e) => handleTocLinkClick(e, link)));
+      DOM.scrollTocLinks.forEach(link => link.addEventListener("click", (e) => handleTocLinkClick(e, link)));
+
+      const observer = new IntersectionObserver(handleHeadingIntersection, {
         threshold: 0.01,
-        rootMargin: "-10% 0px -10% 0px",
-      },
-    );
-
-    headings.forEach((heading) => {
-      heading.element && observer.observe(heading.element);
-    });
-
-    // 新增：单独的游标位置更新函数（考虑容器滚动）
-    function updateIndicatorPosition() {
-      if (
-        !indicator ||
-        !tocList ||
-        window.innerWidth <= 968 ||
-        activeIndex === -1
-      )
-        return;
-
-      const activeLink = mainTocLinks[activeIndex];
-      if (!activeLink) return;
-
-      // 关键修正：计算活跃项位置时减去容器的滚动距离
-      const activeItem = activeLink.parentElement;
-      const activeItemOffsetTop = activeItem?.offsetTop || 0; // 活跃项相对于容器顶部的原始距离
-      const tocListScrollTop = tocList.scrollTop; // 容器已滚动的距离
-      const activeItemHeight = activeItem?.clientHeight || 0;
-
-      // 游标最终位置 = 活跃项原始距离 - 容器滚动距离
-      indicator.style.top = `${activeItemOffsetTop - tocListScrollTop}px`;
-      indicator.style.height = `${activeItemHeight}px`;
-      indicator.style.opacity = "1";
+        rootMargin: "-10% 0px -10% 0px", // 扩展检测范围，提前触发
+      });
+      state.headings.forEach(heading => heading.element && observer.observe(heading.element));
     }
 
-    // 主目录滚动适配
-    function adjustTocListScroll() {
-      if (!tocList || window.innerWidth <= 968) return;
+    // 4. Functions
+    function init() {
+      const allLinks = [...DOM.mainTocLinks, ...DOM.scrollTocLinks];
+      state.headings = Array.from(allLinks)
+        .filter((link, index, self) => 
+          self.findIndex(l => l.getAttribute("data-slug") === link.getAttribute("data-slug")) === index
+        )
+        .map((link, index) => {
+          const slug = link.getAttribute("data-slug");
+          return {
+            slug,
+            element: slug ? document.getElementById(slug) : null,
+            links: allLinks.filter(l => l.getAttribute("data-slug") === slug),
+            listItems: allLinks.filter(l => l.getAttribute("data-slug") === slug)
+              .map(l => l.parentElement as HTMLLIElement),
+            index,
+          };
+        })
+        .filter(item => item.element);
 
-      const activeTocItem = tocList.querySelector(".toc-item.active");
-      if (!activeTocItem) return;
+      bindEvents();
 
-      const tocListClientHeight = tocList.clientHeight;
-      const activeItemOffsetTop = activeTocItem.offsetTop;
-      const activeItemHeight = activeTocItem.clientHeight;
-      const tocListScrollHeight = tocList.scrollHeight;
+      updateActiveHeading();
+      updateIndicatorPosition();
 
-      if (tocListScrollHeight <= tocListClientHeight) return;
-
-      const targetScrollTop =
-        activeItemOffsetTop - (tocListClientHeight - activeItemHeight) * 0.4;
-      tocList.scrollTo({
-        top: Math.max(0, targetScrollTop),
-        behavior: "smooth",
-      });
-    }
-
-    // 顶部滚动目录适配
-    function adjustScrollTocScroll() {
-      if (
-        !scrollToc ||
-        !scrollTocList ||
-        window.innerWidth > 968 ||
-        !scrollToc.classList.contains("expanded")
-      )
-        return;
-
-      const activeScrollTocItem = scrollTocList.querySelector(
-        ".scroll-toc-item.active",
-      );
-      if (!activeScrollTocItem) return;
-
-      const scrollTocClientHeight = scrollToc.clientHeight;
-      const activeItemOffsetTop = activeScrollTocItem.offsetTop;
-      const activeItemHeight = activeScrollTocItem.clientHeight;
-      const scrollTocScrollHeight = scrollTocList.scrollHeight;
-
-      if (scrollTocScrollHeight <= scrollTocClientHeight) return;
-
-      const targetScrollTop =
-        activeItemOffsetTop - (scrollTocClientHeight - activeItemHeight) * 0.4;
-      scrollToc.scrollTo({
-        top: Math.max(0, targetScrollTop),
-        behavior: "smooth",
-      });
-    }
-
-    function updateActiveHeading() {
-      // 重置可见状态
-      headings.forEach((h) => {
-        h.listItems.forEach((item) => item.classList.remove("visible"));
-      });
-
-      const visible = Array.from(visibleHeadings).sort((a, b) => a - b);
-      let newActiveIndex = -1;
-
-      // 标记可见标题
-      visible.forEach((index) => {
-        headings[index].listItems.forEach((item) =>
-          item.classList.add("visible"),
-        );
-      });
-
-      // 确定活跃标题
-      if (visible.length > 0) {
-        const fullyVisible = visible.find((index) => {
-          const rect = headings[index].element!.getBoundingClientRect();
-          return rect.top >= 0 && rect.bottom <= window.innerHeight;
-        });
-
-        if (fullyVisible !== undefined) {
-          newActiveIndex = fullyVisible;
-        } else {
-          const viewportThird = window.innerHeight / 3;
-          let closestToThird = visible[0];
-          let minDistance = Math.abs(
-            headings[closestToThird].element!.getBoundingClientRect().top -
-              viewportThird,
-          );
-
-          visible.forEach((index) => {
-            const distance = Math.abs(
-              headings[index].element!.getBoundingClientRect().top -
-                viewportThird,
-            );
-            if (distance < minDistance) {
-              minDistance = distance;
-              closestToThird = index;
-            }
-          });
-
-          newActiveIndex = closestToThird;
-        }
-      } else {
-        const scrollPosition = window.scrollY;
-        const candidates = [...headings]
-          .filter((h) => h.element!.offsetTop <= scrollPosition + 100)
-          .sort((a, b) => b.element!.offsetTop - a.element!.offsetTop);
-
-        if (candidates.length > 0) {
-          newActiveIndex = candidates[0].index;
-        } else if (headings.length > 0) {
-          newActiveIndex = 0;
-        }
-      }
-
-      // 处理页面底部
-      if (
-        window.innerHeight + window.scrollY >=
-          document.body.offsetHeight - 100 &&
-        headings.length > 0
-      ) {
-        newActiveIndex = headings.length - 1;
-      }
-
-      // 更新活跃状态
-      if (newActiveIndex !== -1 && newActiveIndex !== activeIndex) {
-        activeIndex = newActiveIndex;
-
-        // 移除所有活跃状态
-        headings.forEach((h) => {
-          h.listItems.forEach((item) => item.classList.remove("active"));
-        });
-
-        // 设置新活跃状态
-        if (activeIndex >= 0 && headings[activeIndex]) {
-          headings[activeIndex].listItems.forEach((item) =>
-            item.classList.add("active"),
-          );
-
-          // 更新顶部目录文本
-          if (toggleText && headings[activeIndex]) {
-            toggleText.textContent =
-              headings[activeIndex].element?.textContent || "当前章节";
-          }
-
-          // 修正游标位置（调用专用函数）
-          updateIndicatorPosition();
-          // 调整目录滚动
-          adjustTocListScroll();
-          adjustScrollTocScroll();
-        }
+      const initialHash = window.location.hash.substring(1);
+      if (initialHash) {
+        setTimeout(() => scrollToHeading(initialHash), 100);
       }
     }
+
+    function handleScrollTocToggle() {
+      if (!DOM.scrollTocToggle || !DOM.scrollToc) return;
+      const isExpanded = DOM.scrollTocToggle.getAttribute("aria-expanded") === "true";
+      DOM.scrollTocToggle.setAttribute("aria-expanded", (!isExpanded).toString());
+      DOM.scrollToc.classList.toggle("expanded", !isExpanded);
+      // 展开时确保活跃项在可视区域
+      if (!isExpanded) adjustScrollTocScroll();
+    }
+
+
+    function handleWindowScroll() {
+      if (!DOM.scrollTocContainer) return;
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      
+      if (scrollTop > state.config.scrollThreshold && scrollTop > state.lastScrollTop) {
+        DOM.scrollTocContainer.classList.add("visible");
+      } 
+      else if (scrollTop <= state.config.scrollThreshold) {
+        DOM.scrollTocContainer.classList.remove("visible");
+      }
+
+      state.lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+    }
+
+
+    function handleHeadingIntersection(entries: IntersectionObserverEntry[]) {
+      entries.forEach(entry => {
+        const heading = state.headings.find(h => h.element === entry.target);
+        if (!heading) return;
+        entry.isIntersecting 
+          ? state.visibleHeadings.add(heading.index) 
+          : state.visibleHeadings.delete(heading.index);
+        if (!state.isProgrammaticScroll) updateActiveHeading();
+      });
+    }
+
+    function handleTocLinkClick(e: MouseEvent, link: HTMLAnchorElement) {
+      e.preventDefault();
+      const slug = link.getAttribute("data-slug");
+      slug && scrollToHeading(slug);
+    }
+
 
     function scrollToHeading(slug: string) {
-      isProgrammaticScroll = true;
       const element = document.getElementById(slug);
+      if (!element || !DOM.scrollToc || !DOM.scrollTocToggle) return;
 
-      if (element) {
-        const headerOffset = 120;
-        const elementPosition = element.getBoundingClientRect().top;
-        const offsetPosition =
-          elementPosition + window.pageYOffset - headerOffset;
+      state.isProgrammaticScroll = true;
 
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: "smooth",
-        });
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - state.config.headerOffset;
+      window.scrollTo({ top: offsetPosition, behavior: "smooth" });
 
-        if (window.location.hash !== `#${slug}`) {
-          window.history.replaceState(null, "", `#${slug}`);
-        }
-
-        if (scrollToc && scrollTocToggle) {
-          scrollToc.classList.remove("expanded");
-          scrollTocToggle.setAttribute("aria-expanded", "false");
-        }
+      if (window.location.hash !== `#${slug}`) {
+        window.history.replaceState(null, "", `#${slug}`);
       }
 
+      DOM.scrollToc.classList.remove("expanded");
+      DOM.scrollTocToggle.setAttribute("aria-expanded", "false");
+
       setTimeout(() => {
-        isProgrammaticScroll = false;
+        state.isProgrammaticScroll = false;
         updateActiveHeading();
         adjustTocListScroll();
         adjustScrollTocScroll();
       }, 200);
     }
 
-    // 初始化
-    updateActiveHeading();
+    function updateActiveHeading() {
+      const visible = Array.from(state.visibleHeadings).sort((a, b) => a - b);
+      let newActiveIndex = -1;
 
-    // 窗口大小变化时更新游标
-    window.addEventListener("resize", () => {
-      updateIndicatorPosition(); // 调用专用函数
-      adjustTocListScroll();
-      adjustScrollTocScroll();
-    });
+      state.headings.forEach(h => h.listItems.forEach(item => item.classList.remove("visible")));
+      visible.forEach(index => state.headings[index].listItems.forEach(item => item.classList.add("visible")));
 
-    // 主目录点击事件
-    mainTocLinks.forEach((link) => {
-      link.addEventListener("click", (e) => {
-        e.preventDefault();
-        const slug = link.getAttribute("data-slug");
-        if (slug) {
-          scrollToHeading(slug);
+      if (visible.length > 0) {
+        const fullyVisible = visible.find(index => {
+          const rect = state.headings[index].element!.getBoundingClientRect();
+          return rect.top >= 0 && rect.bottom <= window.innerHeight;
+        });
+        if (fullyVisible !== undefined) {
+          newActiveIndex = fullyVisible;
+        } else {
+          const viewportThird = window.innerHeight / 3;
+          let closestToThird = visible[0];
+          let minDistance = Math.abs(
+            state.headings[closestToThird].element!.getBoundingClientRect().top - viewportThird
+          );
+          visible.forEach(index => {
+            const distance = Math.abs(
+              state.headings[index].element!.getBoundingClientRect().top - viewportThird
+            );
+            if (distance < minDistance) {
+              minDistance = distance;
+              closestToThird = index;
+            }
+          });
+          newActiveIndex = closestToThird;
         }
-      });
-    });
+      } else {
+        const scrollPosition = window.scrollY;
+        const candidates = [...state.headings]
+          .filter(h => h.element!.offsetTop <= scrollPosition + state.config.scrollThreshold)
+          .sort((a, b) => b.element!.offsetTop - a.element!.offsetTop);
+        newActiveIndex = candidates.length > 0 ? candidates[0].index : (state.headings.length > 0 ? 0 : -1);
+      }
 
-    // 顶部目录点击事件
-    scrollTocLinks.forEach((link) => {
-      link.addEventListener("click", (e) => {
-        e.preventDefault();
-        const slug = link.getAttribute("data-slug");
-        if (slug) {
-          scrollToHeading(slug);
+      if (
+        window.innerHeight + window.scrollY >= document.body.offsetHeight - state.config.bottomThreshold &&
+        state.headings.length > 0
+      ) {
+        newActiveIndex = state.headings.length - 1;
+      }
+
+      if (newActiveIndex !== -1 && newActiveIndex !== state.activeIndex) {
+        state.activeIndex = newActiveIndex;
+        state.headings.forEach(h => h.listItems.forEach(item => item.classList.remove("active")));
+        state.headings[state.activeIndex].listItems.forEach(item => item.classList.add("active"));
+        if (DOM.toggleText) {
+          DOM.toggleText.textContent = state.headings[state.activeIndex].element?.textContent || "当前章节";
         }
-      });
-    });
-
-    // 初始哈希处理
-    const initialHash = window.location.hash.substring(1);
-    if (initialHash) {
-      const element = document.getElementById(initialHash);
-      if (element) {
-        setTimeout(() => {
-          scrollToHeading(initialHash);
-        }, 100);
+        updateIndicatorPosition();
+        adjustTocListScroll();
+        adjustScrollTocScroll();
       }
     }
+
+    function updateIndicatorPosition() {
+      if (!DOM.indicator || !DOM.tocList || window.innerWidth <= 968 || state.activeIndex === -1) return;
+      
+      const activeLink = DOM.mainTocLinks[state.activeIndex];
+      if (!activeLink) return;
+
+      const activeItem = activeLink.parentElement;
+      const activeItemOffsetTop = activeItem?.offsetTop || 0;
+      const tocListScrollTop = DOM.tocList.scrollTop;
+      const activeItemHeight = activeItem?.clientHeight || 0;
+
+      DOM.indicator.style.top = `${activeItemOffsetTop - tocListScrollTop}px`;
+      DOM.indicator.style.height = `${activeItemHeight}px`;
+      DOM.indicator.style.opacity = "1";
+    }
+
+    function adjustTocListScroll() {
+      if (!DOM.tocList || window.innerWidth <= 968) return;
+      
+      const activeTocItem = DOM.tocList.querySelector(".toc-item.active");
+      if (!activeTocItem) return;
+
+      const tocListClientHeight = DOM.tocList.clientHeight;
+      const activeItemOffsetTop = activeTocItem.offsetTop;
+      const activeItemHeight = activeTocItem.clientHeight;
+      const tocListScrollHeight = DOM.tocList.scrollHeight;
+
+      if (tocListScrollHeight <= tocListClientHeight) return;
+
+      const targetScrollTop = activeItemOffsetTop - (tocListClientHeight - activeItemHeight) * state.config.scrollRatio;
+      DOM.tocList.scrollTo({
+        top: Math.max(0, targetScrollTop), // 避免负数值（滚到顶部）
+        behavior: "smooth",
+      });
+    }
+
+    function adjustScrollTocScroll() {
+      if (!DOM.scrollToc || !DOM.scrollTocList || window.innerWidth > 968 || !DOM.scrollToc.classList.contains("expanded")) return;
+      
+      const activeScrollTocItem = DOM.scrollTocList.querySelector(".scroll-toc-item.active");
+      if (!activeScrollTocItem) return;
+
+      const scrollTocClientHeight = DOM.scrollToc.clientHeight;
+      const activeItemOffsetTop = activeScrollTocItem.offsetTop;
+      const activeItemHeight = activeScrollTocItem.clientHeight;
+      const scrollTocScrollHeight = DOM.scrollTocList.scrollHeight;
+
+      if (scrollTocScrollHeight <= scrollTocClientHeight) return;
+
+      const targetScrollTop = activeItemOffsetTop - (scrollTocClientHeight - activeItemHeight) * state.config.scrollRatio;
+      DOM.scrollToc.scrollTo({
+        top: Math.max(0, targetScrollTop),
+        behavior: "smooth",
+      });
+    }
+
+    function handleWindowResize() {
+      updateIndicatorPosition();
+      adjustTocListScroll();
+      adjustScrollTocScroll();
+    }
+
+    init();
   });
 </script>
