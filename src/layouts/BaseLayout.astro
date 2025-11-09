@@ -17,9 +17,7 @@ let {
   ogImage = "/og-default.jpg",
   canonicalUrl = Astro.url.href,
 } = Astro.props;
-if (pageTitle !== site) {
-  pageTitle += ` | ${site}`;
-}
+
 let description = "这是一个使用Astro构建的用来放各种乱七八糟东西的网站";
 if (postFrontmatter && postFrontmatter.description) {
   description = postFrontmatter.description;
@@ -29,6 +27,9 @@ if (postFrontmatter && postFrontmatter.image && postFrontmatter.image.url) {
 }
 if (postFrontmatter && postFrontmatter.url) {
   canonicalUrl = Astro.url.origin + postFrontmatter.url;
+}
+if( postFrontmatter && postFrontmatter.title) {
+  pageTitle = `${postFrontmatter.title} | ${site}`;
 }
 
 const items = (await getCollection("posts")).map((post) => ({

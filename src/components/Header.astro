@@ -11,7 +11,6 @@ interface NavItem {
 // 导航项数据
 const navItems: NavItem[] = [
   { href: "/", label: "首页" },
-  // { href: "/posts", label: "文章" },
   { href: "/tags", label: "标签" },
   { href: "/about", label: "关于" },
   { href: "/search", label: "搜索" },
@@ -30,37 +29,43 @@ const isPostsPage = Astro.url.pathname.startsWith("/posts");
       </a>
     </div>
 
-    <!-- 导航菜单 -->
-    <nav class="nav" id="nav">
-      <ul class="nav-list">
-        {
-          navItems.map((item) => (
-            <li class="nav-item">
-              <a
-                href={item.href}
-                class="nav-link"
-                class:list={{
-                  "is-active":
-                    Astro.url.pathname.replace("/", "") ===
-                    item.href.replace("/", ""),
-                }}
-              >
-                {item.label}
-              </a>
-            </li>
-          ))
-        }
-      </ul>
-    </nav>
+    <!-- 中间内容区 - 包含可切换的导航和标题 -->
+    <div class="middle-content">
+      <!-- 滚动切换容器 -->
+      <div class="scroll-container" id="scroll-container">
+        <!-- 导航菜单 -->
+        <nav class="nav-content" id="nav">
+          <ul class="nav-list">
+            {
+              navItems.map((item) => (
+                <li class="nav-item">
+                  <a
+                    href={item.href}
+                    class="nav-link"
+                    class:list={{
+                      "is-active":
+                        Astro.url.pathname.replace("/", "") ===
+                        item.href.replace("/", ""),
+                    }}
+                  >
+                    {item.label}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
 
-    <!-- 文章页标题（默认隐藏） -->
-    {
-      isPostsPage && (
-        <div class="page-title-display" id="page-title">
-          <span>{pageTitle}</span>
-        </div>
-      )
-    }
+        <!-- 文章页标题 -->
+        {
+          isPostsPage && (
+            <div class="title-content" id="page-title">
+              <span>{pageTitle}</span>
+            </div>
+          )
+        }
+      </div>
+    </div>
 
     <!-- 右侧功能区 -->
     <div class="header-actions">
@@ -88,31 +93,36 @@ const isPostsPage = Astro.url.pathname.startsWith("/posts");
     const nav = document.getElementById("nav");
     const header = document.getElementById("header");
     const pageTitle = document.getElementById("page-title");
-    const isPostsPage = true; // 从组件Props获取页面类型
+    const scrollContainer = document.getElementById("scroll-container");
+    const isPostsPage = !!pageTitle; // 根据是否有标题判断是否为文章页
 
     // 滚动状态变量
-    let lastScrollTop = 0; // 上一次滚动位置
-    let currentDirection = "down"; // 当前滚动方向
-    let directionChange = false; // 方向是否改变
-    let scrollDistance = 0; // 方向改变后的滚动距离
-    const threshold = 50; // 触发切换的阈值（px）
-    let isNavVisible = true; // 导航是否可见
+    let lastScrollTop = 0;
+    let currentDirection = "down";
+    let directionChange = false;
+    let scrollDistance = 0;
+    const threshold = 50;
+    let showingNav = true; // 当前是否显示导航（而非标题）
 
-    // 菜单切换逻辑（保留原有）
-    if (menuToggle && nav) {
+    // 菜单切换逻辑（修复移动端）
+    if (menuToggle && nav && scrollContainer) {
       menuToggle.addEventListener("click", () => {
         const isExpanded = menuToggle.getAttribute("aria-expanded") === "true";
         menuToggle.setAttribute("aria-expanded", (!isExpanded).toString());
         nav.classList.toggle("nav-open");
+        scrollContainer.classList.toggle("nav-open");
         header?.classList.toggle("menu-open");
       });
     }
 
     // 滚动处理函数
     function handleScroll() {
-      if (!header || !isPostsPage || !pageTitle) return;
+      // 移动端不执行滚动切换逻辑
+      if (window.innerWidth <= 768) return;
 
-      // 基础滚动阴影（保留原有）
+      if (!header || !isPostsPage || !pageTitle || !scrollContainer) return;
+
+      // 基础滚动阴影
       header.classList.toggle("scrolled", window.scrollY > 10);
 
       const scrollTop = window.scrollY;
@@ -122,7 +132,7 @@ const isPostsPage = Astro.url.pathname.startsWith("/posts");
       if (newDirection !== currentDirection) {
         currentDirection = newDirection;
         directionChange = true;
-        scrollDistance = 0; // 重置方向改变后的距离
+        scrollDistance = 0;
       }
 
       // 累计方向改变后的滚动距离
@@ -132,21 +142,19 @@ const isPostsPage = Astro.url.pathname.startsWith("/posts");
 
       // 当滚动距离超过阈值时触发切换
       if (scrollDistance >= threshold) {
-        if (currentDirection === "down" && isNavVisible) {
-          // 向下滚动：隐藏导航，显示标题
-          isNavVisible = false;
-          nav?.classList.add("nav-hidden");
-          pageTitle.classList.add("title-visible");
-        } else if (currentDirection === "up" && !isNavVisible) {
-          // 向上滚动：显示导航，隐藏标题
-          isNavVisible = true;
-          nav?.classList.remove("nav-hidden");
-          pageTitle.classList.remove("title-visible");
+        if (currentDirection === "down" && showingNav) {
+          // 向下滚动：切换到标题
+          showingNav = false;
+          scrollContainer.style.transform = "translateY(-100%)";
+        } else if (currentDirection === "up" && !showingNav) {
+          // 向上滚动：切换到导航
+          showingNav = true;
+          scrollContainer.style.transform = "translateY(0)";
         }
-        directionChange = false; // 重置方向改变状态
+        directionChange = false;
       }
 
-      lastScrollTop = scrollTop <= 0 ? 0 : scrollTop; // 避免负数值
+      lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
     }
 
     // 初始化事件监听
@@ -178,8 +186,6 @@ const isPostsPage = Astro.url.pathname.startsWith("/posts");
     padding: 0 1.5rem;
     height: 60px;
   }
-
-  /* 品牌标识 */
   .brand {
     display: flex;
     align-items: center;
@@ -192,20 +198,40 @@ const isPostsPage = Astro.url.pathname.startsWith("/posts");
     font-size: 1.25rem;
     transition: color 0.2s ease;
   }
-
   .logo-link:hover {
     color: var(--theme-color);
   }
-
-  /* 导航菜单样式 + 切换动画 */
-  .nav {
-    transition:
-      opacity 0.3s ease,
-      transform 0.3s ease;
-    opacity: 1;
-    transform: translateY(0);
+  /* 中间内容区 - 确保足够空间 */
+  .middle-content {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    overflow: hidden;
+    min-width: 0; /* 允许内容收缩 */
   }
 
+  /* 滚动切换容器 - 核心容器 */
+  .scroll-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transition: transform 0.3s ease;
+    will-change: transform;
+  }
+
+  /* 导航和标题内容区 - 确保高度一致 */
+  .nav-content,
+  .title-content {
+    height: 60px; /* 与header高度一致 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+  }
+
+  /* 导航菜单样式 */
   .nav-list {
     display: flex;
     list-style: none;
@@ -230,33 +256,11 @@ const isPostsPage = Astro.url.pathname.startsWith("/posts");
     color: var(--theme-color);
   }
 
-  /* 导航隐藏状态 */
-  .nav.nav-hidden {
-    opacity: 0;
-    transform: translateY(-10px);
-    pointer-events: none; /* 隐藏时不响应点击 */
-  }
-
-  /* 文章页标题样式 + 切换动画 */
-  .page-title-display {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%) scale(0.9);
-    opacity: 0;
-    pointer-events: none;
-    transition:
-      opacity 0.3s ease,
-      transform 0.3s ease;
+  /* 文章页标题样式 */
+  .title-content {
     color: var(--text-primary);
     font-weight: 500;
     white-space: nowrap;
-  }
-
-  .page-title-display.title-visible {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-    pointer-events: auto;
   }
 
   /* 右侧功能区 */
@@ -264,6 +268,7 @@ const isPostsPage = Astro.url.pathname.startsWith("/posts");
     display: flex;
     align-items: center;
     gap: 1rem;
+    white-space: nowrap;
   }
 
   /* 移动端菜单按钮 */
@@ -289,7 +294,7 @@ const isPostsPage = Astro.url.pathname.startsWith("/posts");
     transform-origin: center;
   }
 
-  /* 响应式设计 */
+  /* 响应式设计 - 修复移动端菜单 */
   @media (max-width: 768px) {
     .header-container {
       padding: 0 1rem;
@@ -299,7 +304,11 @@ const isPostsPage = Astro.url.pathname.startsWith("/posts");
       display: flex;
     }
 
-    .nav {
+    .middle-content {
+      position: static;
+    }
+
+    .scroll-container {
       position: absolute;
       top: 100%;
       left: 0;
@@ -310,17 +319,26 @@ const isPostsPage = Astro.url.pathname.startsWith("/posts");
       height: 0;
       overflow: hidden;
       transition: height 0.3s ease;
+      transform: none !important; /* 取消移动端的transform效果 */
     }
 
-    .nav.nav-open {
+    /* 移动端菜单打开状态 */
+    .scroll-container.nav-open {
       height: auto;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+    .nav-content {
+      height: auto;
+      display: block;
       padding: 1rem 0;
     }
 
     .nav-list {
       flex-direction: column;
       gap: 0;
-      padding: 0 1rem;
+      padding: 0 1.5rem;
     }
 
     .nav-item {
@@ -337,8 +355,8 @@ const isPostsPage = Astro.url.pathname.startsWith("/posts");
       border-bottom: none;
     }
 
-    .page-title-display {
-      display: none;
+    .title-content {
+      display: none; /* 移动端不显示标题切换 */
     }
 
     /* 菜单打开时的动画图标 */
@@ -358,8 +376,7 @@ const isPostsPage = Astro.url.pathname.startsWith("/posts");
   /* 减少运动偏好 */
   @media (prefers-reduced-motion: reduce) {
     .header,
-    .nav,
-    .page-title-display,
+    .scroll-container,
     .menu-toggle span {
       transition: none;
     }

@@ -66,6 +66,10 @@ body {
   margin: 0;
 }
 
+* {
+  -webkit-tap-highlight-color: color-mix(in srgb, var(--theme-color) 20%, transparent);
+}
+
 /* *::-webkit-scrollbar {
   width: 8px;
 } */
