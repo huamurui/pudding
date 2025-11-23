@@ -71,7 +71,7 @@ article a:hover {
 }
 
 /* 列表样式 */
-/* article ul, 
+article ul, 
 article ol {
   margin: 1.2rem 0;
   padding-left: 1.8rem;
@@ -82,18 +82,18 @@ article li {
   line-height: 1.2;
 }
 
-article ul li {
+/* article ul li {
   list-style-type: disc;
-}
+} */
 
-article ol li {
+/* article ol li {
   list-style-type: decimal;
-}
+} */
 
 article li > ul, 
 article li > ol {
   margin: 0.5rem 0;
-} */
+}
 
 /* 为 
 article details  和 
