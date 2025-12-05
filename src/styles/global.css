@@ -70,6 +70,22 @@ body {
   -webkit-tap-highlight-color: color-mix(in srgb, var(--theme-color) 20%, transparent);
 }
 
+h1::after, h2::after, h3::after, h4::after, h5::after, h6::after {
+  content: '#'; 
+  color: var(--primary-color); 
+  position: absolute;
+  opacity: 0; 
+  transform: translateX(20px); 
+  transition: all 0.1s ease; 
+  font-weight: inherit; 
+}
+
+h1:hover::after, h2:hover::after, h3:hover::after, h4:hover::after, h5:hover::after, h6:hover::after {
+  opacity: 1; 
+  transform: translateX(10px); 
+}
+
+
 /* *::-webkit-scrollbar {
   width: 8px;
 } */
