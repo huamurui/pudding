@@ -242,3 +242,26 @@ body {
     color: color-mix(in srgb, var(--theme-color) 80%, var(--text-secondary));
   }
 }
+
+
+.blur-wrapper {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.blur-content {
+  transition: all 0.3s ease;
+  border-radius: 4px;
+  user-select: none;
+}
+
+.blur-wrapper[data-mode="blur"][data-hidden="true"] .blur-content {
+  filter: blur(8px);
+}
+
+.blur-wrapper[data-mode="blackout"][data-hidden="true"] .blur-content {
+  background: var(--text-primary);
+  color: var(--text-primary);
+}
+

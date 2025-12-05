@@ -32,6 +32,9 @@ importers:
       solid-js:
         specifier: ^1.9.9
         version: 1.9.9
+      unist-util-visit:
+        specifier: ^5.0.0
+        version: 5.0.0
 
 packages:
 

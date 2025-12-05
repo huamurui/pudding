@@ -121,6 +121,19 @@ const description = getDescription(post_str);
   </article>
 
   {headings && headings.length > 0 && <ToC slot="aside" headings={headings} />}
+  <script is:inline>
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.blur-wrapper').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation(); // 阻止冒泡
+          const wrapper = btn.closest('.blur-wrapper');
+          if (!wrapper) return;
+          const isHidden = wrapper.dataset.hidden === 'true';
+          wrapper.dataset.hidden = !isHidden;
+        });
+      });
+    });
+  </script>
 </BaseLayout>
 
 <style>
