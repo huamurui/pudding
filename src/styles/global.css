@@ -253,7 +253,6 @@ body {
 .blur-content {
   transition: all 0.3s ease;
   border-radius: 4px;
-  user-select: none;
 }
 
 .blur-wrapper[data-mode="blur"][data-hidden="true"] .blur-content {
@@ -263,5 +262,6 @@ body {
 .blur-wrapper[data-mode="blackout"][data-hidden="true"] .blur-content {
   background: var(--text-primary);
   color: var(--text-primary);
+  user-select: none;
 }
 
