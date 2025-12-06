@@ -11,6 +11,8 @@ title: 数据结构
 
 ## base
 
+### base-structure
+
 - linear
   - array 
     - 连续内存位置，偏移
@@ -27,8 +29,13 @@ title: 数据结构
     - DFS 可以使用 栈（Stack） 为遍历中节点的暂存容器来实现；这与用 队列（Queue） 实现的 BFS 形成高度对应。
 - hash table
 
+### base-... programming?
+
+计算机程序可以被分为数据与算法，数据结构可以看作数据，而算法...是处理使用数据的程序段。  
+面向对象里对象的属性和方法，函数式编程里的闭包和函数，也许都可以看作组织这两者的更具体有规律的方式。  
+即使在什么都没有的 C 里，也会有将一些东西抽象成数据，用表驱动编程去替代冗长的 if else 这种做法。  
+
+## 
+
 Abstract Data Type
 Algebraic Data Type
-
-
-||| 123 |||
