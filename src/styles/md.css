@@ -82,6 +82,10 @@ article li {
   line-height: 1.2;
 }
 
+article li::marker {
+  color: var(--primary-color);
+}
+
 /* article ul li {
   list-style-type: disc;
 } */
@@ -222,7 +226,8 @@ article blockquote p {
 
 article p code {
   background:
-    color-mix(in srgb, var(--theme-color) 15%, transparent);
+    color-mix(in srgb, var(--primary-color) 15%, transparent);
+  color: var(--primary-color);
   padding: 6px;
   border-radius: 6px;
 }
@@ -290,3 +295,27 @@ article .footnotes {
   font-size: 0.9em;
   color: var(--text-secondary);
 }
+
+
+
+.blur-wrapper {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.blur-content {
+  transition: all 0.3s ease;
+  border-radius: 4px;
+}
+
+.blur-wrapper[data-mode="blur"][data-hidden="true"] .blur-content {
+  filter: blur(8px);
+}
+
+.blur-wrapper[data-mode="blackout"][data-hidden="true"] .blur-content {
+  background: var(--text-primary);
+  color: var(--text-primary);
+  user-select: none;
+}
+
