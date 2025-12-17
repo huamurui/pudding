@@ -254,7 +254,7 @@ article img {
 
 /* 强调文本样式 */
 article strong {
-  color: var(--text-primary);
+  color: var(--primary-color);
   font-weight: 650;
 }
 
