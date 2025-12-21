@@ -5,7 +5,7 @@ interface Props {
   intro?: string; // 一句话简介（可选）
 }
 
-const { intro = "记录前端技术与生活碎碎念" } = Astro.props;
+const { intro = "A blog about programming tech and nonsense." } = Astro.props;
 
 const allBlogPosts: CollectionEntry<"posts">[] = await getCollection("posts");
 

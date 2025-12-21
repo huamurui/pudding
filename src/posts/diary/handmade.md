@@ -16,3 +16,6 @@ tags: ['handmade','note','diray']
 ![yu-yu](https://huamurui.github.io/photo-viewer/photos/P1140342-%E5%B7%B2%E5%A2%9E%E5%BC%BA-NR.jpg)
 
 最近想弄一些，电子手工艺品x
+
+- 焊接好难搞，铜丝好难弄直弄漂亮...
+- 发现买的电烙铁的电源接口和之前脱毛仪的是一样的，甚至功率也几乎一样x，同尺寸的 DC 圆形同轴接口
