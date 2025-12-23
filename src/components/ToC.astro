@@ -46,7 +46,7 @@ const { headings = [] } = Astro.props as Props;
     <ul class="scroll-toc-list">
       {
         headings.map((heading) => (
-          <li class={`scroll-toc-item scroll-toc-item-depth-${heading.depth}`}>
+          <li class={`scroll-toc-item scroll-toc-item-depth-${heading.depth - 1}`}>
             <a
               href={`#${heading.slug}`}
               class="scroll-toc-link"
@@ -218,18 +218,13 @@ const { headings = [] } = Astro.props as Props;
   }
 
   .scroll-toc-item-depth-2 {
-    margin-left: 0.5em;
+    margin-left: 0.8em;
     font-size: 1em;
   }
 
   .scroll-toc-item-depth-3 {
-    margin-left: 1rem;
-    font-size: 1em;
-  }
-
-  .scroll-toc-item-depth-4 {
-    margin-left: 1.5rem;
-    font-size: 0.6em;
+    margin-left: 1.2rem;
+    font-size: 0.7em;
   }
 
   .scroll-toc-link {
