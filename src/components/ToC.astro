@@ -15,8 +15,8 @@ const { headings = [] } = Astro.props as Props;
 <nav class="blog-toc main-toc" aria-label="文章目录">
   <ul class="toc-list" id="toc-list">
     {
-      headings.map((heading) => (
-        <li class={`toc-item toc-item-depth-${heading.depth}`}>
+      headings.filter(item=>item.depth < 5).map((heading) => (
+        <li class={`toc-item toc-item-depth-${heading.depth -1}`}>
           <a
             href={`#${heading.slug}`}
             class="toc-link"
@@ -91,22 +91,13 @@ const { headings = [] } = Astro.props as Props;
   }
 
   .toc-item-depth-2 {
-    margin-left: 0.5rem;
+    margin-left: 1rem;
   }
 
   .toc-item-depth-3 {
-    margin-left: 1rem;
-    font-size: 0.9em;
-  }
-
-  .toc-item-depth-4 {
     margin-left: 1.5rem;
-    font-size: 0.85em;
-  }
-
-  .toc-item-depth-5 {
-    margin-left: 2rem;
-    font-size: 0.85em;
+    font-size: 0.7em;
+    line-height: 1;
   }
 
   .toc-link {
@@ -227,23 +218,20 @@ const { headings = [] } = Astro.props as Props;
   }
 
   .scroll-toc-item-depth-2 {
-    margin-left: 0.75rem;
-    font-size: 0.85em;
+    margin-left: 0.5em;
+    font-size: 1em;
   }
 
   .scroll-toc-item-depth-3 {
-    margin-left: 1.5rem;
-    font-size: 0.8em;
+    margin-left: 1rem;
+    font-size: 1em;
   }
 
   .scroll-toc-item-depth-4 {
-    margin-left: 2.25rem;
-    font-size: 0.75em;
+    margin-left: 1.5rem;
+    font-size: 0.6em;
   }
-  .scroll-toc-item-depth-5 {
-    margin-left: 2.50rem;
-    font-size: 0.75em;
-  }
+
   .scroll-toc-link {
     color: var(--text-secondary);
     text-decoration: none;
