@@ -284,8 +284,12 @@ ffmpeg
     - 步态检测、手势识别
   - 至于和舵机结合做那种多足机器人，似乎需要的不只是嵌入式的知识x
 - 显示
-  - 基本接口
+  - 基本接口 i2c spi rgb mipi-dis hdmi
+  - lcd oled, 电阻、电容触摸板
   - 驱动芯片，触摸芯片
+  - 发现了墨水屏这种东西，可以断电显示内容，又想到 nfc 可以供电...  然鹅这事早就有人做了还弄得很炫酷x <https://github.com/peng-zhihui/L-ink_Card>  
+    - 分光棱镜
+    - 然后又逛到... <https://www.bilibili.com/video/BV1JYRjYoEzE> 前段时间刷到过一些小玩具，然鹅... 原来早就不止如此了，不止文字 ai，机器人也都这么厉害了...  
 - 摄像头
   - ..
 - 其他
