@@ -374,7 +374,7 @@ const { headings = [] } = Astro.props as Props;
         entry.isIntersecting 
           ? state.visibleHeadings.add(heading.index) 
           : state.visibleHeadings.delete(heading.index);
-        if (!state.isProgrammaticScroll) updateActiveHeading();
+        if (!state.isProgrammaticScroll) {updateActiveHeading(); updateIndicatorPosition()};
       });
     }
 
@@ -463,25 +463,30 @@ const { headings = [] } = Astro.props as Props;
         if (DOM.toggleText) {
           DOM.toggleText.textContent = state.headings[state.activeIndex].element?.textContent || "当前章节";
         }
-        updateIndicatorPosition();
+        // updateIndicatorPosition();
         adjustTocListScroll();
         adjustScrollTocScroll();
       }
     }
-
+    // todo 更新指示器位置,我现在想要不止指示 DOM.indicator 而是所有 visible 的位置
+    // 主要是，重新计算指示器的位置和高度，更具体的是 top height 这两个数值
     function updateIndicatorPosition() {
       if (!DOM.indicator || !DOM.tocList || window.innerWidth <= 968 || state.activeIndex === -1) return;
       
-      const activeLink = DOM.mainTocLinks[state.activeIndex];
-      if (!activeLink) return;
-
-      const activeItem = activeLink.parentElement;
-      const activeItemOffsetTop = activeItem?.offsetTop || 0;
+      // 找到 visible或active 类的第一个元素
+      const visibleItems = DOM.tocList.querySelectorAll(".toc-item.visible, .toc-item.active");
+      if (visibleItems.length === 0) {
+        DOM.indicator.style.opacity = "0";
+        return;
+      }
+      const firstVisibleItem = visibleItems[0] as HTMLElement;
+      const lastVisibleItem = visibleItems[visibleItems.length - 1] as HTMLElement;
+      const firstOffsetTop = firstVisibleItem.offsetTop;
+      const lastOffsetTop = lastVisibleItem.offsetTop;
+      const lastItemHeight = lastVisibleItem.clientHeight;
       const tocListScrollTop = DOM.tocList.scrollTop;
-      const activeItemHeight = activeItem?.clientHeight || 0;
-
-      DOM.indicator.style.top = `${activeItemOffsetTop - tocListScrollTop}px`;
-      DOM.indicator.style.height = `${activeItemHeight}px`;
+      DOM.indicator.style.top = `${firstOffsetTop - tocListScrollTop}px`;
+      DOM.indicator.style.height = `${(lastOffsetTop + lastItemHeight) - firstOffsetTop}px`;
       DOM.indicator.style.opacity = "1";
     }
 
