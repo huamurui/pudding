@@ -2,7 +2,7 @@
 import { getCollection, type CollectionEntry } from "astro:content";
 
 type TagPostsMap = Map<string, CollectionEntry<"posts">[]>;
-
+const post = Astro.props.post as CollectionEntry<"posts"> | null;
 const posts: CollectionEntry<"posts">[] = await getCollection("posts");
 const tagsPosts: TagPostsMap = new Map();
 
@@ -15,6 +15,22 @@ for (const post of posts) {
       (a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime()
     );
     tagsPosts.set(tag, updatedPosts);
+  }
+}
+
+if(post){
+  // 如果传入了 post，则只展示该 post 的标签
+  const postTags = post.data.tags || [];
+  const filteredTagsPosts: TagPostsMap = new Map();
+  for (const tag of postTags) {
+    if (tagsPosts.has(tag)) {
+      filteredTagsPosts.set(tag, tagsPosts.get(tag)!);
+    }
+  }
+  // 使用过滤后的标签映射
+  tagsPosts.clear();
+  for (const [tag, posts] of filteredTagsPosts.entries()) {
+    tagsPosts.set(tag, posts);
   }
 }
 
@@ -47,10 +63,6 @@ const sortedTags = Array.from(tagsPosts.keys()).sort((a, b) =>
 <style>
   /* 标签导航栏 */
   .tags-nav {
-    margin: 0 0 40px 0;
-    position: sticky;
-    top: 64px;
-    z-index: 10;
     background-color: var(--bg-primary);
     padding: 8px 0;
     border-radius: 8px;

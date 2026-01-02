@@ -16,6 +16,7 @@ let {
   postFrontmatter = null,
   ogImage = "/og-default.jpg",
   canonicalUrl = Astro.url.href,
+  post = null,
 } = Astro.props;
 
 let description = "这是一个使用Astro构建的用来放各种乱七八糟东西的网站";
@@ -109,7 +110,7 @@ const isHome = Astro.url.pathname === "/";
           class="blog-post-sidebar"
           style={isPostsPage ? "position: static" : ";"}
         >
-          <Sidebar />
+          <Sidebar post={post}/>
         </div>
         <div class="blog-post-sidebar">
           <slot name="aside" />

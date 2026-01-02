@@ -1,11 +1,13 @@
 ---
 import { getCollection, type CollectionEntry } from "astro:content";
 import Tag from "./Tag/Tag.astro";
+import { propsToFilename } from "astro/assets/utils";
 interface Props {
   intro?: string; // 一句话简介（可选）
+  post?: Object; // post
 }
 
-const { intro = "A blog about programming tech and nonsense." } = Astro.props;
+const { intro = "A blog about programming tech and nonsense.",post=null } = Astro.props;
 
 const allBlogPosts: CollectionEntry<"posts">[] = await getCollection("posts");
 
@@ -55,7 +57,7 @@ allBlogPosts.map((post) => {
       更新
     </div>
   </div>
-  <Tag />
+  <Tag post={post}/>
 </div>
 
 <style>
