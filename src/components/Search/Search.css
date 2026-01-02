@@ -1,13 +1,13 @@
 .tag-search-wrapper {
     width: 100%;
-    margin: 0 auto;
+    margin: 60px auto;
 }
 
 #tag-search-container {
     display: flex;
     gap: 0;
     max-width: 600px;
-    margin: auto;
+    margin: 10px auto;
     width: 100%;
 }
 
