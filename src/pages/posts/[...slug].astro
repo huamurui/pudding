@@ -86,7 +86,7 @@ const description = getDescription(post_str);
             {Math.ceil((post.body || "").split(" ").length / 200)} 分钟阅读
           </span>
         </div>
-        <div class="post-tags">
+        <!-- <div class="post-tags">
           {
             post.data.tags?.map((tag: string) => (
               <a href={`/tags/${tag}`} class="post-tag">
@@ -94,7 +94,7 @@ const description = getDescription(post_str);
               </a>
             ))
           }
-        </div>
+        </div> -->
       </header>
 
       {
