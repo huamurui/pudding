@@ -3,15 +3,7 @@ import { type CollectionEntry, getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import PostList from "../../components/PostList/PostList";
 
-// 定义文章数据转换后的类型
-interface PostListItem {
-  id: string;
-  title: string;
-  date: string | Date;
-  description?: string;
-  tags: string[];
-  url: string;
-}
+
 
 // 定义getStaticPaths返回类型
 type StaticPath = {
@@ -55,27 +47,22 @@ const { tag, posts } = Astro.props as Props;
 ---
 
 <BaseLayout pageTitle={`Tag ⬝ ${tag}`} description={`Posts tagged with ${tag}`}>
-  <div style={{ "max-width": "800px", margin: "0 auto" }}>
-    <div class="tag-view">
-      <div class="stat">
-        <div class="stat-title">
-          <h1>{tag}</h1>
-        </div>
-        <div class="stat-desc">
-          <span>Total posts: {posts.length}</span>
-        </div>
+  <div style={{ "max-width": "800px", margin: "100px auto" }}>
+    <section class="year-section">
+      <div class="year-posts">
+        <article class="timeline-post">
+          <div class="post-content">
+            <div class="post-info year">
+              <span class="post-date year">{tag}</span>
+              <div class="timeline-connector year">
+                <div class="post-marker year"></div>
+              </div>
+              <span class="inline-tag">{posts.length} posts</span>
+            </div>
+          </div>
+        </article>
+        <PostList posts={() => posts} />
       </div>
-    </div>
-    <PostList
-      posts={() =>
-        posts.map((post) => ({
-          id: post.id,
-          title: post.data.title,
-          date: post.data.date,
-          description: post.data.description,
-          tags: post.data.tags || [],
-          url: `/posts/${post.id}/`,
-        })) as PostListItem[]}
-    />
+    </section>
   </div>
 </BaseLayout>

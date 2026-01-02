@@ -5,103 +5,138 @@
   margin: 0;
 }
 
-/* 文章项 - 移除背景色，减少内边距 */
-.post-item {
-  padding: 20px;
-  border-radius: 8px;
-  margin: 20px 0;
-  transition: background-color 0.3s ease;
+.timeline-post {
   position: relative;
+  padding: 0;
 }
 
-/* 悬停效果 - 仅添加主题色背景 */
-.post-item:hover {
+.post-info {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  height: 40px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.post-info.year:hover {
+  background-color: transparent;
+}
+
+.post-info:hover {
   background-color: color-mix(in srgb, var(--theme-color) 5%, transparent);
 }
 
-/* 独立分割线元素 */
-.divider {
-  height: 1px;
-  background-color: var(--border-color);
-  margin: 0;
-  transition: background-color 0.3s ease;
-}
-
-/* 文章链接容器 */
-.post-link {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  text-decoration: none;
-  color: inherit;
-  margin-bottom: 12px;
-  gap: 16px;
-}
-
-/* 标题样式 */
-.post-title {
-  font-weight: 600;
-  color: var(--text-primary);
-  font-size: 20px;
-  line-height: 1.4;
-  flex: 1;
-  margin: 0;
-  transition: color 0.2s ease;
-}
-
-.post-item:hover .post-title {
-  color: var(--theme-color);
-}
-
-/* 日期样式 - 移除背景色 */
+/* 日期样式（左侧固定宽度） */
 .post-date {
   font-size: 14px;
   color: var(--text-secondary);
+  width: 60px;
+  text-align: right;
   white-space: nowrap;
-  padding: 4px 8px;
-  border-radius: 4px;
-  transition: color 0.2s ease;
 }
 
-.post-item:hover .post-date {
+.post-date.year {
+  font-weight: 600;
+  font-size: 20px;
+  /* color: var(--theme-color); */
+}
+
+.timeline-connector {
+  position: relative;
+  flex-shrink: 0;
+  height: 100%;
+  width: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.timeline-connector::before {
+  content: "";
+  position: absolute;
+  width: 10%;
+  height: 100%;
+  left: calc(50% - 1px);
+  border-left: 2px dashed var(--border-color);
+  z-index: -1;
+  pointer-events: none;
+  transition: all 0.3s;
+  transform: translateY(-50%);
+}
+
+.timeline-connector.year::before {
+  display: none;
+}
+
+.post-marker {
+  width: 6px;
+  height: 6px;
+  border-radius: 6px;
+  background-color: var(--text-secondary);
+  transition: all 0.2s ease;
+}
+
+.post-marker.year {
+  transform: scale(1.5);
+  background-color: var(--theme-color);
+}
+
+.post-info:hover .post-marker {
+  background-color: var(--theme-color);
+  height: 20px;
+}
+
+.post-info:hover .post-marker.year {
+  width: 6px;
+  height: 6px;
+  transform: scale(2);
+  background-color: var(--theme-color);
+}
+
+.post-link {
+  text-decoration: none;
+  flex: 1;
+}
+
+.post-title {
+  margin: 0;
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--text-primary);
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.post-info:hover .post-title {
   color: var(--theme-color);
+  transform: translateX(4px);
 }
 
-/* 摘要样式 */
-.post-excerpt {
-  color: var(--text-secondary);
-  font-size: 15px;
-  line-height: 1.6;
-  margin: 0 0 16px 0;
-}
-
-
-/* 无结果样式 - 移除背景色 */
-.no-results {
-  text-align: center;
-  padding: 48px 32px;
-  font-style: italic;
-  color: var(--text-secondary);
-  margin: 32px 0;
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-  .post-link {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+@media (max-width: 600px) {
+  .timeline-container {
+    padding-left: 30px;
   }
-  
+
+  .year-section::before,
+  .year-marker::before {
+    left: -20px;
+  }
+
+  .post-info {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
   .post-date {
-    align-self: flex-start;
+    width: auto;
+    text-align: left;
+    padding-right: 12px;
   }
-  
-  .post-item {
-    padding: 16px 10px;
-  }
-  
-  .post-title {
-    font-size: 18px;
+
+  .post-tags {
+    margin-top: 8px;
+    width: 100%;
   }
 }

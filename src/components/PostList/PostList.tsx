@@ -3,12 +3,11 @@ import "./PostList.css";
 
 interface Post {
   id: string;
-  url: string;
-  title: string;
-  date: string | Date;
-  tags: string[];
-  description?: string;
-  excerptHtml: string;
+  data: {
+    title: string;
+    date: string | Date;
+    tags: string[];
+  };
 }
 
 interface PostListProps {
@@ -23,33 +22,37 @@ const PostList = ({ posts, selectedTags = () => null }: PostListProps) => {
         <p class="no-results">没有找到匹配的文章</p>
       ) : (
         <ul class="posts-list">
-          {posts().map((post, index) => (
-            <li class="post-item-con">
-              <div class="post-item">
-                <a href={post.url} class="post-link">
-                  <h2 class="post-title">{post.title}</h2>
-                  <time class="post-date" datetime={new Date(post.date).toISOString()}>
-                    {new Date(post.date).toISOString().split('T')[0]}
+          {posts().map((post) => (
+            <article class="timeline-post">
+              <div class="post-content">
+                <div class="post-info">
+                  <time class="post-date">
+                    {new Date(post.data.date)
+                      .toISOString()
+                      .split("T")[0]
+                      .split("-")
+                      .slice(1)
+                      .join("-")}
                   </time>
-                </a>
 
-                {/* 渲染摘要 */}
-                <div class="post-excerpt" innerHTML={post.excerptHtml} />
+                  <div class="timeline-connector">
+                    <div class="post-marker" />
+                  </div>
 
-                <div class="post-tags">
-                  {post.tags.map(tag => (
-                    <a
-                      href={`/tags/${tag}`}
-                      class={`post-tag ${selectedTags()?.has(tag) ? 'highlighted' : ''}`}
-                    >
-                      #{tag}
-                    </a>
-                  ))}
+                  <a href={`/posts/${post.id}`} class="post-link">
+                    <h5 class="post-title">{post.data.title}</h5>
+                  </a>
+
+                  <div class="post-tags">
+                    {post.data.tags?.map((t: string) => (
+                      <a href={`/tags/${t}`} class="inline-tag">
+                        #{t}
+                      </a>
+                    ))}
+                  </div>
                 </div>
               </div>
-              {/* 分割线 - 最后一项不显示 */}
-              {index !== posts().length - 1 && <div class="divider"></div>}
-            </li>
+            </article>
           ))}
         </ul>
       )}

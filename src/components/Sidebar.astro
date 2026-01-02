@@ -1,6 +1,6 @@
 ---
 import { getCollection, type CollectionEntry } from "astro:content";
-
+import Tag from "./Tag/Tag.astro";
 interface Props {
   intro?: string; // 一句话简介（可选）
 }
@@ -55,6 +55,7 @@ allBlogPosts.map((post) => {
       更新
     </div>
   </div>
+  <Tag />
 </div>
 
 <style>

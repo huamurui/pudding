@@ -1,0 +1,96 @@
+---
+import { getCollection, type CollectionEntry } from "astro:content";
+
+type TagPostsMap = Map<string, CollectionEntry<"posts">[]>;
+
+const posts: CollectionEntry<"posts">[] = await getCollection("posts");
+const tagsPosts: TagPostsMap = new Map();
+
+// 按标签分组文章，并按时间排序（最新在前）
+for (const post of posts) {
+  for (const tag of post.data.tags || []) {
+    const existingPosts = tagsPosts.get(tag) || [];
+    // 添加并按日期排序
+    const updatedPosts = [...existingPosts, post].sort(
+      (a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime()
+    );
+    tagsPosts.set(tag, updatedPosts);
+  }
+}
+
+// 按标签名称排序
+const sortedTags = Array.from(tagsPosts.keys()).sort((a, b) =>
+  a.localeCompare(b),
+);
+---
+
+  <div class="tags-page">
+    <!-- 标签导航栏 - 可点击跳转到对应标签 -->
+    <div class="tags-nav">
+      <div class="tags-container">
+        {sortedTags.map((tag) => (
+          <a 
+            href={`/tags/${tag}`}
+            class="post-tag"
+            data-tag={tag}
+          >
+            {tag}
+            <span class="tag-count">
+              {tagsPosts.get(tag)?.length || 0}
+            </span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </div>
+
+<style>
+  /* 标签导航栏 */
+  .tags-nav {
+    margin: 0 0 40px 0;
+    position: sticky;
+    top: 64px;
+    z-index: 10;
+    background-color: var(--bg-primary);
+    padding: 8px 0;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px var(--shadow);
+  }
+
+  /* 标签折叠按钮 - 默认隐藏 */
+  .tags-toggle {
+    display: none;
+    width: 100%;
+    padding: 8px 16px;
+    background-color: var(--bg-secondary);
+    border: none;
+    color: var(--text-primary);
+    font-size: 14px;
+    cursor: pointer;
+    text-align: left;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .toggle-icon {
+    font-size: 12px;
+  }
+
+  .tags-container {
+    display: flex;
+    gap: 12px;
+    padding: 8px 16px;
+    overflow-x: auto;
+    flex-wrap: wrap;
+    scrollbar-width: thin;
+  }
+
+  .tag-count {
+    background-color: var(--bg-tertiary);
+    color: var(--text-secondary);
+    font-size: 12px;
+    padding: 1px 8px;
+    border-radius: 10px;
+  }
+</style>

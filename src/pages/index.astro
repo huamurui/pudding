@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import PostList from '../components/PostList/PostList';
+import PostCardList from '../components/PostCardList/PostCardList';
 import { getCollection, render } from 'astro:content';
 import { experimental_AstroContainer } from "astro/container";
 const container = await experimental_AstroContainer.create();
@@ -54,6 +54,6 @@ const posts = () => postsWithExcerpt.sort(
     margin: '0 auto',
     padding: '2rem 1rem',
   }}>
-    <PostList posts={posts} />
+    <PostCardList posts={posts} />
   </div>
 </BaseLayout>

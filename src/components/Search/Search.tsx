@@ -1,7 +1,7 @@
 import { createSignal, createEffect, For, Show, onMount } from 'solid-js';
 import { evaluateExpression } from './Expression'
 import './Search.css'
-import PostList from '../PostList/PostList';
+import PostCardList from '../PostCardList/PostCardList';
 // 主组件
 const Search = () => {
   // 状态管理
@@ -254,9 +254,9 @@ const Search = () => {
         "max-width": "800px",
         margin: "auto"
       }}>
-        <PostList
+        <PostCardList
           posts={filteredPosts}
-        ></PostList>
+        ></PostCardList>
       </div>
     </div>
   );
