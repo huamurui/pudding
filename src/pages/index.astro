@@ -42,13 +42,33 @@ const postsWithExcerpt = await Promise.all(
   })
 );
 
-// 排序
-const posts = () => postsWithExcerpt.sort(
+// 排序并生成 ItemList 结构化数据
+const sortedPosts = postsWithExcerpt.slice().sort(
   (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
 );
+const posts = () => sortedPosts;
 
+const site = "Greenhouse between Clouds";
+const itemList = {
+  "@type": "ItemList",
+  "name": "Recent posts",
+  "itemListElement": sortedPosts.map((p, i) => ({
+    "@type": "ListItem",
+    "position": i + 1,
+    "url": new URL(p.url, Astro.url.origin).toString(),
+    "name": p.title
+  }))
+};
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    { "@type": "WebSite", "url": Astro.url.origin, "name": site },
+    { "@type": "CollectionPage", "name": "Recent posts", "mainEntity": itemList }
+  ]
+};
 ---
-<BaseLayout>
+<BaseLayout structuredData={structuredData}>
   <div style={{
     maxWidth: '800px',
     margin: '0 auto',

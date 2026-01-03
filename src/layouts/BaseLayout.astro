@@ -17,6 +17,7 @@ let {
   ogImage = "/og-default.jpg",
   canonicalUrl = Astro.url.href,
   post = null,
+  structuredData = null,
 } = Astro.props;
 
 let description = "这是一个使用Astro构建的用来放各种乱七八糟东西的网站";
@@ -48,6 +49,7 @@ const isHome = Astro.url.pathname === "/";
     description={description}
     ogImage={ogImage}
     canonicalUrl={canonicalUrl}
+    structuredData={structuredData}
   />
 
   <body>

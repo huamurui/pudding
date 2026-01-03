@@ -66,9 +66,26 @@ const getDescription = (post: string): string => {
 
 const post_str = await container.renderToString(Content);
 const description = getDescription(post_str);
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "mainEntityOfPage": { "@type": "WebPage", "@id": new URL(`/posts/${post.id}/`, Astro.url.origin).toString() },
+  "headline": post.data.title,
+  "description": post.data.description || '',
+  "image": post.data.image?.url || '',
+  "author": { "@type": "Person", "name": post.data.author || "huamurui" },
+  "datePublished": post.data.date,
+  "dateModified": post.data.updated || post.data.date,
+  "publisher": {
+    "@type": "Organization",
+    "name": "Site Name",
+    "logo": { "@type": "ImageObject", "url": "/logo.png" }
+  }
+};
 ---
 
-<BaseLayout postFrontmatter={{ ...post.data, description } as PostFrontmatter} post={post}>
+<BaseLayout postFrontmatter={{ ...post.data, description } as PostFrontmatter} post={post} structuredData={structuredData}>
   <article class="blog-post-container">
     <div class="blog-post-content">
       <header class="post-header">
