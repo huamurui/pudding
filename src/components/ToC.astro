@@ -254,21 +254,26 @@ const { headings = [] } = Astro.props as Props;
 </style>
 
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    // 1：DOM
-    const DOM = {
-      indicator: document.getElementById("toc-indicator"),
+  (function () {
+    let cleanupFn: (() => void) | null = null;
+
+    function setup() {
+      if (cleanupFn) { try { cleanupFn(); } catch (e) {} }
+
+      // 1：DOM
+      const DOM = {
+        indicator: document.getElementById("toc-indicator"),
       mainTocLinks: document.querySelectorAll<HTMLAnchorElement>(".toc-link"),
-      tocList: document.getElementById("toc-list"),
+        tocList: document.getElementById("toc-list"),
 
-      scrollTocToggle: document.getElementById("scroll-toc-toggle"),
-      scrollToc: document.getElementById("scroll-toc"),
-      scrollTocContainer: document.querySelector(".scroll-toc-container"),
+        scrollTocToggle: document.getElementById("scroll-toc-toggle"),
+        scrollToc: document.getElementById("scroll-toc"),
+        scrollTocContainer: document.querySelector(".scroll-toc-container"),
       scrollTocLinks: document.querySelectorAll<HTMLAnchorElement>(".scroll-toc-link"),
-      scrollTocList: document.querySelector(".scroll-toc-list"),
+        scrollTocList: document.querySelector(".scroll-toc-list"),
 
-      toggleText: document.querySelector(".toggle-text"),
-    };
+        toggleText: document.querySelector(".toggle-text"),
+      };
 
     // 2. State
     const state = {
@@ -279,20 +284,21 @@ const { headings = [] } = Astro.props as Props;
         listItems: HTMLLIElement[];
         index: number;
       }>,
-      isProgrammaticScroll: false, 
-      activeIndex: -1, 
+      isProgrammaticScroll: false,
+      activeIndex: -1,
       visibleHeadings: new Set<number>(), 
       lastScrollTop: 0,
       // constant
       config: {
-        scrollThreshold: 100, 
+        scrollThreshold: 100,
         headerOffset: 120,
         bottomThreshold: 100,
-        scrollRatio: 0.4, 
+        scrollRatio: 0.4,
       },
     };
 
     // 3. Events
+    let observer:IntersectionObserver | null = null;
     function bindEvents() {
       DOM.scrollTocToggle?.addEventListener("click", handleScrollTocToggle);
 
@@ -305,10 +311,26 @@ const { headings = [] } = Astro.props as Props;
       DOM.mainTocLinks.forEach(link => link.addEventListener("click", (e) => handleTocLinkClick(e, link)));
       DOM.scrollTocLinks.forEach(link => link.addEventListener("click", (e) => handleTocLinkClick(e, link)));
 
-      const observer = new IntersectionObserver(handleHeadingIntersection, {
+      observer = new IntersectionObserver(handleHeadingIntersection, {
         threshold: 0.01,
       });
-      state.headings.forEach(heading => heading.element && observer.observe(heading.element));
+      state.headings.forEach(heading => heading.element && observer && observer.observe(heading.element));
+    }
+
+    function cleanup() {
+      DOM.scrollTocToggle?.removeEventListener("click", handleScrollTocToggle);
+      window.removeEventListener("scroll", handleWindowScroll);
+      DOM.tocList?.removeEventListener("scroll", updateIndicatorPosition);
+      window.removeEventListener("resize", handleWindowResize);
+
+      if (observer) {
+        try { observer.disconnect(); } catch(e) {}
+        observer = null;
+      }
+
+      // remove per-link listeners by cloning nodes
+      Array.from(DOM.mainTocLinks).forEach(link => { const clone = link.cloneNode(true); link.parentNode && link.parentNode.replaceChild(clone, link); });
+      Array.from(DOM.scrollTocLinks).forEach(link => { const clone = link.cloneNode(true); link.parentNode && link.parentNode.replaceChild(clone, link); });
     }
 
     // 4. Functions
@@ -340,6 +362,8 @@ const { headings = [] } = Astro.props as Props;
       if (initialHash) {
         setTimeout(() => scrollToHeading(initialHash), 100);
       }
+
+      return cleanup;
     }
 
     function handleScrollTocToggle() {
@@ -497,8 +521,8 @@ const { headings = [] } = Astro.props as Props;
       if (!activeTocItem) return;
 
       const tocListClientHeight = DOM.tocList.clientHeight;
-      const activeItemOffsetTop = activeTocItem.offsetTop;
-      const activeItemHeight = activeTocItem.clientHeight;
+      const activeItemOffsetTop = (activeTocItem as HTMLElement).offsetTop;
+      const activeItemHeight = (activeTocItem as HTMLElement).clientHeight;
       const tocListScrollHeight = DOM.tocList.scrollHeight;
 
       if (tocListScrollHeight <= tocListClientHeight) return;
@@ -517,8 +541,8 @@ const { headings = [] } = Astro.props as Props;
       if (!activeScrollTocItem) return;
 
       const scrollTocClientHeight = DOM.scrollToc.clientHeight;
-      const activeItemOffsetTop = activeScrollTocItem.offsetTop;
-      const activeItemHeight = activeScrollTocItem.clientHeight;
+      const activeItemOffsetTop = (activeScrollTocItem as HTMLElement).offsetTop;
+      const activeItemHeight = (activeScrollTocItem as HTMLElement).clientHeight;
       const scrollTocScrollHeight = DOM.scrollTocList.scrollHeight;
 
       if (scrollTocScrollHeight <= scrollTocClientHeight) return;
@@ -536,6 +560,19 @@ const { headings = [] } = Astro.props as Props;
       adjustScrollTocScroll();
     }
 
-    init();
-  });
+      cleanupFn = init();
+    }
+
+    // initial
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', setup);
+    } else {
+      setup();
+    }
+
+    // reinitialize after client-side navigation
+    document.addEventListener('astro:page-load', () => { setTimeout(setup, 50); });
+    // after swap, trigger a light resize so indicator updates
+    document.addEventListener('astro:after-swap', () => { setTimeout(() => { try { window.dispatchEvent(new Event('resize')); } catch(e) {} }, 50); });
+  })();
 </script>
