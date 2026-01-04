@@ -115,38 +115,66 @@ import { ClientRouter } from "astro:transitions";
     });
   </script>
 
+  <ClientRouter />
+
   <script is:inline>
-    // Executor: run scripts inside article content that are marked with data-astro-exec
-    document.addEventListener('astro:page-load', () => {
-      setTimeout(() => {
+    (function () {
+      function runPostScripts(root = document) {
         try {
-          const root = document.querySelector('.post-content') || document;
-          if (!root) return;
-          root.querySelectorAll('script[data-astro-exec]:not([data-astro-exec-run])').forEach((s) => {
+          const container = root.querySelector('.post-content');
+          if (!container) return;
+
+          // Execute explicit inline scripts
+          container.querySelectorAll('script[data-astro-exec="inline"]').forEach((s) => {
             try {
-              const mode = s.getAttribute('data-astro-exec');
-              if (mode === 'module') {
-                const el = document.createElement('script');
-                el.type = 'module';
-                if (s.src) el.src = s.src;
-                else el.textContent = s.textContent;
-                document.body.appendChild(el);
-              } else {
-                // inline script
-                new Function(s.textContent)();
-              }
-              s.setAttribute('data-astro-exec-run', '1');
+              (new Function(s.textContent || ''))();
             } catch (e) {
-              console.error('Error running inline script', e);
+              console.error('post inline script error', e);
+            }
+          });
+
+          // Execute inline module scripts by injecting a module script element
+          container.querySelectorAll('script[data-astro-exec="module"]:not([src])').forEach((s) => {
+            try {
+              const el = document.createElement('script');
+              el.type = 'module';
+              el.textContent = s.textContent || '';
+              document.body.appendChild(el);
+            } catch (e) {
+              console.error('post module inline error', e);
+            }
+          });
+
+          // Execute module scripts with src by appending a new script element
+          container.querySelectorAll('script[data-astro-exec="module"][src]').forEach((s) => {
+            try {
+              const el = document.createElement('script');
+              el.type = 'module';
+              el.src = s.getAttribute('src') || '';
+              el.async = false; // preserve execution order
+              document.body.appendChild(el);
+            } catch (e) {
+              console.error('post module src error', e);
             }
           });
         } catch (e) {
-          console.error('astro:page-load executor error', e);
+          console.error('runPostScripts error', e);
         }
-      }, 50);
-    });
-  </script>
+      }
 
-  <ClientRouter />
+      // Run on SPA page-load (client router)
+      document.addEventListener('astro:page-load', () => {
+        // small delay to allow swapped content to be inserted
+        setTimeout(() => runPostScripts(document), 50);
+      });
+
+      // Run once on initial load
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => runPostScripts(document));
+      } else {
+        runPostScripts(document);
+      }
+    })();
+  </script>
 
 </head>
