@@ -146,17 +146,33 @@ const customTransition = { forwards: anim, backwards: anim };
 
   {headings && headings.length > 0 && <ToC slot="aside" headings={headings} />}
   <script is:inline>
-    document.addEventListener('DOMContentLoaded', () => {
-      document.querySelectorAll('.blur-wrapper').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          e.stopPropagation(); // 阻止冒泡
-          const wrapper = btn.closest('.blur-wrapper');
-          if (!wrapper) return;
-          const isHidden = wrapper.dataset.hidden === 'true';
-          wrapper.dataset.hidden = !isHidden;
+    (function () {
+      function initBlur() {
+        document.querySelectorAll('.blur-wrapper').forEach(btn => {
+          // 防止重复绑定
+          if (btn.dataset.spoilerInitialized === 'true') return;
+          btn.dataset.spoilerInitialized = 'true';
+
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation(); // 阻止冒泡
+            const wrapper = btn.closest('.blur-wrapper');
+            if (!wrapper) return;
+            const isHidden = wrapper.dataset.hidden === 'true';
+            wrapper.dataset.hidden = (!isHidden).toString();
+          });
         });
-      });
-    });
+      }
+
+      // 初始加载时绑定
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initBlur);
+      } else {
+        initBlur();
+      }
+
+      // 在客户端路由切换后重新绑定（等待内容插入）
+      document.addEventListener('astro:page-load', () => setTimeout(initBlur, 50));
+    })();
   </script>
 </BaseLayout>
 
