@@ -70,6 +70,20 @@ body {
   -webkit-tap-highlight-color: color-mix(in srgb, var(--theme-color) 20%, transparent);
 }
 
+::selection {
+  background-color:color-mix(in srgb, var(--theme-color) 20%, transparent);
+  color: var(--primary-color);
+  text-shadow: none;
+}
+
+::-moz-selection {
+  background-color: color-mix(in srgb, var(--theme-color) 20%, transparent);
+  color: var(--primary-color);
+  text-shadow: none;
+}
+
+/* 选中然后失焦的呢 */
+
 h1::after, h2::after, h3::after, h4::after, h5::after, h6::after {
   content: '#'; 
   color: var(--primary-color); 
