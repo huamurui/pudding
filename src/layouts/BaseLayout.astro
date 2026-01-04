@@ -1,12 +1,14 @@
 ---
 import "../styles/global.css";
 import "../styles/link-card.css";
+import "../styles/code.css";
 import { getCollection } from "astro:content";
 // 导入新提取的 Head 组件
 import Head from "../components/Head.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import FAB from "../components/FAB.tsx";
+import CodeEnhancer from "../components/CodeEnhancer.tsx";
 import Sidebar from "../components/Sidebar.astro";
 // 判断是否为文章页面（/posts路径下）
 const isPostsPage = Astro.url.pathname.startsWith("/posts");
@@ -139,6 +141,7 @@ const isHome = Astro.url.pathname === "/";
       </aside>
     </div>
     <Footer />
+    <CodeEnhancer client:idle />
     <FAB client:only />
   </body>
 </html>

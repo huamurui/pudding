@@ -1,0 +1,19 @@
+/* Code block enhancements: copy button, max height with scroll and expand toggle */
+pre.astro-code { position: relative; padding-top: 2.4rem; border-radius: 8px; }
+pre.astro-code .code-toolbar { position: absolute; right: 0.5rem; top: 0.5rem; display: flex; gap: 0.5rem; align-items: center; }
+.code-toolbar button { background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.06); color: var(--text-secondary); padding: 0.25rem 0.6rem; border-radius: 6px; font-size: 0.85rem; cursor: pointer; }
+.code-toolbar button:hover { background: color-mix(in srgb, var(--theme-color) 10%, transparent); color: var(--text-primary); }
+
+/* collapsed state: limit height and make scrollable */
+pre.astro-code.code-collapsed { max-height: 360px; overflow: auto; }
+pre.astro-code.code-collapsed::after { content: ""; pointer-events: none; position: absolute; left: 0; right: 0; bottom: 0; height: 3rem; background: linear-gradient(180deg, rgba(255,255,255,0), var(--bg-primary)); border-radius: 0 0 8px 8px; }
+
+/* when expanded remove fade */
+pre.astro-code.code-expanded { max-height: none; overflow: visible; }
+pre.astro-code code { display: block; }
+
+/* small adjustments for smaller screens */
+@media (max-width: 640px) {
+  pre.astro-code { padding-top: 2.2rem; }
+  .code-toolbar button { padding: 0.2rem 0.5rem; font-size: 0.8rem; }
+}
