@@ -115,6 +115,38 @@ import { ClientRouter } from "astro:transitions";
     });
   </script>
 
+  <script is:inline>
+    // Executor: run scripts inside article content that are marked with data-astro-exec
+    document.addEventListener('astro:page-load', () => {
+      setTimeout(() => {
+        try {
+          const root = document.querySelector('.post-content') || document;
+          if (!root) return;
+          root.querySelectorAll('script[data-astro-exec]:not([data-astro-exec-run])').forEach((s) => {
+            try {
+              const mode = s.getAttribute('data-astro-exec');
+              if (mode === 'module') {
+                const el = document.createElement('script');
+                el.type = 'module';
+                if (s.src) el.src = s.src;
+                else el.textContent = s.textContent;
+                document.body.appendChild(el);
+              } else {
+                // inline script
+                new Function(s.textContent)();
+              }
+              s.setAttribute('data-astro-exec-run', '1');
+            } catch (e) {
+              console.error('Error running inline script', e);
+            }
+          });
+        } catch (e) {
+          console.error('astro:page-load executor error', e);
+        }
+      }, 50);
+    });
+  </script>
+
   <ClientRouter />
 
 </head>
