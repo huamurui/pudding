@@ -83,13 +83,20 @@ const structuredData = {
     "logo": { "@type": "ImageObject", "url": "/logo.png" }
   }
 };
+
+// page-specific title morph animation
+const anim = {
+  old: { name: "title-old", duration: "0.45s", easing: "cubic-bezier(.2,.8,.2,1)", fillMode: "both" },
+  new: { name: "title-new", duration: "0.45s", easing: "cubic-bezier(.2,.8,.2,1)", fillMode: "both" },
+};
+const customTransition = { forwards: anim, backwards: anim };
 ---
 
 <BaseLayout postFrontmatter={{ ...post.data, description } as PostFrontmatter} post={post} structuredData={structuredData}>
   <article class="blog-post-container">
     <div class="blog-post-content">
       <header class="post-header">
-        <h1 class="post-title">{post.data.title}</h1>
+        <h1 class="post-title" transition:name={`post-${String(post.id).replace(/[^a-zA-Z0-9_-]/g, '-')}`} transition:animate={customTransition}>{post.data.title}</h1>
         <!-- <p class="post-description">{post.data.description}</p> -->
         <div class="post-meta">
           <time

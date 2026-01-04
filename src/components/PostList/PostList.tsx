@@ -13,16 +13,19 @@ interface Post {
 interface PostListProps {
   posts: () => Post[];
   selectedTags?: () => Set<string> | null;
+  transition?: any;
 }
 
-const PostList = ({ posts, selectedTags = () => null }: PostListProps) => {
+const PostList = ({ posts, selectedTags = () => null, transition }: PostListProps) => {
   return (
     <>
       {posts().length === 0 ? (
         <p class="no-results">没有找到匹配的文章</p>
       ) : (
         <ul class="posts-list">
-          {posts().map((post) => (
+          {posts().map((post) => {
+            const safeId = String(post.id).replace(/[^a-zA-Z0-9_-]/g, '-');
+            return (
             <article class="timeline-post">
               <div class="post-content">
                 <div class="post-info">
@@ -40,7 +43,7 @@ const PostList = ({ posts, selectedTags = () => null }: PostListProps) => {
                   </div>
 
                   <a href={`/posts/${post.id}`} class="post-link">
-                    <h5 class="post-title">{post.data.title}</h5>
+                    <h5 {...{style:{ "view-transition-name": `post-${String(post.id).replace(/[^a-zA-Z0-9_-]/g, '-')}`}}} class="post-title">{post.data.title}</h5>
                   </a>
 
                   <div class="post-tags">
@@ -53,7 +56,7 @@ const PostList = ({ posts, selectedTags = () => null }: PostListProps) => {
                 </div>
               </div>
             </article>
-          ))}
+          )})}
         </ul>
       )}
     </>

@@ -20,6 +20,12 @@ for (const post of sortedPosts) {
 const sortedYears = Array.from(yearPostsMap.keys()).sort((a, b) =>
   b.localeCompare(a),
 );
+
+const anim = {
+  old: { name: "title-old", duration: "0.45s", easing: "cubic-bezier(.2,.8,.2,1)", fillMode: "both" },
+  new: { name: "title-new", duration: "0.45s", easing: "cubic-bezier(.2,.8,.2,1)", fillMode: "both" },
+};
+const customTransition = { forwards: anim, backwards: anim };
 ---
 
 <BaseLayout pageTitle="时间线">
@@ -44,7 +50,7 @@ const sortedYears = Array.from(yearPostsMap.keys()).sort((a, b) =>
                     </div>
                   </div>
                 </article>
-                <PostList posts={() => yearPosts} />
+                <PostList posts={() => yearPosts} transition={customTransition} />
               </div>
             </section>
           );

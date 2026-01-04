@@ -67,6 +67,13 @@ const structuredData = {
     { "@type": "CollectionPage", "name": "Recent posts", "mainEntity": itemList }
   ]
 };
+
+// custom title morph animation used for list <-> post transitions
+const anim = {
+  old: { name: "title-old", duration: "0.45s", easing: "cubic-bezier(.2,.8,.2,1)", fillMode: "both" },
+  new: { name: "title-new", duration: "0.45s", easing: "cubic-bezier(.2,.8,.2,1)", fillMode: "both" },
+};
+const customTransition = { forwards: anim, backwards: anim };
 ---
 <BaseLayout structuredData={structuredData}>
   <div style={{
@@ -74,6 +81,6 @@ const structuredData = {
     margin: '0 auto',
     padding: '2rem 1rem',
   }}>
-    <PostCardList posts={posts} />
+    <PostCardList posts={posts} transition={customTransition} />
   </div>
 </BaseLayout>

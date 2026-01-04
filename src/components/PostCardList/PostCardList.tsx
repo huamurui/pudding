@@ -14,9 +14,10 @@ interface Post {
 interface PostCardListProps {
   posts: () => Post[];
   selectedTags?: () => Set<string> | null;
+  transition?: any;
 }
 
-const PostCardList = ({ posts, selectedTags = () => null }: PostCardListProps) => {
+const PostCardList = ({ posts, selectedTags = () => null, transition }: PostCardListProps) => {
   return (
     <>
       {posts().length === 0 ? (
@@ -27,7 +28,7 @@ const PostCardList = ({ posts, selectedTags = () => null }: PostCardListProps) =
             <li class="post-item-con">
               <div class="post-item">
                 <a href={post.url} class="post-link">
-                  <h2 class="post-title">{post.title}</h2>
+                  <h2 {...{style:{ "view-transition-name": `post-${String(post.id).replace(/[^a-zA-Z0-9_-]/g, '-')}`}}} class="post-title">{post.title}</h2>
                   <time class="post-date" datetime={new Date(post.date).toISOString()}>
                     {new Date(post.date).toISOString().split('T')[0]}
                   </time>

@@ -54,12 +54,30 @@ const isHome = Astro.url.pathname === "/";
 
   <body>
     <style>
+      /* View transition keyframes for title morphing */
+      @keyframes title-old {
+        0% { opacity: 1; transform: none; }
+        100% { opacity: 0; transform: translateY(-6px) scale(0.85); }
+      }
+      @keyframes title-new {
+        0% { opacity: 0; transform: translateY(6px) scale(0.85); }
+        100% { opacity: 1; transform: none; }
+      }
+
       .main-content {
         flex: 1;
         max-width: 800px;
         margin: 0 auto;
         width: 100%;
       }
+
+      /* Make titles behave better during view transitions */
+      .post-title {
+        display: inline-block;
+        transform-origin: left top;
+        will-change: transform, opacity;
+      }
+
       /* 侧边栏 */
       .blog-post-sidebar {
         width: 280px;

@@ -44,6 +44,12 @@ interface Props {
 }
 
 const { tag, posts } = Astro.props as Props;
+
+const anim = {
+  old: { name: "title-old", duration: "0.45s", easing: "cubic-bezier(.2,.8,.2,1)", fillMode: "both" },
+  new: { name: "title-new", duration: "0.45s", easing: "cubic-bezier(.2,.8,.2,1)", fillMode: "both" },
+};
+const customTransition = { forwards: anim, backwards: anim };
 ---
 
 <BaseLayout pageTitle={`Tag ⬝ ${tag}`} description={`Posts tagged with ${tag}`}>
@@ -61,7 +67,7 @@ const { tag, posts } = Astro.props as Props;
             </div>
           </div>
         </article>
-        <PostList posts={() => posts} />
+        <PostList posts={() => posts} transition={customTransition} />
       </div>
     </section>
   </div>
