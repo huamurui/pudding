@@ -1,103 +1,38 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import "../styles/about.css";
 
-const pageTitle = "About Me";
+const pageTitle = "About";
 ---
 
-<style>
-  .about-container {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 2rem 1rem;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    line-height: 1.6;
-    color: #333;
-  }
-  
-  .projects-section {
-    display: flex;
-    flex-direction: column;
-    gap: 2.5rem;
-    margin: 2.5rem 0;
-  }
-  
-  .project-card {
-    border: 1px solid #e0e0e0;
-    overflow: hidden;
-    transition: border-color 0.2s ease;
-  }
-  
-  .project-card:hover {
-    border-color: #a0a0a0;
-  }
-  
-  .project-link {
-    display: block;
-    text-decoration: none;
-    color: inherit;
-  }
-  
-  .project-title {
-    padding: 1rem 1.2rem;
-    font-size: 1.2rem;
-    font-weight: 500;
-    color: #2c3e50;
-    background-color: #f9f9f9;
-    border-bottom: 1px solid #eaeaea;
-  }
-  
-  .project-iframe {
-    width: 100%;
-    height: 600px;
-    border: none;
-    display: block;
-  }
-  
-  .quote-section {
-    padding: 4px 16px;
-    background-color: #f8f8f8;
-    border-left: 4px solid #7d7d7d;
-    border-radius: 4px;
-    color: #555;
-    font-size: 1rem;
-  }
-  
-</style>
-
 <BaseLayout pageTitle={pageTitle}>
-  <div class="about-container">
-    <div class="projects-section">
-      <div class="project-card">
-        <h3>
-          好看的
-        </h3>
-        <a href="https://huamurui.github.io/photo-viewer/" class="project-link" target="_blank">
-          <iframe 
-            src="https://huamurui.github.io/photo-viewer/" 
-            class="project-iframe"
-            title="照片"
-            loading="lazy"
-          ></iframe>
-        </a>
+  <header class="about-hero">
+    <h1 class="title">关于</h1>
+    <p>这个网站使用 <strong>Astro</strong> 构建</p> 
+    <p>关于主题，可以看看这里 <a class="post-link" href="/posts/tech/astro-pudding/">astro-pudding</a> 或者访问我的 GitHub。</p>
+  </header>
+
+  <main class="about-container">
+    <section class="projects-section">
+      <div class="projects-grid">
+        <article class="project-card card">
+          <div class="iframe-wrapper">
+            <iframe src="https://huamurui.github.io/photo-viewer/" title="照片" loading="lazy"></iframe>
+          </div>
+          <div class="project-actions"><a class="post-link" href="https://huamurui.github.io/photo-viewer/" target="_blank" rel="noopener">在新标签页打开</a></div>
+        </article>
+
+        <article class="project-card card">
+          <div class="iframe-wrapper">
+            <iframe src="https://huamurui.github.io/html-s/" title="HTML 示例" loading="lazy"></iframe>
+          </div>
+          <div class="project-actions"><a class="post-link" href="https://huamurui.github.io/html-s/" target="_blank" rel="noopener">在新标签页打开</a></div>
+        </article>
       </div>
-      
-      <div class="project-card">
-        <h3 class="project-title">
-          还是好看的
-        </h3>
-        <a href="https://huamurui.github.io/html-s/" class="project-link" target="_blank">
-          <iframe 
-            src="https://huamurui.github.io/html-s/" 
-            class="project-iframe"
-            title="HTML"
-            loading="lazy"
-          ></iframe>
-        </a>
-      </div>
-    </div>
-    
-    <div class="quote-section">
-      <p>痛苦如此持久，像蜗牛充满耐心地移动; 快乐如此短暂，像兔子的尾巴掠过秋天的草原。</p>
-    </div>
-  </div>
+    </section>
+
+    <aside class="quote-section">
+      <p>痛苦如此持久，像蜗牛充满耐心地移动；快乐如此短暂，像兔子的尾巴掠过秋天的草原。</p>
+    </aside>
+  </main>
 </BaseLayout>

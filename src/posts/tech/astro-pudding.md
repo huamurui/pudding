@@ -51,6 +51,9 @@ vuepress 会根据某些规则自动截取文章前部内容，生成简介，�
 markdown 语法拓展，一些自定义的容器，卡片一类的  
 不过我想做的是那个， spoiler。  
 
+还有，关于链接自动生成卡片。
+<https://www.npmjs.com/package/link-preview-js>
+
 ### toc, header
 
 我还啥都不会写的时候就很喜欢很多网站的这些地方的一些小交互。  
