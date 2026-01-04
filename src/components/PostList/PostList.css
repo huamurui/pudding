@@ -38,8 +38,7 @@
 
 .post-date.year {
   font-weight: 600;
-  font-size: 20px;
-  /* color: var(--theme-color); */
+  font-size: 16px;
 }
 
 .timeline-connector {
@@ -85,6 +84,7 @@
 .post-info:hover .post-marker {
   background-color: var(--theme-color);
   height: 20px;
+  position: relative;
 }
 
 .post-info:hover .post-marker.year {
