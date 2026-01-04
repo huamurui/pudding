@@ -79,11 +79,10 @@ import { ClientRouter } from "astro:transitions";
   {structuredDataHtml && <script type="application/ld+json" set:html={structuredDataHtml}></script>}
 
   <!-- <link rel="preload" href="/fonts/main-font.woff2" as="font" type="font/woff2" crossorigin /> -->
-  <ClientRouter />
 
   <script is:inline>
     (function () {
-      try {
+      try {        
         const savedTheme = localStorage.getItem("theme");
         const systemPrefersDark = window.matchMedia(
           "(prefers-color-scheme: dark)",
@@ -97,5 +96,25 @@ import { ClientRouter } from "astro:transitions";
       }
     })();
   </script>
+
+  <script is:inline>
+    document.addEventListener('astro:before-swap', (event) => {
+      try {
+        const savedTheme = localStorage.getItem('theme');
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const theme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
+        const el = event.newDocument && event.newDocument.documentElement;
+        if (el) {
+          el.classList.remove('light', 'dark');
+          el.classList.add(theme);
+          el.setAttribute('data-theme', theme);
+        }
+      } catch (e) {
+        // ignore
+      }
+    });
+  </script>
+
+  <ClientRouter />
 
 </head>
