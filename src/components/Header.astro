@@ -88,13 +88,7 @@ const isPostsPage = Astro.url.pathname.startsWith("/posts");
 
 <script>
   (function () {
-    // DOM元素（注意：pageTitle 可能在路由切换中出现/消失，运行时重新获取）
-    const menuToggle = document.getElementById("menu-toggle");
-    const nav = document.getElementById("nav");
-    const header = document.getElementById("header");
-    const scrollContainer = document.getElementById("scroll-container");
-
-    // 滚动状态变量
+    // 滚动状态变量（保持在外部以保存状态）
     let lastScrollTop = 0;
     let currentDirection = "down";
     let directionChange = false;
@@ -102,55 +96,54 @@ const isPostsPage = Astro.url.pathname.startsWith("/posts");
     const threshold = 50;
     let showingNav = true; // 当前是否显示导航（而非标题）
 
-    // 菜单切换逻辑（修复移动端）
-    if (menuToggle && nav && scrollContainer) {
-      menuToggle.addEventListener("click", () => {
-        const isExpanded = menuToggle.getAttribute("aria-expanded") === "true";
-        menuToggle.setAttribute("aria-expanded", (!isExpanded).toString());
-        nav.classList.toggle("nav-open");
-        scrollContainer.classList.toggle("nav-open");
-        header?.classList.toggle("menu-open");
-      });
-    }
+    // 使用事件委托处理移动端菜单切换（避免在 DOM 替换后丢失监听器）
+    document.addEventListener('click', (e) => {
+      const toggle = (e.target instanceof Element) ? e.target.closest('#menu-toggle') : null;
+      if (!toggle) return;
+      const nav = document.getElementById('nav');
+      const header = document.getElementById('header');
+      const scrollContainer = document.getElementById('scroll-container');
+      const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
+      toggle.setAttribute('aria-expanded', (!isExpanded).toString());
+      nav?.classList.toggle('nav-open');
+      scrollContainer?.classList.toggle('nav-open');
+      header?.classList.toggle('menu-open');
+    });
 
-    // 滚动处理函数（在每次调用时实时查询是否为文章页）
+    // 滚动处理函数：每次运行时重新查询相关 DOM 元素以应对 SPA 替换
     function handleScroll() {
-      // 移动端不执行滚动切换逻辑
       if (window.innerWidth <= 768) return;
 
-      const pageTitle = document.getElementById("page-title");
+      const header = document.getElementById('header');
+      const pageTitle = document.getElementById('page-title');
+      const scrollContainer = document.getElementById('scroll-container');
       const isPostsPage = !!pageTitle; // 根据是否有标题判断是否为文章页
 
       // 即便不是文章页，也需要维持滚动阴影效果
-      header?.classList.toggle("scrolled", window.scrollY > 10);
+      header?.classList.toggle('scrolled', window.scrollY > 10);
 
       if (!header || !isPostsPage || !pageTitle || !scrollContainer) return;
 
       const scrollTop = window.scrollY;
-      const newDirection = scrollTop > lastScrollTop ? "down" : "up";
+      const newDirection = scrollTop > lastScrollTop ? 'down' : 'up';
 
-      // 检测滚动方向改变
       if (newDirection !== currentDirection) {
         currentDirection = newDirection;
         directionChange = true;
         scrollDistance = 0;
       }
 
-      // 累计方向改变后的滚动距离
       if (directionChange) {
         scrollDistance += Math.abs(scrollTop - lastScrollTop);
       }
 
-      // 当滚动距离超过阈值时触发切换
       if (scrollDistance >= threshold) {
-        if (currentDirection === "down" && showingNav) {
-          // 向下滚动：切换到标题
+        if (currentDirection === 'down' && showingNav) {
           showingNav = false;
-          scrollContainer.style.transform = "translateY(-100%)";
-        } else if (currentDirection === "up" && !showingNav) {
-          // 向上滚动：切换到导航
+          scrollContainer.style.transform = 'translateY(-100%)';
+        } else if (currentDirection === 'up' && !showingNav) {
           showingNav = true;
-          scrollContainer.style.transform = "translateY(0)";
+          scrollContainer.style.transform = 'translateY(0)';
         }
         directionChange = false;
       }
@@ -158,22 +151,31 @@ const isPostsPage = Astro.url.pathname.startsWith("/posts");
       lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
     }
 
-    // 初始化事件监听
-    window.addEventListener("scroll", handleScroll);
+    // 确保只添加一次滚动监听
+    let scrollListenerAttached = false;
+    function ensureScrollListener() {
+      if (scrollListenerAttached) return;
+      window.addEventListener('scroll', handleScroll, { passive: true });
+      scrollListenerAttached = true;
+    }
 
-    // 在客户端路由切换后重置状态并重新运行一次检查
-    document.addEventListener("astro:page-load", () => {
+    // 在客户端路由后重置状态并重新运行一次检查
+    document.addEventListener('astro:page-load', () => {
       lastScrollTop = 0;
-      currentDirection = "down";
+      currentDirection = 'down';
       directionChange = false;
       scrollDistance = 0;
       showingNav = true;
-      if (scrollContainer) scrollContainer.style.transform = "translateY(0)";
-      // 等待页面元素插入后再运行一次
+      const scrollContainer = document.getElementById('scroll-container');
+      if (scrollContainer) scrollContainer.style.transform = 'translateY(0)';
+      // 小延迟以等待内容插入
       setTimeout(handleScroll, 50);
+      ensureScrollListener();
     });
 
-    handleScroll(); // 初始状态检查
+    // 初始初始化
+    ensureScrollListener();
+    handleScroll();
   })();
 </script>
 
