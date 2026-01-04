@@ -72,13 +72,11 @@ body {
 
 ::selection {
   background-color:color-mix(in srgb, var(--theme-color) 20%, transparent);
-  color: var(--primary-color);
   text-shadow: none;
 }
 
 ::-moz-selection {
   background-color: color-mix(in srgb, var(--theme-color) 20%, transparent);
-  color: var(--primary-color);
   text-shadow: none;
 }
 
