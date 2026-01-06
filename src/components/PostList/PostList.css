@@ -99,6 +99,9 @@
   flex: 1;
 }
 
+.post-link:after {
+  display: none;
+}
 .post-title {
   margin: 0;
   font-weight: 600;
