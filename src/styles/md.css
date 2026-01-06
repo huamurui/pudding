@@ -62,7 +62,6 @@ article p {
 /* 链接样式 */
 article a {
   color: var(--primary-color);
-  transition: all 0.2s ease;
   font-weight: 500;
   position: relative;
   text-decoration: none;
