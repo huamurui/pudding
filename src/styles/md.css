@@ -71,10 +71,11 @@ article a:after {
   content: "";
   position: absolute;
   z-index: -1;
-  top: 66%;
+  top:  calc(100% - 5px);
   left: -0.1em;
   right: -0.1em;
   bottom: 0;
+  border-radius: 4px;
   transition: top 200ms cubic-bezier(0, 0.8, 0.13, 1);
   background-color: color-mix(in srgb, var(--primary-color) 20%, transparent);
 }
