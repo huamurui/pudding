@@ -1,15 +1,9 @@
 // PostCardList.tsx
 import "./PostCardList.css";
+import { formatDate, sanitizeViewTransitionName, getTagUrl } from "../../utils/helpers";
+import type { PostData } from "../../types";
 
-interface Post {
-  id: string;
-  url: string;
-  title: string;
-  date: string | Date;
-  tags: string[];
-  description?: string;
-  excerptHtml: string;
-}
+interface Post extends PostData {}
 
 interface PostCardListProps {
   posts: () => Post[];
@@ -28,9 +22,9 @@ const PostCardList = ({ posts, selectedTags = () => null, transition }: PostCard
             <li class="post-item-con">
               <div class="post-item">
                 <a href={post.url} class="post-link">
-                  <h2 {...{style:{ "view-transition-name": `post-${String(post.id).replace(/[^a-zA-Z0-9_-]/g, '-')}`}}} class="post-title">{post.title}</h2>
+                  <h2 {...{style:{ "view-transition-name": sanitizeViewTransitionName(post.id)}}} class="post-title">{post.title}</h2>
                   <time class="post-date" datetime={new Date(post.date).toISOString()}>
-                    {new Date(post.date).toISOString().split('T')[0]}
+                    {formatDate(post.date)}
                   </time>
                 </a>
 
@@ -40,7 +34,7 @@ const PostCardList = ({ posts, selectedTags = () => null, transition }: PostCard
                 <div class="post-tags">
                   {post.tags.map(tag => (
                     <a
-                      href={`/tags/${tag}`}
+                      href={getTagUrl(tag)}
                       class={`post-tag ${selectedTags()?.has(tag) ? 'highlighted' : ''}`}
                     >
                       #{tag}

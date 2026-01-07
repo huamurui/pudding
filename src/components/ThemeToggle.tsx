@@ -52,30 +52,47 @@ export default function ThemeToggle() {
 
   return (
     <div
+      role="button"
+      tabIndex={0}
       onClick={toggleTheme}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggleTheme();
+        }
+      }}
       aria-label={`切换到${theme() === 'dark' ? '亮色' : '暗色'}模式`}
+      aria-pressed={theme() === 'dark'}
       style={{ 
         cursor: 'pointer',
         position: 'relative',
       }}
     >
       <span>
-        <a 
+        <a
           class={theme() === 'light' ? 'nav-link is-active' : 'nav-link'}
-          href="#"
-          onClick={(e) => e.preventDefault()}
+          aria-pressed={theme() === 'light'}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (theme() !== 'light') toggleTheme();
+          }}
         >
           Light
         </a>
-        <span>/</span>
-        <a 
+        <span aria-hidden="true">/</span>
+        <a
           class={theme() === 'dark' ? 'nav-link is-active' : 'nav-link'}
-          href="#"
-          onClick={(e) => e.preventDefault()}
+          aria-pressed={theme() === 'dark'}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (theme() !== 'dark') toggleTheme();
+          }}
         >
           Dark
         </a>
-        <span class="indicator theme-toggle"></span>
+        <span class="indicator theme-toggle" aria-hidden="true"></span>
       </span>
     </div>
   );

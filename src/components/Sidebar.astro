@@ -1,13 +1,15 @@
 ---
 import { getCollection, type CollectionEntry } from "astro:content";
+import { siteConfig } from "../config/site.config";
+import type { PostEntry } from "../types";
 import Tag from "./Tag/Tag.astro";
-import { propsToFilename } from "astro/assets/utils";
+
 interface Props {
   intro?: string; // 一句话简介（可选）
-  post?: Object; // post
+  post?: PostEntry | null; // post
 }
 
-const { intro = "A blog about programming tech and nonsense.",post=null } = Astro.props;
+const { intro = siteConfig.description, post = null } = Astro.props as Props;
 
 const allBlogPosts: CollectionEntry<"posts">[] = await getCollection("posts");
 
@@ -38,7 +40,7 @@ allBlogPosts.map((post) => {
   <div class="profile-avatar">
     <!-- <img src="/avatar.jpg" alt="你的昵称" class="avatar-img" /> -->
   </div>
-  <h3 class="profile-name">云苔</h3>
+  <h3 class="profile-name">{siteConfig.author.name}</h3>
   <p class="profile-intro">{intro}</p>
 
   <!-- 社交链接 -->

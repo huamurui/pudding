@@ -1,23 +1,20 @@
 ---
 import ThemeToggle from "./ThemeToggle";
-const { pageTitle } = Astro.props;
+import { siteConfig } from "../config/site.config";
+import { isPostPage } from "../utils/helpers";
+import { SCROLL_THRESHOLD } from "../utils/constants";
 
-// 定义导航项类型
-interface NavItem {
-  href: string;
-  label: string;
+interface Props {
+  pageTitle: string;
 }
 
-// 导航项数据
-const navItems: NavItem[] = [
-  { href: "/", label: "首页" },
-  { href: "/timeline", label: "时间线" },
-  { href: "/about", label: "关于" },
-  { href: "/search", label: "搜索" },
-];
+const { pageTitle } = Astro.props as Props;
 
-// 判断是否为文章页面（/posts路径下）
-const isPostsPage = Astro.url.pathname.startsWith("/posts");
+// 导航项数据
+const navItems = siteConfig.navItems;
+
+// 判断是否为文章页面
+const isPostsPage = isPostPage(Astro.url.pathname);
 ---
 
 <header class="header" id="header">
@@ -75,8 +72,10 @@ const isPostsPage = Astro.url.pathname.startsWith("/posts");
       <button
         class="menu-toggle"
         id="menu-toggle"
+        type="button"
         aria-label="切换菜单"
         aria-expanded="false"
+        aria-controls="nav"
       >
         <span></span>
         <span></span>

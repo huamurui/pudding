@@ -1,26 +1,24 @@
 ---
+import { siteConfig } from "../config/site.config";
+import type { StructuredData } from "../types";
+
 // 定义组件接收的 Props 类型及默认值
 interface Props {
   pageTitle: string;
   description?: string;
   ogImage?: string;
   canonicalUrl?: string;
-  structuredData?: Record<string, unknown>;
+  structuredData?: StructuredData | null;
 }
 
-// 解构 Props 并设置默认值（与原逻辑保持一致）
+// 解构 Props 并设置默认值
 const {
   pageTitle,
-  description = "这是一个使用Astro构建的用来放各种乱七八糟东西的网站",
-  ogImage = "/og-default.jpg",
+  description = siteConfig.description,
+  ogImage = siteConfig.defaultOgImage,
   canonicalUrl = Astro.url.href,
   structuredData = null,
 } = Astro.props as Props;
-
-// 站点固定信息（统一维护）
-const siteName = "Greenhouse between Clouds";
-const siteOgName = "云苔的blog";
-const siteKeywords = "云苔,芸薹,huamurui,花木瑞,blog,tech,software,nonsense,chattering,碎碎念,web,front-end";
 // 将 JSON-LD 转为字符串并对可能的闭合 </script> 标签进行转义以避免提早结束脚本
 const structuredDataHtml = structuredData
   ? JSON.stringify(structuredData).replace(/<\/script/gi, '<\\/script')
@@ -38,7 +36,7 @@ import { ClientRouter } from "astro:transitions";
 
   <title>{pageTitle}</title>
   <meta name="description" content={description} />
-  <meta name="keywords" content={siteKeywords} />
+  <meta name="keywords" content={siteConfig.keywords} />
 
   <link rel="canonical" href={canonicalUrl} />
 
@@ -53,8 +51,8 @@ import { ClientRouter } from "astro:transitions";
   <meta property="og:type" content="website" />
   <meta property="og:url" content={canonicalUrl} />
   <meta property="og:image" content={ogImage} />
-  <meta property="og:site_name" content={siteOgName} />
-  <meta property="og:locale" content="zh_CN" />
+  <meta property="og:site_name" content={siteConfig.ogName} />
+  <meta property="og:locale" content={siteConfig.locale} />
 
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content={pageTitle} />
@@ -68,12 +66,12 @@ import { ClientRouter } from "astro:transitions";
 
   <meta
     name="theme-color"
-    content="#5e7eff"
+    content={siteConfig.theme.light.primary}
     media="(prefers-color-scheme: light)"
   />
   <meta
     name="theme-color"
-    content="#ff9eb6"
+    content={siteConfig.theme.dark.primary}
     media="(prefers-color-scheme: dark)"
   />
   {structuredDataHtml && <script type="application/ld+json" set:html={structuredDataHtml}></script>}

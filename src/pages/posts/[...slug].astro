@@ -2,20 +2,12 @@
 import ToC from "../../components/ToC.astro";
 import { getCollection, render, type CollectionEntry } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import { siteConfig } from "../../config/site.config";
+import { extractExcerptFromHtml, calculateReadingTime, formatDate, sanitizeViewTransitionName } from "../../utils/helpers";
+import { generatePostStructuredData } from "../../utils/structured-data";
+import { ANIMATION_DURATION, EASING, READING_SPEED } from "../../utils/constants";
+import type { PostFrontmatter, PostEntry, StructuredData } from "../../types";
 import "/node_modules/katex/dist/katex.min.css";
-
-interface PostImage {
-  url: string;
-  alt?: string;
-}
-
-interface PostFrontmatter {
-  title: string;
-  description?: string;
-  date: Date;
-  tags?: string[];
-  image?: PostImage;
-}
 
 type StaticPath = {
   params: {
@@ -44,50 +36,15 @@ interface Props {
 const { post } = Astro.props as Props;
 const { Content, headings } = await render(post);
 
-const getDescription = (post: string): string => {
-  // 1. 查找<!-- more -->标记
-  const moreMarker = /<!--\s*more\s*-->/i;
-  if (moreMarker.test(post)) {
-    const [excerptHtml] = post.split(moreMarker);
-    return excerptHtml.trim();
-  }
-
-  // 2. 自动提取第一段（到第一个块级元素结束）
-  const firstParagraphMatch = post.match(
-    /<p>.*?<\/p>|<div>.*?<\/div>|<ul>.*?<\/ul>/s,
-  );
-  if (firstParagraphMatch) {
-    return firstParagraphMatch[0];
-  }
-
-  // 3. 兜底处理
-  return post.slice(0, 300).replace(/<[^>]+$/, "") + "...";
-};
-
 const post_str = await container.renderToString(Content);
-const description = getDescription(post_str);
+const description = extractExcerptFromHtml(post_str);
 
-const structuredData = {
-  "@context": "https://schema.org",
-  "@type": "BlogPosting",
-  "mainEntityOfPage": { "@type": "WebPage", "@id": new URL(`/posts/${post.id}/`, Astro.url.origin).toString() },
-  "headline": post.data.title,
-  "description": post.data.description || '',
-  "image": post.data.image?.url || '',
-  "author": { "@type": "Person", "name": post.data.author || "huamurui" },
-  "datePublished": post.data.date,
-  "dateModified": post.data.updated || post.data.date,
-  "publisher": {
-    "@type": "Organization",
-    "name": "Site Name",
-    "logo": { "@type": "ImageObject", "url": "/logo.png" }
-  }
-};
+const structuredData = generatePostStructuredData(post, description, Astro.url.origin);
 
 // page-specific title morph animation
 const anim = {
-  old: { name: "title-old", duration: "0.45s", easing: "cubic-bezier(.2,.8,.2,1)", fillMode: "both" },
-  new: { name: "title-new", duration: "0.45s", easing: "cubic-bezier(.2,.8,.2,1)", fillMode: "both" },
+  old: { name: "title-old", duration: ANIMATION_DURATION.slow, easing: EASING.smooth, fillMode: "both" },
+  new: { name: "title-new", duration: ANIMATION_DURATION.slow, easing: EASING.smooth, fillMode: "both" },
 };
 const customTransition = { forwards: anim, backwards: anim };
 ---
@@ -96,18 +53,18 @@ const customTransition = { forwards: anim, backwards: anim };
   <article class="blog-post-container">
     <div class="blog-post-content">
       <header class="post-header">
-        <h1 class="post-title" transition:name={`post-${String(post.id).replace(/[^a-zA-Z0-9_-]/g, '-')}`} transition:animate={customTransition}>{post.data.title}</h1>
+        <h1 class="post-title" transition:name={sanitizeViewTransitionName(post.id)} transition:animate={customTransition}>{post.data.title}</h1>
         <!-- <p class="post-description">{post.data.description}</p> -->
         <div class="post-meta">
           <time
             class="post-date"
             datetime={new Date(post.data.date).toISOString()}
           >
-            {post.data.date.toISOString().split("T")[0]}
+            {formatDate(post.data.date)}
           </time>
           <span class="meta-separator">•</span>
           <span class="reading-time">
-            {Math.ceil((post.body || "").split(" ").length / 200)} 分钟阅读
+            {calculateReadingTime(post.body || "", READING_SPEED)} 分钟阅读
           </span>
         </div>
         <!-- <div class="post-tags">

@@ -1,12 +1,5 @@
 ---
-const footerLinks = {
-  social: [
-    { name: "GitHub", href: "https://github.com/huamurui" },
-    { name: "Email", href: "huamurui@outlook.com" },
-    { name: "RSS", href: "/rss.xml" },
-    { name: "Sitemap", href: "/sitemap-index.xml" },
-  ],
-};
+import { siteConfig } from "../config/site.config";
 
 const currentYear = new Date().getFullYear();
 ---
@@ -16,7 +9,7 @@ const currentYear = new Date().getFullYear();
     <!-- 链接 -->
     <div class="footer-links">
       {
-        footerLinks.social.map((link) => (
+        siteConfig.socialLinks.map((link) => (
           <a
             href={link.href}
             class="nav-link footer-link"
@@ -33,10 +26,10 @@ const currentYear = new Date().getFullYear();
     <!-- 底部版权信息 -->
     <div class="footer-bottom">
       <p class="footer-description">
-        A blog about programming tech and nonsense.
+        {siteConfig.description}
       </p>
       <p class="copyright">
-        &copy; {currentYear} huamurui. All rights reserved.
+        &copy; {currentYear} {siteConfig.author.name}. All rights reserved.
       </p>
       <p class="credit">
         Powered by <a

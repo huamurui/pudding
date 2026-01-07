@@ -2,33 +2,18 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PostCardList from '../components/PostCardList/PostCardList';
 import { getCollection, render } from 'astro:content';
+import { siteConfig } from '../config/site.config';
+import { extractExcerptFromHtml, getPostUrl } from '../utils/helpers';
+import { generatePostListStructuredData } from '../utils/structured-data';
+import { ANIMATION_DURATION, EASING } from '../utils/constants';
+import type { PostData, StructuredData } from '../types';
 import { experimental_AstroContainer } from "astro/container";
 const container = await experimental_AstroContainer.create();
 
-// 从渲染后的HTML中提取摘要
-const extractExcerptFromRendered = (html: string): string => {
-  // 1. 查找<!-- more -->标记
-  const moreMarker = /<!--\s*more\s*-->/i;
-  if (moreMarker.test(html)) {
-    const [excerptHtml] = html.split(moreMarker);
-    return excerptHtml.trim();
-  }
-
-  // 2. 自动提取第一段（到第一个块级元素结束）
-  const firstParagraphMatch = html.match(/<p>.*?<\/p>|<div>.*?<\/div>|<ul>.*?<\/ul>/s);
-  if (firstParagraphMatch) {
-    return firstParagraphMatch[0];
-  }
-
-  // 3. 兜底处理
-  return html.slice(0, 300).replace(/<[^>]+$/, '') + '...';
-};
-
 const _posts = await getCollection('posts');
-const postsWithExcerpt = await Promise.all(
+const postsWithExcerpt: PostData[] = await Promise.all(
   _posts.map(async (post) => {
     const { Content } = await render(post);
-    
     const html = await container.renderToString(Content);
     
     return {
@@ -36,8 +21,8 @@ const postsWithExcerpt = await Promise.all(
       title: post.data.title,
       date: post.data.date,
       tags: post.data.tags || [],
-      url: `/posts/${post.id}/`,
-      excerptHtml: extractExcerptFromRendered(html)
+      url: getPostUrl(post.id),
+      excerptHtml: extractExcerptFromHtml(html)
     };
   })
 );
@@ -48,30 +33,15 @@ const sortedPosts = postsWithExcerpt.slice().sort(
 );
 const posts = () => sortedPosts;
 
-const site = "Greenhouse between Clouds";
-const itemList = {
-  "@type": "ItemList",
-  "name": "Recent posts",
-  "itemListElement": sortedPosts.map((p, i) => ({
-    "@type": "ListItem",
-    "position": i + 1,
-    "url": new URL(p.url, Astro.url.origin).toString(),
-    "name": p.title
-  }))
-};
-
-const structuredData = {
-  "@context": "https://schema.org",
-  "@graph": [
-    { "@type": "WebSite", "url": Astro.url.origin, "name": site },
-    { "@type": "CollectionPage", "name": "Recent posts", "mainEntity": itemList }
-  ]
-};
+const structuredData = generatePostListStructuredData(
+  sortedPosts.map(p => ({ title: p.title, url: p.url })),
+  Astro.url.origin
+);
 
 // custom title morph animation used for list <-> post transitions
 const anim = {
-  old: { name: "title-old", duration: "0.45s", easing: "cubic-bezier(.2,.8,.2,1)", fillMode: "both" },
-  new: { name: "title-new", duration: "0.45s", easing: "cubic-bezier(.2,.8,.2,1)", fillMode: "both" },
+  old: { name: "title-old", duration: ANIMATION_DURATION.slow, easing: EASING.smooth, fillMode: "both" },
+  new: { name: "title-new", duration: ANIMATION_DURATION.slow, easing: EASING.smooth, fillMode: "both" },
 };
 const customTransition = { forwards: anim, backwards: anim };
 ---
