@@ -204,7 +204,7 @@ h1:hover::after, h2:hover::after, h3:hover::after, h4:hover::after, h5:hover::af
   gap: 8px;
   justify-content: flex-end;
   min-width: 120px;
-  margin-top: 0;
+  margin: 0 10px;
 }
 
 .inline-tag {

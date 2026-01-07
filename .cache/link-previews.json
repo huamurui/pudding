@@ -12,19 +12,5 @@
     "description": "Enable seamless navigation between pages in Astro with view transitions.",
     "image": "https://docs.astro.build/open-graph/en/guides/view-transitions.webp",
     "site": "docs.astro.build"
-  },
-  "https://www.bilibili.com/video/BV1By4y1U7zF": {
-    "fetched": true,
-    "title": "视频去哪了呢？_哔哩哔哩_bilibili",
-    "description": "undefined, 视频播放量 undefined、弹幕量 undefined、点赞数 undefined、投硬币枚数 undefined、收藏人数 undefined、转发人数 undefined, 视频作者 undefined, 作者简介 undefined，相关视频：",
-    "image": "@100w_100h_1c.png",
-    "site": "bilibili.com"
-  },
-  "https://github.com/huamurui/Snowfall": {
-    "fetched": true,
-    "title": "GitHub - huamurui/Snowfall: Snowfall.js is a little script that draws falling snow on top of a page, using a &lt;canvas&gt; and JavaScript.",
-    "description": "Snowfall.js is a little script that draws falling snow on top of a page, using a &lt;canvas&gt; and JavaScript. - huamurui/Snowfall",
-    "image": "https://opengraph.githubassets.com/315907ab38afdb6291a2917ffe7f4932a87575cefaecc3a329fe88cf16bea63e/huamurui/Snowfall",
-    "site": "github.com"
   }
 }

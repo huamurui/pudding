@@ -138,8 +138,8 @@
     padding-right: 12px;
   }
 
-  .post-tags {
+  div.post-tags {
     margin-top: 8px;
-    width: 100%;
+    display: none;
   }
 }
