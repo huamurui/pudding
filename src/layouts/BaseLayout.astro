@@ -37,7 +37,9 @@ let {
 
 let description = siteConfig.description;
 if (postFrontmatter?.description) {
-  description = postFrontmatter.description;
+  // Override default description with post-specific one
+  // and erase any HTML tags
+  description = postFrontmatter.description.replace(/<[^>]*>/g, "");
 }
 if (postFrontmatter?.image?.url) {
   ogImage = postFrontmatter.image.url;
