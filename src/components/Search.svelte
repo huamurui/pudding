@@ -1,21 +1,20 @@
 <script lang="ts">
-  import Fuse from 'fuse.js';
-  import { onMount, onDestroy } from 'svelte'; // 仅保留 Svelte 支持的生命周期
+  import Fuse,{type FuseResult } from 'fuse.js';
+  import { onMount } from 'svelte'; 
 
-  // 接收 Astro 传递的可搜索文章数据（Props）
-  export let searchablePosts: Array<{
+  type SearchablePosts = readonly Post[];
+  interface Post {
     id: string;
     title: string;
     excerpt: string;
     url: string;
-  }> = [];
+  }
+  export let searchablePosts: SearchablePosts = [];
 
-  // 修正：Svelte 原生响应式变量（直接用 let 声明，无需 createSignal）
-  let searchQuery = ''; // 搜索输入内容
-  let isSearchOpen = false; // 搜索框展开/收起
-  let searchResults: Array<{ item: any; score: number }> = []; // Fuse 搜索结果
+  let searchQuery = ''; 
+  let isSearchOpen = false; 
+  let searchResults: FuseResult<Post & { score: number }>[]= [];
 
-  // 初始化 Fuse.js 实例（配置搜索规则）
   let fuse: Fuse<any>;
   const fuseOptions = {
     includeScore: true,
@@ -27,43 +26,34 @@
   };
   fuse = new Fuse(searchablePosts, fuseOptions);
   onMount(() => {
-    // 点击页面外部收起搜索框（事件委托）
     document.addEventListener('click', handleClickOutside);
+    return() => {
+      document.removeEventListener('click', handleClickOutside);
+    };  
   });
-
-  // 组件销毁时清理事件监听，防止内存泄漏
-  onDestroy(() => {
-    // document.removeEventListener('click', handleClickOutside);
-  });
-
-  // 处理「点击外部收起搜索框」逻辑（修正：响应式变量直接访问，无需 ()）
   const handleClickOutside = (e: MouseEvent) => {
     const searchContainer = document.querySelector('.search-container');
     if (searchContainer && !searchContainer.contains(e.target as Node)) {
-      isSearchOpen = false; // 直接赋值更新响应式状态
+      isSearchOpen = false;
       searchQuery = '';
       searchResults = [];
     }
   };
 
-  // 实时搜索处理（输入变化时触发，修正：响应式变量直接访问/赋值）
   const handleSearchInput = (e: Event) => {
     const inputValue = (e.target as HTMLInputElement).value.trim();
-    searchQuery = inputValue; // 直接赋值更新输入内容
+    searchQuery = inputValue;
 
-    // 无输入时清空结果，有输入时执行 Fuse 搜索
     if (!inputValue) {
       searchResults = [];
       return;
     }
     const results = fuse.search(inputValue);
-    searchResults = results.slice(0, 5); // 直接赋值更新搜索结果
+    searchResults = results.slice(0, 5);
   };
 
-  // 切换搜索框展开/收起状态（修正：响应式变量直接访问/赋值）
   const toggleSearch = () => {
-    isSearchOpen = !isSearchOpen; // 直接取反更新状态
-    // 展开时自动聚焦输入框
+    isSearchOpen = !isSearchOpen; 
     if (!isSearchOpen) {
       setTimeout(() => {
         const searchInput = document.querySelector<HTMLElement>('.search-input');
@@ -75,9 +65,7 @@
     }
   };
 
-  // 键盘事件处理（ESC 收起、回车跳转第一条结果，修正：响应式变量直接访问）
   const handleSearchKeydown = (e: KeyboardEvent) => {
-    // ESC 键收起搜索框
     if (e.key === 'Escape') {
       isSearchOpen = false;
       searchQuery = '';
