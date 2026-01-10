@@ -37,15 +37,15 @@ export interface SiteConfig {
 }
 
 export const siteConfig: SiteConfig = {
-  name: "Greenhouse between Clouds",
-  ogName: "云苔的blog",
-  description: "这是一个使用Astro构建的用来放各种乱七八糟东西的网站",
-  keywords: "云苔,芸薹,huamurui,花木瑞,blog,tech,software,nonsense,chattering,碎碎念,web,front-end",
-  url: "https://huamurui.github.io",
+  name: "Your Site Name",
+  ogName: "Your Site ogName",
+  description: "Your Site Description",
+  keywords: "Your Site Keywords",
+  url: "https://yoursite.com",
   author: {
-    name: "云苔",
-    email: "huamurui@outlook.com",
-    github: "https://github.com/huamurui",
+    name: "Your Name",
+    email: "your@email.com",
+    github: "https://github.com/your",
   },
   navItems: [
     { href: "/", label: "首页" },
@@ -53,8 +53,8 @@ export const siteConfig: SiteConfig = {
     { href: "/about", label: "关于" },
   ],
   socialLinks: [
-    { name: "GitHub", href: "https://github.com/huamurui" },
-    { name: "Email", href: "mailto:huamurui@outlook.com" },
+    { name: "GitHub", href: "https://github.com/your" },
+    { name: "Email", href: "mailto:your@email.com" },
     { name: "RSS", href: "/rss.xml" },
     { name: "Sitemap", href: "/sitemap-index.xml" },
   ],
@@ -67,6 +67,6 @@ export const siteConfig: SiteConfig = {
     },
   },
   defaultOgImage: "/og-default.jpg",
-  locale: "zh_CN",
+  locale: "en",
   postsPerPage: 10,
 };

@@ -7,32 +7,24 @@ const pageTitle = "About";
 
 <BaseLayout pageTitle={pageTitle}>
   <header class="about-hero">
-    <h1 class="title">关于</h1>
-    <p>这个网站使用 <strong>Astro</strong> 构建</p> 
-    <p>关于主题，可以看看这里 <a class="post-link" href="/posts/tech/astro-pudding/">astro-pudding</a> 或者访问我的 GitHub。</p>
+    <h1 class="title">关于本博客主题</h1>
+    <p>本博客基于 <strong>Astro</strong> 构建，采用轻量级高性能博客主题，专注于内容展示与阅读体验优化</p> 
+    <p>关于主题详情，可查看 <a class="inline-tag" href="/posts/tech/blog-theme-intro/">《通用 Astro 博客主题使用指南》</a> 或访问 Astro 官方文档了解更多建站方案。</p>
   </header>
 
   <main class="about-container">
     <section class="projects-section">
       <div class="projects-grid">
+        <!-- 通用博客首页演示案例 -->
         <article class="project-card card">
           <div class="iframe-wrapper">
-            <iframe src="https://huamurui.github.io/photo-viewer/" title="照片" loading="lazy"></iframe>
+            <iframe src="https://astro.build/themes/demo/official/blog/" title="通用博客首页演示" loading="lazy"></iframe>
           </div>
-          <div class="project-actions"><a class="post-link" href="https://huamurui.github.io/photo-viewer/" target="_blank" rel="noopener">在新标签页打开</a></div>
-        </article>
-
-        <article class="project-card card">
-          <div class="iframe-wrapper">
-            <iframe src="https://huamurui.github.io/html-s/" title="HTML 示例" loading="lazy"></iframe>
+          <div class="project-actions">
+            <a class="inline-tag" href="https://astro.build/themes/categories/blog/" target="_blank" rel="noopener">查看更多博客主题示例</a>
           </div>
-          <div class="project-actions"><a class="post-link" href="https://huamurui.github.io/html-s/" target="_blank" rel="noopener">在新标签页打开</a></div>
         </article>
       </div>
     </section>
-
-    <aside class="quote-section">
-      <p>痛苦如此持久，像蜗牛充满耐心地移动；快乐如此短暂，像兔子的尾巴掠过秋天的草原。</p>
-    </aside>
   </main>
 </BaseLayout>
