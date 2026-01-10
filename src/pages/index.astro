@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import PostCardList from '../components/PostCardList/PostCardList';
+import PostCardList from '../components/PostCardList/PostCardList.svelte';
 import { getCollection, render } from 'astro:content';
 import { siteConfig } from '../config/site.config';
 import { extractExcerptFromHtml, getPostUrl } from '../utils/helpers';
@@ -31,7 +31,7 @@ const postsWithExcerpt: PostData[] = await Promise.all(
 const sortedPosts = postsWithExcerpt.slice().sort(
   (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
 );
-const posts = () => sortedPosts;
+const posts = sortedPosts;
 
 const structuredData = generatePostListStructuredData(
   sortedPosts.map(p => ({ title: p.title, url: p.url })),

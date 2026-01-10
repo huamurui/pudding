@@ -1,13 +1,10 @@
-/**
- * 组件导出入口
- */
-
 export { default as Header } from './Header.astro';
 export { default as Footer } from './Footer.astro';
 export { default as Sidebar } from './Sidebar.astro';
 export { default as Head } from './Head.astro';
 export { default as ToC } from './ToC.astro';
-export { default as ThemeToggle } from './ThemeToggle';
-export { default as PostCardList } from './PostCardList/PostCardList';
-export { default as CodeEnhancer } from './CodeEnhancer';
-export { default as FAB } from './FAB';
+export { default as ThemeToggle } from './ThemeToggle/ThemeToggle.svelte';
+export { default as PostCardList } from './PostCardList/PostCardList.svelte';
+export { default as PostList } from './PostList/PostList.svelte';
+export { default as CodeEnhancer } from './CodeEnhancer/CodeEnhancer.svelte';
+export { default as FAB } from './FAB/FAB.svelte';

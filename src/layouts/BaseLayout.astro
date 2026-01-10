@@ -9,8 +9,8 @@ import type { PostFrontmatter, PostEntry, StructuredData } from "../types";
 import Head from "../components/Head.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
-import FAB from "../components/FAB.tsx";
-import CodeEnhancer from "../components/CodeEnhancer.tsx";
+import FAB from "../components/FAB/FAB.svelte";
+import CodeEnhancer from "../components/CodeEnhancer/CodeEnhancer.svelte";
 import Sidebar from "../components/Sidebar.astro";
 
 // 判断是否为文章页面
@@ -23,6 +23,7 @@ interface Props {
   canonicalUrl?: string;
   post?: PostEntry | null;
   structuredData?: StructuredData | null;
+  description?: string;
 }
 
 let {

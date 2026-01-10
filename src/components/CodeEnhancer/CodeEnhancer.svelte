@@ -1,6 +1,5 @@
-import { onMount } from 'solid-js';
-
-export default function CodeEnhancer() {
+<script>
+  import { onMount } from 'svelte';
   onMount(() => {
     const MAX_HEIGHT = 360;
     const preList = Array.from(document.querySelectorAll('pre.astro-code'));
@@ -12,7 +11,6 @@ export default function CodeEnhancer() {
       const codeEl = pre.querySelector('code');
       if (!codeEl) return;
 
-      // create toolbar
       const toolbar = document.createElement('div');
       toolbar.className = 'code-toolbar';
 
@@ -20,7 +18,6 @@ export default function CodeEnhancer() {
       copyBtn.type = 'button';
       copyBtn.className = 'code-copy';
       copyBtn.innerText = '复制';
-      copyBtn.title = '复制代码';
 
       let expandBtn = null;
       const needsCollapse = pre.scrollHeight > MAX_HEIGHT + 20;
@@ -30,18 +27,14 @@ export default function CodeEnhancer() {
         expandBtn.type = 'button';
         expandBtn.className = 'code-expand';
         expandBtn.innerText = '展开';
-        expandBtn.title = '展开/收起';
       }
 
       toolbar.appendChild(copyBtn);
       if (expandBtn) toolbar.appendChild(expandBtn);
-
       pre.appendChild(toolbar);
 
-      // copy handler
       copyBtn.addEventListener('click', async (e) => {
         e.preventDefault();
-        // Clean copy: preserve text content of code element
         const text = codeEl.innerText.replace(/\u00A0/g, ' ');
         try {
           await navigator.clipboard.writeText(text);
@@ -49,21 +42,15 @@ export default function CodeEnhancer() {
           copyBtn.innerText = '已复制';
           setTimeout(() => (copyBtn.innerText = old), 1500);
         } catch (err) {
-          // fallback
           const ta = document.createElement('textarea');
           ta.value = text;
           document.body.appendChild(ta);
           ta.select();
-          try { document.execCommand('copy'); }
-          catch (e) {}
+          try { document.execCommand('copy'); } catch (e) {}
           document.body.removeChild(ta);
-          const old = copyBtn.innerText;
-          copyBtn.innerText = '已复制';
-          setTimeout(() => (copyBtn.innerText = old), 1500);
         }
       });
 
-      // expand handler
       if (expandBtn) {
         expandBtn.addEventListener('click', (e) => {
           e.preventDefault();
@@ -79,6 +66,8 @@ export default function CodeEnhancer() {
       }
     });
   });
+</script>
 
-  return null;
-}
+<style>
+  /* Intentionally empty — styles live in CSS files */
+</style>

@@ -1,5 +1,5 @@
 ---
-import PostList from "../../components/PostList/PostList";
+import PostList from "../../components/PostList/PostList.svelte";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { getCollection, type CollectionEntry } from "astro:content";
 
@@ -50,7 +50,7 @@ const customTransition = { forwards: anim, backwards: anim };
                     </div>
                   </div>
                 </article>
-                <PostList posts={() => yearPosts} transition={customTransition} />
+                <PostList posts={yearPosts} transition={customTransition} />
               </div>
             </section>
           );

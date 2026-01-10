@@ -51,7 +51,6 @@ export const siteConfig: SiteConfig = {
     { href: "/", label: "首页" },
     { href: "/timeline", label: "时间线" },
     { href: "/about", label: "关于" },
-    { href: "/search", label: "搜索" },
   ],
   socialLinks: [
     { name: "GitHub", href: "https://github.com/huamurui" },
