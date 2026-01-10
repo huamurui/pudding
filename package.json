@@ -10,15 +10,15 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/rss": "^4.0.12",
-    "@astrojs/sitemap": "^3.6.0",
-    "@astrojs/svelte": "^3.0.0",
-    "astro": "^5.13.5",
+    "@astrojs/rss": "^4.0.14",
+    "@astrojs/sitemap": "^3.6.1",
+    "@astrojs/svelte": "^7.2.5",
+    "astro": "^5.16.8",
     "fuse.js": "^7.1.0",
-    "katex": "^0.16.22",
+    "katex": "^0.16.27",
     "rehype-katex": "^7.0.1",
     "remark-math": "^6.0.0",
-    "svelte": "^4.0.0",
+    "svelte": "^5.46.1",
     "unist-util-visit": "^5.0.0"
   }
 }
