@@ -1,41 +1,44 @@
 <script lang="ts">
-  import Fuse,{type FuseResult } from 'fuse.js';
-  import { onMount } from 'svelte'; 
+  import Fuse, { type FuseResult, type IFuseOptions } from "fuse.js";
+  import { onMount } from "svelte";
 
-  type SearchablePosts = readonly Post[];
   interface Post {
     id: string;
     title: string;
     excerpt: string;
     url: string;
   }
+
+  type SearchablePosts = readonly Post[];
   export let searchablePosts: SearchablePosts = [];
 
-  let searchQuery = ''; 
-  let isSearchOpen = false; 
-  let searchResults: FuseResult<Post & { score: number }>[]= [];
-
-  let fuse: Fuse<any>;
-  const fuseOptions = {
+  let searchQuery = "";
+  let isSearchOpen = false;
+  let searchResults: FuseResult<Post>[] = [];
+  let fuse: Fuse<Post>;
+  const fuseOptions: IFuseOptions<Post> = {
     includeScore: true,
     threshold: 0.3,
     keys: [
-      { name: 'title', weight: 2 },
-      { name: 'excerpt', weight: 1 }
-    ]
+      { name: "title", weight: 2 },
+      { name: "excerpt", weight: 1 },
+    ],
   };
-  fuse = new Fuse(searchablePosts, fuseOptions);
+
+  fuse = new Fuse(searchablePosts as Post[], fuseOptions);
+
   onMount(() => {
-    document.addEventListener('click', handleClickOutside);
-    return() => {
-      document.removeEventListener('click', handleClickOutside);
-    };  
+    document.addEventListener("click", handleClickOutside);
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
   });
+
   const handleClickOutside = (e: MouseEvent) => {
-    const searchContainer = document.querySelector('.search-container');
+    const searchContainer = document.querySelector(".search-container");
     if (searchContainer && !searchContainer.contains(e.target as Node)) {
       isSearchOpen = false;
-      searchQuery = '';
+      searchQuery = "";
       searchResults = [];
     }
   };
@@ -53,41 +56,48 @@
   };
 
   const toggleSearch = () => {
-    isSearchOpen = !isSearchOpen; 
-    if (!isSearchOpen) {
+    isSearchOpen = !isSearchOpen;
+    if (isSearchOpen) {
       setTimeout(() => {
-        const searchInput = document.querySelector<HTMLElement>('.search-input');
+        const searchInput =
+          document.querySelector<HTMLInputElement>(".search-input");
         searchInput?.focus();
       }, 100);
     } else {
-      searchQuery = '';
+      searchQuery = "";
       searchResults = [];
     }
   };
 
   const handleSearchKeydown = (e: KeyboardEvent) => {
-    if (e.key === 'Escape') {
+    if (e.key === "Escape") {
       isSearchOpen = false;
-      searchQuery = '';
+      searchQuery = "";
       searchResults = [];
     }
 
-    // 回车键跳转第一条结果（有结果时）
-    if (e.key === 'Enter' && searchResults.length > 0) {
+    if (e.key === "Enter" && searchResults.length > 0) {
+      e.preventDefault();
       window.location.href = searchResults[0].item.url;
     }
   };
 </script>
 
-<!-- 模板部分：仅修正响应式变量调用（移除所有 ()，直接访问变量） -->
-<div class="search-container" on:click|stopPropagation>
+<div class="search-container" role="search" aria-label="文章搜索区域">
   <button
     class="search-toggle"
     type="button"
-    aria-label={isSearchOpen ? '收起搜索框' : '打开搜索框'}
+    aria-label={isSearchOpen ? "收起搜索框" : "打开搜索框"}
     on:click={toggleSearch}
   >
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+    >
       <circle cx="11" cy="11" r="8"></circle>
       <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
     </svg>
@@ -103,22 +113,27 @@
         on:input={handleSearchInput}
         on:keydown={handleSearchKeydown}
         aria-label="输入关键词搜索文章"
+        aria-autocomplete="list"
+        aria-controls="search-results-list"
       />
 
       {#if searchResults.length > 0}
-        <ul class="search-results">
+        <ul class="search-results" id="search-results-list">
           {#each searchResults as result}
             <li class="search-result-item">
               <a
                 href={result.item.url}
                 on:click={() => {
                   isSearchOpen = false;
-                  searchQuery = '';
+                  searchQuery = "";
                 }}
+                aria-label={`查看文章：${result.item.title}`}
               >
                 <h4 class="result-title">{result.item.title}</h4>
                 {#if result.item.excerpt}
-                  <p class="result-excerpt">{result.item.excerpt.slice(0, 80)}...</p>
+                  <p class="result-excerpt">
+                    {result.item.excerpt.slice(0, 80)}...
+                  </p>
                 {/if}
               </a>
             </li>
@@ -130,7 +145,6 @@
 </div>
 
 <style>
-  /* 样式部分完全不变，保持原有布局和风格 */
   .search-container {
     position: relative;
     display: flex;
@@ -151,8 +165,12 @@
     transition: background-color 0.2s ease;
   }
 
-  .search-toggle:hover {
+  .search-toggle:hover,
+  .search-toggle:focus-visible {
+    /* 补充：按钮聚焦样式，提升键盘导航体验 */
     background-color: rgba(0, 0, 0, 0.05);
+    outline: 2px solid rgba(var(--theme-color), 0.8);
+    outline-offset: 2px;
   }
 
   .search-dropdown {
@@ -211,8 +229,11 @@
     transition: background-color 0.2s ease;
   }
 
-  .search-result-item a:hover {
+  .search-result-item a:hover,
+  .search-result-item a:focus-visible {
+    /* 补充：链接聚焦样式，提升键盘导航体验 */
     background-color: rgba(0, 0, 0, 0.05);
+    outline: none;
   }
 
   .result-title {

@@ -51,7 +51,6 @@
     };
   });
 
-
   const defaultPosition = {
     bottom: '20px',
     right: '20px'
@@ -59,7 +58,9 @@
   const fabPosition = { ...defaultPosition, ...position };
 </script>
 
-<div
+<!-- 关键修改：将 div 替换为 button type="button" -->
+<button
+  type="button" 
   class="floating-action-button"
   class:visible={isVisible} 
   class:hidden={!isVisible}
@@ -67,6 +68,7 @@
   style:right={fabPosition.right} 
   on:click={scrollToTop} 
   title="回到顶部"
+  aria-label="回到顶部" 
 >
   <div class="icon">{scrollPercent}%</div>
   <svg class="progress-ring">
@@ -80,10 +82,21 @@
       stroke-dashoffset={circumference}
     ></circle>
   </svg>
-</div>
-
+</button>
 
 <style>
+/* 补充：重置 button 原生默认样式，保持原有 FAB 外观 */
+button {
+  margin: 0;
+  padding: 0;
+  border: none;
+  outline: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
 .floating-action-button {
   position: fixed;
   width: 50px;
@@ -95,7 +108,6 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  cursor: pointer;
   user-select: none;
   z-index: 999;
   transition: opacity 0.3s ease, transform 0.3s ease;
@@ -136,5 +148,10 @@
   transform: scale(1.05);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
-    
+
+/* 补充：聚焦样式，提升键盘导航用户体验（无障碍必备） */
+.floating-action-button:focus-visible {
+  outline: 2px solid rgba(var(--primary-color), 0.8);
+  outline-offset: 2px;
+}
 </style>
