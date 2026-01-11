@@ -2,8 +2,6 @@
 <script>
   import { sanitizeViewTransitionName, getTagUrl } from "../../utils/helpers";
   import { formatDate } from "../../utils/helpers";
-  import "./PostCardList.css";
-
   export let posts = [];
   export let selectedTags = null;
 
@@ -55,6 +53,100 @@
   </ul>
 {/if}
 <style>
-  /* 将原组件的 CSS 内容直接放入此处 */
-  @import "./PostCardList.css";
+/* PostCardList.css */
+.posts-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.post-item {
+  padding: 20px;
+  border-radius: 8px;
+  margin: 20px 0;
+  transition: background-color 0.3s ease;
+  position: relative;
+}
+
+.post-item:hover {
+  background-color: color-mix(in srgb, var(--theme-color) 5%, transparent);
+}
+
+.divider {
+  height: 1px;
+  background-color: var(--border-color);
+  margin: 0;
+  transition: background-color 0.3s ease;
+}
+
+.post-link {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  text-decoration: none;
+  color: inherit;
+  margin-bottom: 12px;
+  gap: 16px;
+}
+
+.post-title {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 20px;
+  line-height: 1.4;
+  flex: 1;
+  margin: 0;
+  transition: color 0.2s ease;
+}
+
+.post-item:hover .post-title {
+  color: var(--theme-color);
+}
+
+.post-date {
+  font-size: 14px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: color 0.2s ease;
+}
+
+.post-item:hover .post-date {
+  color: var(--theme-color);
+}
+
+.post-excerpt {
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 0 0 16px 0;
+}
+
+.no-results {
+  text-align: center;
+  padding: 48px 32px;
+  font-style: italic;
+  color: var(--text-secondary);
+  margin: 32px 0;
+}
+
+@media (max-width: 768px) {
+  .post-link {
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .post-date {
+    align-self: flex-start;
+  }
+  
+  .post-item {
+    padding: 16px 10px;
+  }
+  
+  .post-title {
+    font-size: 18px;
+  }
+}
 </style>
