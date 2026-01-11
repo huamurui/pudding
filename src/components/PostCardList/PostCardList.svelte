@@ -53,7 +53,6 @@
   </ul>
 {/if}
 <style>
-/* PostCardList.css */
 .posts-list {
   list-style: none;
   padding: 0;

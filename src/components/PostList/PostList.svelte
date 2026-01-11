@@ -1,7 +1,5 @@
 <!-- PostList.svelte（开启 TypeScript 支持） -->
 <script lang="ts">
-  import "./PostList.css";
-
   interface Post {
     id: string;
     data: {
@@ -63,7 +61,6 @@
 {/if}
 
 <style>
-  /* PostList.css */
 .posts-list {
   list-style: none;
   padding: 0;
