@@ -30,7 +30,7 @@ export const GET: APIRoute = async () => {
     // 处理标签，确保是数组格式
     const tags: string[] = Array.isArray(post.data.tags)
       ? post.data.tags
-      : (post.data.tag ? [post.data.tag] : []);
+      : (post.data.tags ? [post.data.tags] : []);
 
     // 更新标签计数
     tags.forEach(tag => {

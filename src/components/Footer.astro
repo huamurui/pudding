@@ -29,7 +29,8 @@ const currentYear = new Date().getFullYear();
         {siteConfig.description}
       </p>
       <p class="copyright">
-        &copy; {currentYear} {siteConfig.author.name}. All rights reserved.
+        &copy; {currentYear}
+        {siteConfig.author.name}. All rights reserved.
       </p>
       <p class="credit">
         Powered by <a
@@ -44,18 +45,16 @@ const currentYear = new Date().getFullYear();
 </footer>
 
 <style>
-  /* 基础样式：无背景，弱化分割 */
   .footer {
     margin-top: 1rem;
   }
 
-  /* 容器：限制宽度+居中 */
   .footer-container {
     border-top: 1px dashed var(--border-color);
-    max-width: 800px; /* 按要求限制最大宽度 */
+    max-width: 800px;
     margin: 0 auto;
     padding: 1rem;
-    text-align: center; /* 整体文字居中 */
+    text-align: center;
   }
 
   .footer-description {
@@ -79,13 +78,6 @@ const currentYear = new Date().getFullYear();
     text-decoration: underline;
   }
 
-  /* 底部版权信息 */
-  .footer-bottom {
-    /* padding-top: 1rem; */
-    /* border-top: 1px dashed var(--border-color); */
-     /* 虚线分割，弱化视觉效果 */
-  }
-
   .copyright {
     margin: 0 0 0.5rem 0;
   }
@@ -93,7 +85,7 @@ const currentYear = new Date().getFullYear();
   .credit {
     margin: 0;
   }
-  /* 响应式调整 */
+
   @media (max-width: 600px) {
     .footer-links {
       flex-direction: column;
@@ -105,7 +97,6 @@ const currentYear = new Date().getFullYear();
     }
   }
 
-  /* 减少运动偏好 */
   @media (prefers-reduced-motion: reduce) {
     .social-link {
       transition: none;

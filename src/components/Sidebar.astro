@@ -13,15 +13,13 @@ const { intro = siteConfig.description, post = null } = Astro.props as Props;
 
 const allBlogPosts: CollectionEntry<"posts">[] = await getCollection("posts");
 
-// 用于统计标签的Map
 const tagCountMap: Map<string, number> = new Map();
 
 allBlogPosts.map((post) => {
-  // 处理标签，确保是数组格式
   const tags: string[] = Array.isArray(post.data.tags)
     ? post.data.tags
-    : post.data.tag
-      ? [post.data.tag]
+    : post.data.tags
+      ? [post.data.tags]
       : [];
 
   // 更新标签计数
@@ -36,7 +34,6 @@ allBlogPosts.map((post) => {
 ---
 
 <div class="profile-sidebar">
-  <!-- 个人信息 -->
   <div class="profile-avatar">
     <!-- <img src="/avatar.jpg" alt="你的昵称" class="avatar-img" /> -->
   </div>
@@ -49,21 +46,18 @@ allBlogPosts.map((post) => {
     <a href="mailto:xxx@xxx.com" aria-label="邮箱">📧</a>
   </div> -->
 
-  <!-- 站点统计 -->
   <div class="profile-stats">
     <div class="stat-item">📝 {allBlogPosts.length} 篇文章</div>
     <div class="stat-item">🏷️ {Array.from(tagCountMap).length} 个标签</div>
     <div class="stat-item">
-      <!-- {new Date().toISOString().replace("T", " ").split('.')[0]}  -->
       {new Date().toISOString().split("T")[0]}
       更新
     </div>
   </div>
-  <Tag post={post}/>
+  <Tag post={post} />
 </div>
 
 <style>
-  /* 只写内容样式，不写定位！定位由父布局控制 */
   .profile-sidebar {
     width: 100%;
     margin: 20px 0;
@@ -78,5 +72,4 @@ allBlogPosts.map((post) => {
     border-radius: 80px;
     object-fit: cover;
   }
-  /* 其他样式省略... */
 </style>

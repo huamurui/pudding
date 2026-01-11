@@ -1,5 +1,5 @@
 ---
-import ThemeToggle from "./ThemeToggle/ThemeToggle.svelte"
+import ThemeToggle from "./ThemeToggle/ThemeToggle.svelte";
 import { siteConfig } from "../config/site.config";
 import { isPostPage } from "../utils/helpers";
 import { SCROLL_THRESHOLD } from "../utils/constants";
@@ -12,36 +12,28 @@ interface Props {
 
 const { pageTitle } = Astro.props as Props;
 
-// 导航项数据
 const navItems = siteConfig.navItems;
 
-// 判断是否为文章页面
 const isPostsPage = isPostPage(Astro.url.pathname);
-// 新增：获取所有博客文章并整理为可搜索格式（Astro 服务端运行，性能无损耗）
-// 注意：需确保你已配置 src/content/config.ts 定义 posts 集合（见下方补充说明）
-const allPosts = await getCollection('posts');
+const allPosts = await getCollection("posts");
 const searchablePosts = allPosts.map((post) => ({
   id: post.id,
-  title: post.data.title, // 文章标题（核心搜索字段）
-  excerpt: post.data.description || '无摘要', // 文章摘要（辅助搜索字段）
-  url: `/posts/${post.id}`, // 文章跳转链接（根据你的路由规则调整）
+  title: post.data.title,
+  excerpt: post.data.description || "无摘要",
+  url: `/posts/${post.id}`,
 }));
 ---
 
 <header class="header" id="header">
   <div class="header-container">
-    <!-- 网站标识 -->
     <div class="brand">
       <a href="/" class="logo-link">
         <span class="logo">云苔</span>
       </a>
     </div>
 
-    <!-- 中间内容区 - 包含可切换的导航和标题 -->
     <div class="middle-content">
-      <!-- 滚动切换容器 -->
       <div class="scroll-container" id="scroll-container">
-        <!-- 导航菜单 -->
         <nav class="nav-content" id="nav">
           <ul class="nav-list">
             {
@@ -64,7 +56,6 @@ const searchablePosts = allPosts.map((post) => ({
           </ul>
         </nav>
 
-        <!-- 文章页标题 -->
         {
           isPostsPage && (
             <div class="title-content" id="page-title">
@@ -75,12 +66,10 @@ const searchablePosts = allPosts.map((post) => ({
       </div>
     </div>
 
-    <!-- 右侧功能区 -->
     <div class="header-actions">
       <Search client:idle searchablePosts={searchablePosts} />
       <ThemeToggle client:load />
 
-      <!-- 移动端菜单按钮 -->
       <button
         class="menu-toggle"
         id="menu-toggle"
@@ -107,36 +96,35 @@ const searchablePosts = allPosts.map((post) => ({
     const threshold = 50;
     let showingNav = true; // 当前是否显示导航（而非标题）
 
-    // 使用事件委托处理移动端菜单切换（避免在 DOM 替换后丢失监听器）
-    document.addEventListener('click', (e) => {
-      const toggle = (e.target instanceof Element) ? e.target.closest('#menu-toggle') : null;
+    document.addEventListener("click", (e) => {
+      const toggle =
+        e.target instanceof Element ? e.target.closest("#menu-toggle") : null;
       if (!toggle) return;
-      const nav = document.getElementById('nav');
-      const header = document.getElementById('header');
-      const scrollContainer = document.getElementById('scroll-container');
-      const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
-      toggle.setAttribute('aria-expanded', (!isExpanded).toString());
-      nav?.classList.toggle('nav-open');
-      scrollContainer?.classList.toggle('nav-open');
-      header?.classList.toggle('menu-open');
+      const nav = document.getElementById("nav");
+      const header = document.getElementById("header");
+      const scrollContainer = document.getElementById("scroll-container");
+      const isExpanded = toggle.getAttribute("aria-expanded") === "true";
+      toggle.setAttribute("aria-expanded", (!isExpanded).toString());
+      nav?.classList.toggle("nav-open");
+      scrollContainer?.classList.toggle("nav-open");
+      header?.classList.toggle("menu-open");
     });
 
     // 滚动处理函数：每次运行时重新查询相关 DOM 元素以应对 SPA 替换
     function handleScroll() {
       if (window.innerWidth <= 768) return;
 
-      const header = document.getElementById('header');
-      const pageTitle = document.getElementById('page-title');
-      const scrollContainer = document.getElementById('scroll-container');
-      const isPostsPage = !!pageTitle; // 根据是否有标题判断是否为文章页
+      const header = document.getElementById("header");
+      const pageTitle = document.getElementById("page-title");
+      const scrollContainer = document.getElementById("scroll-container");
+      const isPostsPage = !!pageTitle;
 
-      // 即便不是文章页，也需要维持滚动阴影效果
-      header?.classList.toggle('scrolled', window.scrollY > 10);
+      header?.classList.toggle("scrolled", window.scrollY > 10);
 
       if (!header || !isPostsPage || !pageTitle || !scrollContainer) return;
 
       const scrollTop = window.scrollY;
-      const newDirection = scrollTop > lastScrollTop ? 'down' : 'up';
+      const newDirection = scrollTop > lastScrollTop ? "down" : "up";
 
       if (newDirection !== currentDirection) {
         currentDirection = newDirection;
@@ -149,12 +137,12 @@ const searchablePosts = allPosts.map((post) => ({
       }
 
       if (scrollDistance >= threshold) {
-        if (currentDirection === 'down' && showingNav) {
+        if (currentDirection === "down" && showingNav) {
           showingNav = false;
-          scrollContainer.style.transform = 'translateY(-100%)';
-        } else if (currentDirection === 'up' && !showingNav) {
+          scrollContainer.style.transform = "translateY(-100%)";
+        } else if (currentDirection === "up" && !showingNav) {
           showingNav = true;
-          scrollContainer.style.transform = 'translateY(0)';
+          scrollContainer.style.transform = "translateY(0)";
         }
         directionChange = false;
       }
@@ -162,29 +150,25 @@ const searchablePosts = allPosts.map((post) => ({
       lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
     }
 
-    // 确保只添加一次滚动监听
     let scrollListenerAttached = false;
     function ensureScrollListener() {
       if (scrollListenerAttached) return;
-      window.addEventListener('scroll', handleScroll, { passive: true });
+      window.addEventListener("scroll", handleScroll, { passive: true });
       scrollListenerAttached = true;
     }
 
-    // 在客户端路由后重置状态并重新运行一次检查
-    document.addEventListener('astro:page-load', () => {
+    document.addEventListener("astro:page-load", () => {
       lastScrollTop = 0;
-      currentDirection = 'down';
+      currentDirection = "down";
       directionChange = false;
       scrollDistance = 0;
       showingNav = true;
-      const scrollContainer = document.getElementById('scroll-container');
-      if (scrollContainer) scrollContainer.style.transform = 'translateY(0)';
-      // 小延迟以等待内容插入
+      const scrollContainer = document.getElementById("scroll-container");
+      if (scrollContainer) scrollContainer.style.transform = "translateY(0)";
       setTimeout(handleScroll, 50);
       ensureScrollListener();
     });
 
-    // 初始初始化
     ensureScrollListener();
     handleScroll();
   })();
@@ -228,7 +212,6 @@ const searchablePosts = allPosts.map((post) => ({
   .logo-link:hover {
     color: var(--theme-color);
   }
-  /* 中间内容区 - 确保足够空间 */
   .middle-content {
     flex: 1;
     display: flex;
@@ -236,10 +219,9 @@ const searchablePosts = allPosts.map((post) => ({
     align-items: center;
     height: 100%;
     overflow: hidden;
-    min-width: 0; /* 允许内容收缩 */
+    min-width: 0;
   }
 
-  /* 滚动切换容器 - 核心容器 */
   .scroll-container {
     width: 100%;
     height: 100%;
@@ -248,17 +230,15 @@ const searchablePosts = allPosts.map((post) => ({
     will-change: transform;
   }
 
-  /* 导航和标题内容区 - 确保高度一致 */
   .nav-content,
   .title-content {
-    height: 60px; /* 与header高度一致 */
+    height: 60px;
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
   }
 
-  /* 导航菜单样式 */
   .nav-list {
     display: flex;
     list-style: none;
@@ -283,14 +263,12 @@ const searchablePosts = allPosts.map((post) => ({
     color: var(--theme-color);
   }
 
-  /* 文章页标题样式 */
   .title-content {
     color: var(--text-primary);
     font-weight: 500;
     white-space: nowrap;
   }
 
-  /* 右侧功能区 */
   .header-actions {
     display: flex;
     align-items: center;
@@ -298,7 +276,6 @@ const searchablePosts = allPosts.map((post) => ({
     white-space: nowrap;
   }
 
-  /* 移动端菜单按钮 */
   .menu-toggle {
     display: none;
     flex-direction: column;
@@ -321,7 +298,6 @@ const searchablePosts = allPosts.map((post) => ({
     transform-origin: center;
   }
 
-  /* 响应式设计 - 修复移动端菜单 */
   @media (max-width: 768px) {
     .header-container {
       padding: 0 1rem;
@@ -346,10 +322,9 @@ const searchablePosts = allPosts.map((post) => ({
       height: 0;
       overflow: hidden;
       transition: height 0.3s ease;
-      transform: none !important; /* 取消移动端的transform效果 */
+      transform: none !important;
     }
 
-    /* 移动端菜单打开状态 */
     .scroll-container.nav-open {
       height: auto;
       max-height: 500px;
@@ -383,10 +358,9 @@ const searchablePosts = allPosts.map((post) => ({
     }
 
     .title-content {
-      display: none; /* 移动端不显示标题切换 */
+      display: none;
     }
 
-    /* 菜单打开时的动画图标 */
     .menu-toggle[aria-expanded="true"] span:nth-child(1) {
       transform: translateY(6px) rotate(45deg);
     }
@@ -400,7 +374,6 @@ const searchablePosts = allPosts.map((post) => ({
     }
   }
 
-  /* 减少运动偏好 */
   @media (prefers-reduced-motion: reduce) {
     .header,
     .scroll-container,

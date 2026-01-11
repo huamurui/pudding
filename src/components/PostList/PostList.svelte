@@ -1,4 +1,4 @@
-<!-- PostList.svelte（开启 TypeScript 支持） -->
+<!-- PostList.svelte -->
 <script lang="ts">
   interface Post {
     id: string;

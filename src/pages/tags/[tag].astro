@@ -3,7 +3,6 @@ import { type CollectionEntry, getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import PostList from "../../components/PostList/PostList.svelte";
 import '../../components/PostList/PostList.css';
-// 定义getStaticPaths返回类型
 type StaticPath = {
   params: {
     tag: string;

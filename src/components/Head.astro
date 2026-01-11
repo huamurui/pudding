@@ -2,7 +2,6 @@
 import { siteConfig } from "../config/site.config";
 import type { StructuredData } from "../types";
 
-// 定义组件接收的 Props 类型及默认值
 interface Props {
   pageTitle: string;
   description?: string;
@@ -11,7 +10,6 @@ interface Props {
   structuredData?: StructuredData | null;
 }
 
-// 解构 Props 并设置默认值
 const {
   pageTitle,
   description = siteConfig.description,
@@ -21,7 +19,7 @@ const {
 } = Astro.props as Props;
 // 将 JSON-LD 转为字符串并对可能的闭合 </script> 标签进行转义以避免提早结束脚本
 const structuredDataHtml = structuredData
-  ? JSON.stringify(structuredData).replace(/<\/script/gi, '<\\/script')
+  ? JSON.stringify(structuredData).replace(/<\/script/gi, "<\\/script")
   : null;
 
 import { ClientRouter } from "astro:transitions";
@@ -74,13 +72,17 @@ import { ClientRouter } from "astro:transitions";
     content={siteConfig.theme.dark.primary}
     media="(prefers-color-scheme: dark)"
   />
-  {structuredDataHtml && <script type="application/ld+json" set:html={structuredDataHtml}></script>}
+  {
+    structuredDataHtml && (
+      <script type="application/ld+json" set:html={structuredDataHtml} />
+    )
+  }
 
   <!-- <link rel="preload" href="/fonts/main-font.woff2" as="font" type="font/woff2" crossorigin /> -->
 
   <script is:inline>
     (function () {
-      try {        
+      try {
         const savedTheme = localStorage.getItem("theme");
         const systemPrefersDark = window.matchMedia(
           "(prefers-color-scheme: dark)",
@@ -96,16 +98,18 @@ import { ClientRouter } from "astro:transitions";
   </script>
 
   <script is:inline>
-    document.addEventListener('astro:before-swap', (event) => {
+    document.addEventListener("astro:before-swap", (event) => {
       try {
-        const savedTheme = localStorage.getItem('theme');
-        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const theme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
+        const savedTheme = localStorage.getItem("theme");
+        const systemPrefersDark = window.matchMedia(
+          "(prefers-color-scheme: dark)",
+        ).matches;
+        const theme = savedTheme || (systemPrefersDark ? "dark" : "light");
         const el = event.newDocument && event.newDocument.documentElement;
         if (el) {
-          el.classList.remove('light', 'dark');
+          el.classList.remove("light", "dark");
           el.classList.add(theme);
-          el.setAttribute('data-theme', theme);
+          el.setAttribute("data-theme", theme);
         }
       } catch (e) {
         // ignore
@@ -119,60 +123,67 @@ import { ClientRouter } from "astro:transitions";
     (function () {
       function runPostScripts(root = document) {
         try {
-          const container = root.querySelector('.post-content');
+          const container = root.querySelector(".post-content");
           if (!container) return;
 
           // Execute explicit inline scripts
-          container.querySelectorAll('script[data-astro-exec="inline"]').forEach((s) => {
-            try {
-              (new Function(s.textContent || ''))();
-            } catch (e) {
-              console.error('post inline script error', e);
-            }
-          });
+          container
+            .querySelectorAll('script[data-astro-exec="inline"]')
+            .forEach((s) => {
+              try {
+                new Function(s.textContent || "")();
+              } catch (e) {
+                console.error("post inline script error", e);
+              }
+            });
 
           // Execute inline module scripts by injecting a module script element
-          container.querySelectorAll('script[data-astro-exec="module"]:not([src])').forEach((s) => {
-            try {
-              const el = document.createElement('script');
-              el.type = 'module';
-              el.textContent = s.textContent || '';
-              document.body.appendChild(el);
-            } catch (e) {
-              console.error('post module inline error', e);
-            }
-          });
+          container
+            .querySelectorAll('script[data-astro-exec="module"]:not([src])')
+            .forEach((s) => {
+              try {
+                const el = document.createElement("script");
+                el.type = "module";
+                el.textContent = s.textContent || "";
+                document.body.appendChild(el);
+              } catch (e) {
+                console.error("post module inline error", e);
+              }
+            });
 
           // Execute module scripts with src by appending a new script element
-          container.querySelectorAll('script[data-astro-exec="module"][src]').forEach((s) => {
-            try {
-              const el = document.createElement('script');
-              el.type = 'module';
-              el.src = s.getAttribute('src') || '';
-              el.async = false; // preserve execution order
-              document.body.appendChild(el);
-            } catch (e) {
-              console.error('post module src error', e);
-            }
-          });
+          container
+            .querySelectorAll('script[data-astro-exec="module"][src]')
+            .forEach((s) => {
+              try {
+                const el = document.createElement("script");
+                el.type = "module";
+                el.src = s.getAttribute("src") || "";
+                el.async = false; // preserve execution order
+                document.body.appendChild(el);
+              } catch (e) {
+                console.error("post module src error", e);
+              }
+            });
         } catch (e) {
-          console.error('runPostScripts error', e);
+          console.error("runPostScripts error", e);
         }
       }
 
       // Run on SPA page-load (client router)
-      document.addEventListener('astro:page-load', () => {
+      document.addEventListener("astro:page-load", () => {
         // small delay to allow swapped content to be inserted
         setTimeout(() => runPostScripts(document), 50);
       });
 
       // Run once on initial load
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => runPostScripts(document));
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", () =>
+          runPostScripts(document),
+        );
       } else {
         runPostScripts(document);
       }
     })();
   </script>
-
 </head>

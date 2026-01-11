@@ -492,8 +492,7 @@ const { headings = [] } = Astro.props as Props;
         adjustScrollTocScroll();
       }
     }
-    // todo 更新指示器位置,我现在想要不止指示 DOM.indicator 而是所有 visible 的位置
-    // 主要是，重新计算指示器的位置和高度，更具体的是 top height 这两个数值
+
     function updateIndicatorPosition() {
       if (!DOM.indicator || !DOM.tocList || window.innerWidth <= 968 || state.activeIndex === -1) return;
       

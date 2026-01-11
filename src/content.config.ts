@@ -1,17 +1,12 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
-/**
- * 文章图片 Schema
- */
 const postImageSchema = z.object({
   url: z.string().url(),
   alt: z.string().optional(),
 });
 
-/**
- * 文章集合 Schema
- */
+
 const postsSchema = z.object({
   title: z.string().min(1, "标题不能为空"),
   description: z.string().optional(),

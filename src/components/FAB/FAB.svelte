@@ -85,7 +85,6 @@
 </button>
 
 <style>
-/* 补充：重置 button 原生默认样式，保持原有 FAB 外观 */
 button {
   margin: 0;
   padding: 0;
