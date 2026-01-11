@@ -2,6 +2,7 @@
 import PostList from "../../components/PostList/PostList.svelte";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { getCollection, type CollectionEntry } from "astro:content";
+import "../../components/PostList/PostList.css";
 
 const posts: CollectionEntry<"posts">[] = await getCollection("posts");
 const sortedPosts = [...posts].sort(
@@ -20,12 +21,6 @@ for (const post of sortedPosts) {
 const sortedYears = Array.from(yearPostsMap.keys()).sort((a, b) =>
   b.localeCompare(a),
 );
-
-const anim = {
-  old: { name: "title-old", duration: "0.45s", easing: "cubic-bezier(.2,.8,.2,1)", fillMode: "both" },
-  new: { name: "title-new", duration: "0.45s", easing: "cubic-bezier(.2,.8,.2,1)", fillMode: "both" },
-};
-const customTransition = { forwards: anim, backwards: anim };
 ---
 
 <BaseLayout pageTitle="时间线">
@@ -50,7 +45,7 @@ const customTransition = { forwards: anim, backwards: anim };
                     </div>
                   </div>
                 </article>
-                <PostList posts={yearPosts} transition={customTransition} />
+                <PostList posts={yearPosts} />
               </div>
             </section>
           );
@@ -59,9 +54,7 @@ const customTransition = { forwards: anim, backwards: anim };
     </div>
   </div>
 </BaseLayout>
-
 <style>
-  /* 页面基础样式 */
   .timeline-page {
     max-width: 800px;
     margin: 0 auto;
@@ -69,7 +62,6 @@ const customTransition = { forwards: anim, backwards: anim };
     position: relative;
   }
 
-  /* 页面标题 */
   .page-header {
     text-align: center;
     margin-bottom: 48px;
@@ -92,6 +84,4 @@ const customTransition = { forwards: anim, backwards: anim };
   .timeline-container {
     position: relative;
   }
-
- 
 </style>

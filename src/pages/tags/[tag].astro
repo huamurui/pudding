@@ -2,9 +2,7 @@
 import { type CollectionEntry, getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import PostList from "../../components/PostList/PostList.svelte";
-
-
-
+import '../../components/PostList/PostList.css';
 // 定义getStaticPaths返回类型
 type StaticPath = {
   params: {
@@ -44,12 +42,6 @@ interface Props {
 }
 
 const { tag, posts } = Astro.props as Props;
-
-const anim = {
-  old: { name: "title-old", duration: "0.45s", easing: "cubic-bezier(.2,.8,.2,1)", fillMode: "both" },
-  new: { name: "title-new", duration: "0.45s", easing: "cubic-bezier(.2,.8,.2,1)", fillMode: "both" },
-};
-const customTransition = { forwards: anim, backwards: anim };
 ---
 
 <BaseLayout pageTitle={`Tag ⬝ ${tag}`} description={`Posts tagged with ${tag}`}>
@@ -67,8 +59,55 @@ const customTransition = { forwards: anim, backwards: anim };
             </div>
           </div>
         </article>
-        <PostList posts={posts} transition={customTransition} />
+        <PostList posts={posts} />
       </div>
     </section>
   </div>
+  <style>
+    .inline-tag {
+      display: inline-block;
+      background-color: var(--color-accent);
+      color: var(--color-on-accent);
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      margin-left: 12px;
+    }
+
+    .post-info.year:hover {
+      background-color: transparent;
+    }
+
+    .post-date.year {
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    .timeline-connector.year::before {
+      display: none;
+    }
+
+    .post-marker.year {
+      transform: scale(1.5);
+      background-color: var(--theme-color);
+    }
+
+    .post-info:hover .post-marker.year {
+      width: 6px;
+      height: 6px;
+      transform: scale(2);
+      background-color: var(--theme-color);
+    }
+
+    @media (max-width: 600px) {
+      .timeline-container {
+        padding-left: 30px;
+      }
+
+      .year-section::before,
+      .year-marker::before {
+        left: -20px;
+      }
+    }
+  </style>
 </BaseLayout>

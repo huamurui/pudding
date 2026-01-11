@@ -51,12 +51,6 @@ if (postFrontmatter?.title) {
   pageTitle = `${postFrontmatter.title} | ${siteConfig.name}`;
 }
 
-const items = (await getCollection("posts")).map((post) => ({
-  title: post.data.title,
-  url: `/posts/${post.id}/`,
-  depth: post.data.url?.split("/").length - 1 || 0,
-}));
-
 const isHome = isHomePage(Astro.url.pathname);
 ---
 
