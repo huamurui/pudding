@@ -1,5 +1,5 @@
 .link-card {
-    border: 1px solid color-mix(in srgb, var(--primary-color) 20%, transparent);
+    border: 1px solid var(--color-primary-mix-20);
     border-radius: 8px;
     overflow: hidden;
     margin: 1rem 0;

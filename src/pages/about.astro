@@ -1,15 +1,16 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
-import "../styles/about.css";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import "@/styles/about.css";
+import { t } from "@/utils/i18n";
 
 const pageTitle = "About";
 ---
 
 <BaseLayout pageTitle={pageTitle}>
   <header class="about-hero">
-    <h1 class="title">关于本博客主题</h1>
-    <p>本博客基于 <strong>Astro</strong> 构建，采用轻量级高性能博客主题，专注于内容展示与阅读体验优化</p> 
-    <p>关于主题详情，可查看 <a class="inline-tag" href="/posts/tech/blog-theme-intro/">《通用 Astro 博客主题使用指南》</a> 或访问 Astro 官方文档了解更多建站方案。</p>
+    <h1 class="title">{t('about.title')}</h1>
+    <p>{t('about.description')}</p> 
+    <p>{t('about.themeIntro')} <a class="inline-tag" href="/posts/tech/blog-theme-intro/">{t('about.themeGuide')}</a> {t('about.themeIntroEnd')}</p>
   </header>
 
   <main class="about-container">

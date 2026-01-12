@@ -1,7 +1,8 @@
 <!-- PostCardList.svelte -->
 <script>
-  import { sanitizeViewTransitionName, getTagUrl } from "../../utils/helpers";
-  import { formatDate } from "../../utils/helpers";
+  import { sanitizeViewTransitionName, getTagUrl } from "@/utils/helpers";
+  import { formatDate } from "@/utils/helpers";
+  import { t } from "@/utils/i18n";
   export let posts = [];
   export let selectedTags = null;
 
@@ -9,7 +10,7 @@
 </script>
 
 {#if postsArr.length === 0}
-  <p class="no-results">没有找到匹配的文章</p>
+  <p class="no-results">{t('common.posts.noResults')}</p>
 {:else}
   <ul class="posts-list">
     {#each postsArr as post, index (post.id)}
@@ -71,7 +72,7 @@
   }
 
   .post-item:hover {
-    background-color: color-mix(in srgb, var(--theme-color) 5%, transparent);
+    background-color: var(--color-theme-mix-5);
   }
 
   .divider {

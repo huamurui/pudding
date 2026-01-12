@@ -1,5 +1,7 @@
 <!-- PostList.svelte -->
 <script lang="ts">
+  import { t } from "@/utils/i18n";
+
   interface Post {
     id: string;
     data: {
@@ -17,7 +19,7 @@
 </script>
 
 {#if postsArr.length === 0}
-  <p class="no-results">没有找到匹配的文章</p>
+  <p class="no-results">{t('common.posts.noResults')}</p>
 {:else}
   <ul class="posts-list">
     {#each postsArr as post (post.id)}

@@ -1,5 +1,5 @@
-import { siteConfig } from "../config/site.config";
-import type { PostEntry, StructuredData } from "../types";
+import { siteConfig } from "@/config/site.config";
+import type { PostEntry, StructuredData } from "@/types";
 import { getPostUrl } from "./helpers";
 
 
@@ -19,7 +19,7 @@ export function generatePostStructuredData(
     },
     "headline": post.data.title,
     "description": post.data.description || description,
-    "image": post.data.image?.url || siteConfig.defaultOgImage,
+    "image": post.data.image?.url || '',
     "author": { 
       "@type": "Person", 
       "name": post.data.author || siteConfig.author.name 

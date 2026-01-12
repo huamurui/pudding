@@ -1,12 +1,12 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import PostCardList from '../components/PostCardList/PostCardList.svelte';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PostCardList from '@/components/PostCardList/PostCardList.svelte';
 import { getCollection, render } from 'astro:content';
-import { siteConfig } from '../config/site.config';
-import { extractExcerptFromHtml, getPostUrl } from '../utils/helpers';
-import { generatePostListStructuredData } from '../utils/structured-data';
-import { ANIMATION_DURATION, EASING } from '../utils/constants';
-import type { PostData, StructuredData } from '../types';
+import { siteConfig } from '@/config/site.config';
+import { extractExcerptFromHtml, getPostUrl } from '@/utils/helpers';
+import { generatePostListStructuredData } from '@/utils/structured-data';
+import { ANIMATION_DURATION, EASING } from '@/utils/constants';
+import type { PostData, StructuredData } from '@/types';
 import { experimental_AstroContainer } from "astro/container";
 const container = await experimental_AstroContainer.create();
 

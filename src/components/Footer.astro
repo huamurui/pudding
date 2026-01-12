@@ -1,5 +1,6 @@
 ---
-import { siteConfig } from "../config/site.config";
+import { siteConfig } from "@/config/site.config";
+import { t } from "@/utils/i18n";
 
 const currentYear = new Date().getFullYear();
 ---
@@ -13,11 +14,11 @@ const currentYear = new Date().getFullYear();
           <a
             href={link.href}
             class="nav-link footer-link"
-            aria-label={link.name}
+            aria-label={t(link.nameKey)}
             target="_blank"
             rel="noopener noreferrer"
           >
-            <span>{link.name}</span>
+            <span>{t(link.nameKey)}</span>
           </a>
         ))
       }
@@ -26,14 +27,13 @@ const currentYear = new Date().getFullYear();
     <!-- 底部版权信息 -->
     <div class="footer-bottom">
       <p class="footer-description">
-        {siteConfig.description}
+        {t('site.description')}
       </p>
       <p class="copyright">
-        &copy; {currentYear}
-        {siteConfig.author.name}. All rights reserved.
+        {t('footer.copyright', { year: currentYear, author: siteConfig.author.name })}
       </p>
       <p class="credit">
-        Powered by <a
+        {t('footer.poweredBy')} <a
           href="https://astro.build/"
           class="nav-link footer-link"
           target="_blank"

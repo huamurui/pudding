@@ -70,6 +70,18 @@
   --breakpoint-tablet: 768px;
   --breakpoint-desktop: 968px;
   --breakpoint-wide: 1200px;
+
+  /* 颜色混合变量 - 基于 theme-color */
+  --color-theme-mix-5: color-mix(in srgb, var(--theme-color) 5%, transparent);
+  --color-theme-mix-10: color-mix(in srgb, var(--theme-color) 10%, transparent);
+  --color-theme-mix-15: color-mix(in srgb, var(--theme-color) 15%, transparent);
+  --color-theme-mix-20: color-mix(in srgb, var(--theme-color) 20%, transparent);
+  --color-theme-mix-70: color-mix(in srgb, var(--theme-color) 70%, transparent);
+  --color-theme-mix-80-text: color-mix(in srgb, var(--theme-color) 80%, var(--text-secondary));
+
+  /* 颜色混合变量 - 基于 primary-color */
+  --color-primary-mix-15: color-mix(in srgb, var(--primary-color) 15%, transparent);
+  --color-primary-mix-20: color-mix(in srgb, var(--primary-color) 20%, transparent);
 }
 
 [data-theme="dark"] {

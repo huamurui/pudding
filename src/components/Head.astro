@@ -1,6 +1,7 @@
 ---
-import { siteConfig } from "../config/site.config";
-import type { StructuredData } from "../types";
+import { siteConfig } from "@/config/site.config";
+import type { StructuredData } from "@/types";
+import { t } from "@/utils/i18n";
 
 interface Props {
   pageTitle: string;
@@ -12,8 +13,8 @@ interface Props {
 
 const {
   pageTitle,
-  description = siteConfig.description,
-  ogImage = siteConfig.defaultOgImage,
+  description = t('site.description'),
+  ogImage = '',
   canonicalUrl = Astro.url.href,
   structuredData = null,
 } = Astro.props as Props;
@@ -34,7 +35,7 @@ import { ClientRouter } from "astro:transitions";
 
   <title>{pageTitle}</title>
   <meta name="description" content={description} />
-  <meta name="keywords" content={siteConfig.keywords} />
+  <meta name="keywords" content={t('site.keywords')} />
 
   <link rel="canonical" href={canonicalUrl} />
 
@@ -49,7 +50,7 @@ import { ClientRouter } from "astro:transitions";
   <meta property="og:type" content="website" />
   <meta property="og:url" content={canonicalUrl} />
   <meta property="og:image" content={ogImage} />
-  <meta property="og:site_name" content={siteConfig.ogName} />
+  <meta property="og:site_name" content={t('site.ogName')} />
   <meta property="og:locale" content={siteConfig.locale} />
 
   <meta name="twitter:card" content="summary_large_image" />

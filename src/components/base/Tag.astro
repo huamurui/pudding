@@ -1,0 +1,54 @@
+---
+interface Props {
+  variant?: 'default' | 'primary' | 'ghost';
+  size?: 'sm' | 'md' | 'lg';
+  active?: boolean;
+  href?: string;
+  count?: number;
+  class?: string;
+  ariaLabel?: string;
+}
+
+const {
+  variant = 'default',
+  size = 'md',
+  active = false,
+  href,
+  count,
+  class: className = '',
+  ariaLabel
+} = Astro.props;
+
+const classes = [
+  'base-tag',
+  variant !== 'default' && `base-tag--${variant}`,
+  size !== 'md' && `base-tag--${size}`,
+  active && 'base-tag--active',
+  className
+].filter(Boolean).join(' ');
+
+const TagElement = href ? 'a' : 'span';
+const tagProps = href ? { href, class: classes, 'aria-label': ariaLabel } : { class: classes };
+---
+
+<TagElement {...tagProps}>
+  <slot />
+  {count !== undefined && <span class="base-tag__count">{count}</span>}
+</TagElement>
+
+<style>
+  .base-tag__count {
+    background-color: var(--color-bg-tertiary);
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-xs);
+    padding: 1px 8px;
+    border-radius: var(--radius-full);
+    margin-left: var(--spacing-xs);
+  }
+
+  .base-tag--primary .base-tag__count,
+  .base-tag--active .base-tag__count {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: var(--color-bg-primary);
+  }
+</style>

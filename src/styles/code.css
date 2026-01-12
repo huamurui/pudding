@@ -2,7 +2,7 @@
 pre.astro-code { position: relative; padding-top: 2.4rem; border-radius: 8px; }
 pre.astro-code .code-toolbar { position: absolute; right: 0.5rem; top: 0.5rem; display: flex; gap: 0.5rem; align-items: center; }
 .code-toolbar button { background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.06); color: var(--text-secondary); padding: 0.25rem 0.6rem; border-radius: 6px; font-size: 0.85rem; cursor: pointer; }
-.code-toolbar button:hover { background: color-mix(in srgb, var(--theme-color) 10%, transparent); color: var(--text-primary); }
+.code-toolbar button:hover { background: var(--color-theme-mix-10); color: var(--text-primary); }
 
 /* collapsed state: limit height and make scrollable */
 pre.astro-code.code-collapsed { max-height: 360px; overflow: auto; }

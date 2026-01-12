@@ -2,7 +2,7 @@
  * 工具函数
  */
 
-import type { PostEntry } from "../types";
+import type { PostEntry } from "@/types";
 
 /**
  * 从 HTML 中提取摘要

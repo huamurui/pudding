@@ -1,5 +1,6 @@
 @import url('./tokens.css');
 @import url('./md.css');
+@import url('../components/base/base.css');
 
 /* src/styles/global.css */
 
@@ -232,16 +233,16 @@ h1:hover::after, h2:hover::after, h3:hover::after, h4:hover::after, h5:hover::af
   }
 
   .nav-link:hover:before {
-    background-color: color-mix(in srgb, var(--theme-color) 10%, transparent);
+    background-color: var(--color-theme-mix-10);
     transform: translate(-50%, -50%) scale(1);
   }
 
   .nav-link:active:before {
     transform: translate(-50%, -50%) scale(0.95);
-    background-color: color-mix(in srgb, var(--theme-color) 20%, transparent);
+    background-color: var(--color-theme-mix-20);
   }
 
   .nav-link:active {
-    color: color-mix(in srgb, var(--theme-color) 80%, var(--text-secondary));
+    color: var(--color-theme-mix-80-text);
   }
 }

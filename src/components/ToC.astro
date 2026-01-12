@@ -119,12 +119,12 @@ const { headings = [] } = Astro.props as Props;
   .toc-item.active > .toc-link {
     color: var(--theme-color) !important;
     font-weight: 600;
-    background-color: color-mix(in srgb, var(--theme-color) 10%, transparent);
+    background-color: var(--color-theme-mix-10);
   }
 
   .toc-item.visible > .toc-link {
     color: var(--text-primary);
-    background-color: color-mix(in srgb, var(--theme-color) 5%, transparent);
+    background-color: var(--color-theme-mix-5);
   }
 
   .toc-indicator {
@@ -134,7 +134,7 @@ const { headings = [] } = Astro.props as Props;
     background: linear-gradient(
       to bottom,
       var(--theme-color),
-      color-mix(in srgb, var(--theme-color) 70%, transparent)
+      var(--color-theme-mix-70)
     );
     border-radius: 2px;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);

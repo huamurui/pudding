@@ -1,8 +1,9 @@
 ---
-import PostList from "../../components/PostList/PostList.svelte";
-import BaseLayout from "../../layouts/BaseLayout.astro";
+import PostList from "@/components/PostList/PostList.svelte";
+import BaseLayout from "@/layouts/BaseLayout.astro";
 import { getCollection, type CollectionEntry } from "astro:content";
-import "../../components/PostList/PostList.css";
+import "@/components/PostList/PostList.css";
+import { t } from "@/utils/i18n";
 
 const posts: CollectionEntry<"posts">[] = await getCollection("posts");
 const sortedPosts = [...posts].sort(
@@ -41,7 +42,7 @@ const sortedYears = Array.from(yearPostsMap.keys()).sort((a, b) =>
                       <div class="timeline-connector year">
                         <div class="post-marker year" />
                       </div>
-                      <span class="inline-tag">{yearPosts.length} posts</span>
+                      <span class="inline-tag">{yearPosts.length} {t('common.timeline.count')}</span>
                     </div>
                   </div>
                 </article>
@@ -84,4 +85,5 @@ const sortedYears = Array.from(yearPostsMap.keys()).sort((a, b) =>
   .timeline-container {
     position: relative;
   }
+</style>
 </style>

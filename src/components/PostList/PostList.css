@@ -23,7 +23,7 @@
 }
 
 .post-info:hover {
-    background-color: color-mix(in srgb, var(--theme-color) 5%, transparent);
+    background-color: var(--color-theme-mix-5);
 }
 
 /* 日期样式（左侧固定宽度） */

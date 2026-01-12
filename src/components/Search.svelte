@@ -1,6 +1,7 @@
 <script lang="ts">
   import Fuse, { type FuseResult, type IFuseOptions } from "fuse.js";
   import { onMount } from "svelte";
+  import { t } from "@/utils/i18n";
 
   interface Post {
     id: string;
@@ -127,7 +128,7 @@
                   isSearchOpen = false;
                   searchQuery = "";
                 }}
-                aria-label={`查看文章：${result.item.title}`}
+                aria-label={t('common.search.ariaLabel.viewArticle', { title: result.item.title })}
               >
                 <h4 class="result-title">{result.item.title}</h4>
                 {#if result.item.excerpt}

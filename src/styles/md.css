@@ -77,7 +77,7 @@ article a:after {
   bottom: 0;
   border-radius: 4px;
   transition: top 200ms cubic-bezier(0, 0.8, 0.13, 1);
-  background-color: color-mix(in srgb, var(--primary-color) 20%, transparent);
+  background-color: var(--color-primary-mix-20);
 }
 
 article a:hover:after {

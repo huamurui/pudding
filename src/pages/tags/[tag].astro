@@ -1,8 +1,9 @@
 ---
 import { type CollectionEntry, getCollection } from "astro:content";
-import BaseLayout from "../../layouts/BaseLayout.astro";
-import PostList from "../../components/PostList/PostList.svelte";
-import '../../components/PostList/PostList.css';
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import PostList from "@/components/PostList/PostList.svelte";
+import '@/components/PostList/PostList.css';
+import { t } from "@/utils/i18n";
 type StaticPath = {
   params: {
     tag: string;
@@ -54,7 +55,7 @@ const { tag, posts } = Astro.props as Props;
               <div class="timeline-connector year">
                 <div class="post-marker year"></div>
               </div>
-              <span class="inline-tag">{posts.length} posts</span>
+              <span class="inline-tag">{posts.length} {t('common.tags.count')}</span>
             </div>
           </div>
         </article>

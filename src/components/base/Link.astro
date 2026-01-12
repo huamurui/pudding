@@ -1,0 +1,36 @@
+---
+interface Props {
+  href: string;
+  variant?: 'default' | 'primary' | 'muted';
+  external?: boolean;
+  class?: string;
+  ariaLabel?: string;
+}
+
+const {
+  href,
+  variant = 'default',
+  external = false,
+  class: className = '',
+  ariaLabel
+} = Astro.props;
+
+const classes = [
+  'base-link',
+  variant !== 'default' && `base-link--${variant}`,
+  className
+].filter(Boolean).join(' ');
+
+const rel = external ? 'noopener noreferrer' : undefined;
+const target = external ? '_blank' : undefined;
+---
+
+<a
+  href={href}
+  class={classes}
+  rel={rel}
+  target={target}
+  aria-label={ariaLabel}
+>
+  <slot />
+</a>

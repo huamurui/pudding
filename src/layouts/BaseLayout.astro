@@ -1,17 +1,18 @@
 ---
-import "../styles/global.css";
-import "../styles/link-card.css";
-import "../styles/code.css";
+import "@/styles/global.css";
+import "@/styles/link-card.css";
+import "@/styles/code.css";
 import { getCollection } from "astro:content";
-import { siteConfig } from "../config/site.config";
-import { isPostPage, isHomePage } from "../utils/helpers";
-import type { PostFrontmatter, PostEntry, StructuredData } from "../types";
-import Head from "../components/Head.astro";
-import Header from "../components/Header.astro";
-import Footer from "../components/Footer.astro";
-import FAB from "../components/FAB/FAB.svelte";
-import CodeEnhancer from "../components/CodeEnhancer/CodeEnhancer.svelte";
-import Sidebar from "../components/Sidebar.astro";
+import { siteConfig } from "@/config/site.config";
+import { isPostPage, isHomePage } from "@/utils/helpers";
+import type { PostFrontmatter, PostEntry, StructuredData } from "@/types";
+import Head from "@/components/Head.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import FAB from "@/components/FAB/FAB.svelte";
+import CodeEnhancer from "@/components/CodeEnhancer/CodeEnhancer.svelte";
+import Sidebar from "@/components/Sidebar.astro";
+import { t } from "@/utils/i18n";
 
 // 判断是否为文章页面
 const isPostsPage = isPostPage(Astro.url.pathname);
@@ -27,15 +28,15 @@ interface Props {
 }
 
 let {
-  pageTitle = siteConfig.name,
+  pageTitle = t('site.name'),
   postFrontmatter = null,
-  ogImage = siteConfig.defaultOgImage,
+  ogImage = '',
   canonicalUrl = Astro.url.href,
   post = null,
   structuredData = null,
 } = Astro.props as Props;
 
-let description = siteConfig.description;
+let description = t('site.description');
 if (postFrontmatter?.description) {
   // Override default description with post-specific one
   // and erase any HTML tags
@@ -48,7 +49,7 @@ if (postFrontmatter?.url) {
   canonicalUrl = Astro.url.origin + postFrontmatter.url;
 }
 if (postFrontmatter?.title) {
-  pageTitle = `${postFrontmatter.title} | ${siteConfig.name}`;
+  pageTitle = `${postFrontmatter.title} | ${t('site.name')}`;
 }
 
 const isHome = isHomePage(Astro.url.pathname);

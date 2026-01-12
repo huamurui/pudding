@@ -6,6 +6,7 @@ import remarkSpoiler from './src/plugin/remark-spoiler.js'; // 导入插件
 import remarkLinkPreview from './src/plugin/remark-link-preview.js';
 import sitemap from '@astrojs/sitemap';
 import svelte from '@astrojs/svelte';
+import path from 'path';
 
 // https://astro.build/config
 export default defineConfig({
@@ -22,6 +23,14 @@ export default defineConfig({
       },
       langs: [],
       transformers: [],
+    },
+  },
+  vite: {
+    resolve: {
+      alias: {
+        '@': path.resolve('./src'),
+        '~': path.resolve('./src'),
+      },
     },
   },
 });

@@ -1,10 +1,11 @@
 ---
 import ThemeToggle from "./ThemeToggle/ThemeToggle.svelte";
-import { siteConfig } from "../config/site.config";
-import { isPostPage } from "../utils/helpers";
-import { SCROLL_THRESHOLD } from "../utils/constants";
+import { siteConfig } from "@/config/site.config";
+import { isPostPage } from "@/utils/helpers";
+import { SCROLL_THRESHOLD } from "@/utils/constants";
 import Search from "./Search.svelte";
 import { getCollection } from "astro:content";
+import { t } from "@/utils/i18n";
 
 interface Props {
   pageTitle: string;
@@ -12,7 +13,10 @@ interface Props {
 
 const { pageTitle } = Astro.props as Props;
 
-const navItems = siteConfig.navItems;
+const navItems = siteConfig.navItems.map((item) => ({
+  ...item,
+  label: t(`header.nav.${item.href.replace('/', '') || 'home'}`)
+}));
 
 const isPostsPage = isPostPage(Astro.url.pathname);
 const allPosts = await getCollection("posts");
@@ -28,7 +32,7 @@ const searchablePosts = allPosts.map((post) => ({
   <div class="header-container">
     <div class="brand">
       <a href="/" class="logo-link">
-        <span class="logo">云苔</span>
+        <span class="logo">{t('common.brand')}</span>
       </a>
     </div>
 
@@ -74,7 +78,7 @@ const searchablePosts = allPosts.map((post) => ({
         class="menu-toggle"
         id="menu-toggle"
         type="button"
-        aria-label="切换菜单"
+        aria-label={t('common.menu.toggle')}
         aria-expanded="false"
         aria-controls="nav"
       >

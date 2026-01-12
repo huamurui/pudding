@@ -2,9 +2,7 @@
 
 export interface SiteConfig {
   name: string;
-  ogName: string;
   description: string;
-  keywords: string;
   url: string;
   author: {
     name: string;
@@ -14,10 +12,10 @@ export interface SiteConfig {
   };
   navItems: Array<{
     href: string;
-    label: string;
+    labelKey: string;
   }>;
   socialLinks: Array<{
-    name: string;
+    nameKey: string;
     href: string;
     icon?: string;
   }>;
@@ -31,16 +29,12 @@ export interface SiteConfig {
       secondary?: string;
     };
   };
-  defaultOgImage: string;
   locale: string;
-  postsPerPage?: number;
 }
 
 export const siteConfig: SiteConfig = {
-  name: "Your Site Name",
-  ogName: "Your Site ogName",
-  description: "Your Site Description",
-  keywords: "Your Site Keywords",
+  name: "Site Name",
+  description: "Site Description",
   url: "https://yoursite.com",
   author: {
     name: "Your Name",
@@ -48,15 +42,15 @@ export const siteConfig: SiteConfig = {
     github: "https://github.com/your",
   },
   navItems: [
-    { href: "/", label: "首页" },
-    { href: "/timeline", label: "时间线" },
-    { href: "/about", label: "关于" },
+    { href: "/", labelKey: "header.nav.home" },
+    { href: "/timeline", labelKey: "header.nav.timeline" },
+    { href: "/about", labelKey: "header.nav.about" },
   ],
   socialLinks: [
-    { name: "GitHub", href: "https://github.com/your" },
-    { name: "Email", href: "mailto:your@email.com" },
-    { name: "RSS", href: "/rss.xml" },
-    { name: "Sitemap", href: "/sitemap-index.xml" },
+    { nameKey: "social.github", href: "https://github.com/your" },
+    { nameKey: "social.email", href: "mailto:your@email.com" },
+    { nameKey: "social.rss", href: "/rss.xml" },
+    { nameKey: "social.sitemap", href: "/sitemap-index.xml" },
   ],
   theme: {
     light: {
@@ -66,7 +60,5 @@ export const siteConfig: SiteConfig = {
       primary: "#ff9eb6",
     },
   },
-  defaultOgImage: "/og-default.jpg",
-  locale: "en",
-  postsPerPage: 10,
+  locale: "zh-CN",
 };

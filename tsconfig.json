@@ -9,5 +9,10 @@
   ],
   "compilerOptions": {
     "jsx": "preserve",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "~/*": ["./src/*"]
+    }
   }
 }

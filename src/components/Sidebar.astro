@@ -1,15 +1,16 @@
 ---
 import { getCollection, type CollectionEntry } from "astro:content";
-import { siteConfig } from "../config/site.config";
-import type { PostEntry } from "../types";
+import { siteConfig } from "@/config/site.config";
+import type { PostEntry } from "@/types";
 import Tag from "./Tag/Tag.astro";
+import { t } from "@/utils/i18n";
 
 interface Props {
   intro?: string; // 一句话简介（可选）
   post?: PostEntry | null; // post
 }
 
-const { intro = siteConfig.description, post = null } = Astro.props as Props;
+const { intro = t('site.description'), post = null } = Astro.props as Props;
 
 const allBlogPosts: CollectionEntry<"posts">[] = await getCollection("posts");
 
@@ -47,11 +48,11 @@ allBlogPosts.map((post) => {
   </div> -->
 
   <div class="profile-stats">
-    <div class="stat-item">📝 {allBlogPosts.length} 篇文章</div>
-    <div class="stat-item">🏷️ {Array.from(tagCountMap).length} 个标签</div>
+    <div class="stat-item">📝 {allBlogPosts.length} {t('sidebar.stats.posts')}</div>
+    <div class="stat-item">🏷️ {Array.from(tagCountMap).length} {t('sidebar.stats.tags')}</div>
     <div class="stat-item">
       {new Date().toISOString().split("T")[0]}
-      更新
+      {t('sidebar.stats.updated')}
     </div>
   </div>
   <Tag post={post} />

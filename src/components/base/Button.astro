@@ -1,0 +1,38 @@
+---
+interface Props {
+  variant?: 'default' | 'primary' | 'ghost' | 'icon';
+  size?: 'sm' | 'md' | 'lg';
+  disabled?: boolean;
+  type?: 'button' | 'submit' | 'reset';
+  class?: string;
+  ariaLabel?: string;
+  children?: any;
+}
+
+const {
+  variant = 'default',
+  size = 'md',
+  disabled = false,
+  type = 'button',
+  class: className = '',
+  ariaLabel,
+  children
+} = Astro.props;
+
+const classes = [
+  'base-button',
+  variant !== 'default' && `base-button--${variant}`,
+  size !== 'md' && `base-button--${size}`,
+  disabled && 'base-button--disabled',
+  className
+].filter(Boolean).join(' ');
+---
+
+<button
+  type={type}
+  class={classes}
+  disabled={disabled}
+  aria-label={ariaLabel}
+>
+  <slot />
+</button>
