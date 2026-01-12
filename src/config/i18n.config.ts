@@ -69,7 +69,7 @@ export interface I18nConfig {
 export const i18nConfig: Record<string, I18nConfig> = {
   'zh-CN': {
     common: {
-      brand: '云苔',
+      brand: 'Pudding',
       menu: {
         toggle: '切换菜单'
       },
@@ -95,9 +95,9 @@ export const i18nConfig: Record<string, I18nConfig> = {
       }
     },
     site: {
-      name: '云苔',
-      ogName: '云苔',
-      description: '云苔 - 一个基于 Astro 构建的轻量级高性能博客',
+      name: 'Pudding',
+      ogName: 'Pudding',
+      description: 'Pudding - 一个基于 Astro 构建的轻量级高性能博客',
       keywords: '博客, Astro, 技术博客, 前端开发',
       author: 'Your Name'
     },
@@ -137,7 +137,7 @@ export const i18nConfig: Record<string, I18nConfig> = {
   },
   'en-US': {
     common: {
-      brand: 'Yuntai',
+      brand: 'Pudding',
       search: {
         placeholder: 'Search articles...',
         ariaLabel: {
@@ -163,9 +163,9 @@ export const i18nConfig: Record<string, I18nConfig> = {
       }
     },
     site: {
-      name: 'Yuntai',
-      ogName: 'Yuntai',
-      description: 'Yuntai - A lightweight, high-performance blog built with Astro',
+      name: 'Pudding',
+      ogName: 'Pudding',
+      description: 'Pudding - A lightweight, high-performance blog built with Astro',
       keywords: 'blog, Astro, tech blog, frontend development',
       author: 'Your Name'
     },

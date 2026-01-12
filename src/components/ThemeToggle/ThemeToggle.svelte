@@ -82,7 +82,6 @@
     >
       Dark
     </span>
-
     <span class="indicator theme-toggle-indicator" aria-hidden="true"></span>
   </span>
 </button>
@@ -100,36 +99,19 @@
     position: relative;
   }
 
-  .theme-options {
-    display: inline-flex;
-    align-items: center;
-  }
-
-  .nav-link {
-    padding: 0.25rem 0.5rem;
-    cursor: pointer;
-    transition: color 0.2s ease;
-  }
-
-  .nav-link.is-active {
-    color: var(--theme-color);
-    font-weight: 500;
-    pointer-events: none;
-  }
-
-  .theme-toggle-indicator {
-    position: absolute;
-    top: 0;
+  .indicator.theme-toggle-indicator {
     left: 0;
+    position: absolute;
+    bottom: -3px;
     width: 50%;
-    height: 100%;
-    background-color: rgba(var(--theme-color), 0.1);
-    border-radius: 4px;
-    transition: transform 0.2s ease;
+    height: 3px;
+    border-radius: 3px;
+    background: var(--primary-color);
+    transition: all 0.3s ease;
   }
 
   .theme-toggle-container[aria-pressed="true"] .theme-toggle-indicator {
-    transform: translateX(100%);
+    transform: translateX(calc(100% + 3px));
   }
 
   .theme-toggle-container:focus-visible {

@@ -5,7 +5,7 @@ import { getCollection } from 'astro:content';
 export const GET:APIRoute = async (context) => {
   const blog = await getCollection('posts');
   return rss({
-    title: '云苔 | Blog',
+    title: 'Pudding | Blog',
     description: 'My Blog',
     site: context.site || '',
     items: blog.map((post) => ({
