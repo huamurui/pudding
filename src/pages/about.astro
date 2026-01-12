@@ -1,31 +1,16 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import "@/styles/about.css";
-import { t } from "@/utils/i18n";
+import "@/styles/global.css";
 
 const pageTitle = "About";
 ---
 
 <BaseLayout pageTitle={pageTitle}>
   <header class="about-hero">
-    <h1 class="title">{t('about.title')}</h1>
-    <p>{t('about.description')}</p> 
-    <p>{t('about.themeIntro')} <a class="inline-tag" href="/posts/tech/blog-theme-intro/">{t('about.themeGuide')}</a> {t('about.themeIntroEnd')}</p>
+    <h1 class="title">About Pudding</h1>
+    <p>A modern, simple Astro blog theme. </p>
   </header>
-
-  <main class="about-container">
-    <section class="projects-section">
-      <div class="projects-grid">
-        <!-- 通用博客首页演示案例 -->
-        <article class="project-card card">
-          <div class="iframe-wrapper">
-            <iframe src="https://astro.build/themes/demo/official/blog/" title="通用博客首页演示" loading="lazy"></iframe>
-          </div>
-          <div class="project-actions">
-            <a class="inline-tag" href="https://astro.build/themes/categories/blog/" target="_blank" rel="noopener">查看更多博客主题示例</a>
-          </div>
-        </article>
-      </div>
-    </section>
-  </main>
+  <div class="github">
+    <p>Check out <a class="nav-link" style="color: var(--primary-color);" href="https://github.com/huamurui/pudding">GitHub repository</a></p>
+  </div>
 </BaseLayout>

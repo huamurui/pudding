@@ -1,6 +1,6 @@
 # Astro Theme Pudding
 
-A modern, customizable Astro blog theme with elegant design and rich features.
+A modern, customizable Astro blog theme.
 
 ## Features
 
@@ -126,18 +126,6 @@ Supports spoiler content with different styles:
 ||| black-spoiler |||
 || blur-spoiler ||
 ```
-
-## Development
-
-### Adding New Posts
-
-Create a new markdown file in `src/posts/` with the required frontmatter. The post will be automatically available after development server restart.
-
-### Modifying Styles
-
-- Global styles: `src/styles/global.css`
-- CSS variables: `src/styles/tokens.css`
-- Component styles: In each component's `<style>` tag
 
 ## License
 

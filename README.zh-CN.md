@@ -126,19 +126,6 @@ pinned: true  # 可选：将文章置顶
 || blur-spoiler ||
 ```
 
-
-## 开发
-
-### 添加新文章
-
-在 `src/posts/` 中创建新的 markdown 文件，包含必需的 frontmatter。重启开发服务器后文章将自动可用。
-
-### 修改样式
-
-- 全局样式：`src/styles/global.css`
-- CSS 变量：`src/styles/tokens.css`
-- 组件样式：在每个组件的 `<style>` 标签中
-
 ## 许可证
 
 MIT
