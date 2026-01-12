@@ -20,6 +20,7 @@ export interface PostFrontmatter {
   author?: string;
   updated?: Date;
   url?: string;
+  pinned?: boolean;
 }
 
 /** 文章数据 */

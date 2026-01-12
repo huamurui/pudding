@@ -17,6 +17,7 @@ const postsSchema = z.object({
   updated: z.coerce.date().optional(),
   url: z.string().optional(),
   draft: z.boolean().default(false),
+  pinned: z.boolean().default(false),
 });
 
 const posts = defineCollection({
