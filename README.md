@@ -1,56 +1,54 @@
 # Astro Theme Pudding
 
-一个现代化的、可定制的 Astro 博客主题，具有优雅的设计和丰富的功能。
+A modern, customizable Astro blog theme with elegant design and rich features.
 
-## 特性
+## Features
 
-- 🎨 **现代化设计** - 简洁美观的界面设计
-- 🌓 **深色模式** - 支持亮色/暗色主题切换
-- 📱 **响应式设计** - 完美适配移动端和桌面端
-- ⚡ **性能优化** - 基于 Astro 的静态站点生成，极速加载
-- 🔍 **强大的搜索** - 支持标签搜索和表达式搜索
-- 📝 **Markdown 支持** - 完整的 Markdown 和数学公式支持
-- 🏷️ **标签系统** - 灵活的标签管理和筛选
-- 📊 **SEO 优化** - 完整的结构化数据和 SEO 支持
-- 🎯 **类型安全** - 完整的 TypeScript 类型定义
+- 🎨 **Modern Design** - Clean and beautiful interface
+- 🌓 **Dark Mode** - Light/dark theme switching support
+- 📱 **Responsive Design** - Perfect for mobile and desktop
+- 📝 **Markdown Support** - Full Markdown and math formula support
+- 🏷️ **Tag System** - Flexible tag management and filtering
+- 📊 **SEO Optimized** - Complete structured data and SEO support
+- 🍞 **Breadcrumb Navigation** - File directory-based breadcrumbs
 
-## 快速开始
+## Quick Start
 
-### 安装
+### Installation
 
 ```bash
 npm install
-# 或
+# or
 pnpm install
 ```
 
-### 开发
+### Development
 
 ```bash
 npm run dev
-# 或
+# or
 pnpm dev
 ```
 
-### 构建
+### Build
 
 ```bash
 npm run build
-# 或
+# or
 pnpm build
 ```
 
-### 预览
+### Preview
 
 ```bash
 npm run preview
-# 或
+# or
 pnpm preview
 ```
 
-## 配置
+## Configuration
 
-所有配置都在 `src/config/site.config.ts` 文件中：
+All configuration is in `src/config/site.config.ts`:
 
 ```typescript
 export const siteConfig: SiteConfig = {
@@ -61,29 +59,15 @@ export const siteConfig: SiteConfig = {
     name: "Your Name",
     email: "your@email.com",
   },
-  // ... 更多配置
+  locale: "en-US", // or "zh-CN"
+  // Add more language support in `src/config/i18n.config.ts`
+  // ... more config
 };
 ```
 
-## 项目结构
+### Theme Colors
 
-```
-src/
-├── components/      # 可复用组件
-├── config/         # 配置文件
-├── layouts/        # 布局组件
-├── pages/          # 页面路由
-├── posts/          # 文章内容
-├── styles/         # 样式文件
-├── types/          # TypeScript 类型定义
-└── utils/          # 工具函数
-```
-
-## 自定义
-
-### 主题颜色
-
-在 `src/config/site.config.ts` 中修改主题颜色：
+Modify theme colors in `src/config/site.config.ts`:
 
 ```typescript
 theme: {
@@ -96,25 +80,54 @@ theme: {
 }
 ```
 
-### 样式定制
+## Features Guide
 
-所有样式变量都在 `src/styles/global.css` 中定义，你可以根据需要修改 CSS 变量。
+### Post Management
 
-## 功能说明
-
-### 文章管理
-
-文章放在 `src/posts/` 目录下，支持嵌套文件夹结构。每篇文章需要包含以下 frontmatter：
+Posts are placed in the `src/posts/` directory with support for nested folder structures. Each post requires the following frontmatter:
 
 ```markdown
 ---
-title: "文章标题"
+title: "Post Title"
 date: 2025-01-01
-description: "文章描述"
-tags: ["标签1", "标签2"]
+description: "Post description"
+tags: ["tag1", "tag2"]
+pinned: true  # Optional: pin post to top
 ---
 ```
 
-### 标签系统
+### Category Pages
 
-标签会自动从文章 frontmatter 中提取，并生成标签页面和统计信息。
+Category pages are automatically generated based on the directory structure. For example, posts in `src/posts/tech/` will be accessible at `/posts/tech/` without needing to create an index.md file.
+
+### Breadcrumb Navigation
+
+Breadcrumb navigation is automatically generated based on the file directory structure, showing the path from Home to the current page.
+
+### Tag System
+
+Tags are automatically extracted from post frontmatter, generating tag pages and statistics.
+
+### Post Pinning
+
+Add `pinned: true` to post frontmatter to pin it to the top of post lists. Pinned posts display with a 📌 icon and special styling.
+
+## Development
+
+### Adding New Posts
+
+Create a new markdown file in `src/posts/` with the required frontmatter. The post will be automatically available after development server restart.
+
+### Modifying Styles
+
+- Global styles: `src/styles/global.css`
+- CSS variables: `src/styles/tokens.css`
+- Component styles: In each component's `<style>` tag
+
+## License
+
+MIT
+
+## Credits
+
+Built with [Astro](https://astro.build/)
