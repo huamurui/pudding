@@ -10,7 +10,7 @@ import path from 'path';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://huamurui.github.io',
+  site: 'https://huamurui.github.io/pudding',
   // base: '/',
   integrations: [svelte(), sitemap()],
   markdown: {
