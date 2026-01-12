@@ -10,7 +10,7 @@ interface Props {
   post?: PostEntry | null; // post
 }
 
-const { intro = t('site.description'), post = null } = Astro.props as Props;
+const { intro = siteConfig.description, post = null } = Astro.props as Props;
 
 const allBlogPosts: CollectionEntry<"posts">[] = await getCollection("posts");
 

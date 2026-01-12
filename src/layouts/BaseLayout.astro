@@ -28,7 +28,7 @@ interface Props {
 }
 
 let {
-  pageTitle = t('site.name'),
+  pageTitle = siteConfig.name,
   postFrontmatter = null,
   ogImage = '',
   canonicalUrl = Astro.url.href,
@@ -36,7 +36,7 @@ let {
   structuredData = null,
 } = Astro.props as Props;
 
-let description = t('site.description');
+let description = siteConfig.description;
 if (postFrontmatter?.description) {
   // Override default description with post-specific one
   // and erase any HTML tags
@@ -49,7 +49,7 @@ if (postFrontmatter?.url) {
   canonicalUrl = Astro.url.origin + postFrontmatter.url;
 }
 if (postFrontmatter?.title) {
-  pageTitle = `${postFrontmatter.title} | ${t('site.name')}`;
+  pageTitle = `${postFrontmatter.title} | ${siteConfig.name}`;
 }
 
 const isHome = isHomePage(Astro.url.pathname);

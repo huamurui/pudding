@@ -4,6 +4,7 @@ export interface SiteConfig {
   name: string;
   description: string;
   url: string;
+  keywords: Array<string>;
   author: {
     name: string;
     email?: string;
@@ -36,6 +37,7 @@ export const siteConfig: SiteConfig = {
   name: "Site Name",
   description: "Site Description",
   url: "https://yoursite.com",
+  keywords: ["astro", "blog", "theme", "pudding"],
   author: {
     name: "Your Name",
     email: "your@email.com",
@@ -60,5 +62,5 @@ export const siteConfig: SiteConfig = {
       primary: "#ff9eb6",
     },
   },
-  locale: "en-US",
+  locale: "zh-CN",
 };

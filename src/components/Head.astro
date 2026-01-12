@@ -13,7 +13,7 @@ interface Props {
 
 const {
   pageTitle,
-  description = t('site.description'),
+  description = siteConfig.description,
   ogImage = '',
   canonicalUrl = Astro.url.href,
   structuredData = null,
@@ -35,7 +35,7 @@ import { ClientRouter } from "astro:transitions";
 
   <title>{pageTitle}</title>
   <meta name="description" content={description} />
-  <meta name="keywords" content={t('site.keywords')} />
+  <meta name="keywords" content={siteConfig.keywords.join(', ')} />
 
   <link rel="canonical" href={canonicalUrl} />
 
@@ -50,7 +50,7 @@ import { ClientRouter } from "astro:transitions";
   <meta property="og:type" content="website" />
   <meta property="og:url" content={canonicalUrl} />
   <meta property="og:image" content={ogImage} />
-  <meta property="og:site_name" content={t('site.ogName')} />
+  <meta property="og:site_name" content={siteConfig.name} />
   <meta property="og:locale" content={siteConfig.locale} />
 
   <meta name="twitter:card" content="summary_large_image" />

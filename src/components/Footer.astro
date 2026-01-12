@@ -27,7 +27,7 @@ const currentYear = new Date().getFullYear();
     <!-- 底部版权信息 -->
     <div class="footer-bottom">
       <p class="footer-description">
-        {t('site.description')}
+        {siteConfig.description}
       </p>
       <p class="copyright">
         {t('footer.copyright', { year: currentYear, author: siteConfig.author.name })}
