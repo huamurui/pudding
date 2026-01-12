@@ -1,6 +1,7 @@
 <!-- PostList.svelte -->
 <script lang="ts">
   import { t } from "@/utils/i18n";
+  import { getPostUrl, getTagUrl } from "@/utils/helpers";
 
   interface Post {
     id: string;
@@ -39,7 +40,7 @@
               <div class="post-marker"></div>
             </div>
 
-            <a href={`/posts/${post.id}`} class="post-link">
+            <a href={getPostUrl(post.id)} class="post-link">
               <h5
                 class="post-title"
                 style={`view-transition-name: post-${getSafeId(post.id)}`}
@@ -50,7 +51,7 @@
 
             <div class="post-tags">
               {#each post.data.tags || [] as t}
-                <a href={`/tags/${t}`} class="inline-tag">
+                <a href={getTagUrl(t)} class="inline-tag">
                   #{t}
                 </a>
               {/each}

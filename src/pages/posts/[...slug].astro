@@ -4,7 +4,7 @@ import Breadcrumb from "@/components/Breadcrumb.astro";
 import { getCollection, render, type CollectionEntry } from "astro:content";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { siteConfig } from "@/config/site.config";
-import { extractExcerptFromHtml, calculateReadingTime, formatDate, sanitizeViewTransitionName, generateBreadcrumbItems } from "@/utils/helpers";
+import { extractExcerptFromHtml, calculateReadingTime, formatDate, sanitizeViewTransitionName, generateBreadcrumbItems, getTagUrl } from "@/utils/helpers";
 import { generatePostStructuredData } from "@/utils/structured-data";
 import { ANIMATION_DURATION, EASING, READING_SPEED } from "@/utils/constants";
 import type { PostFrontmatter, PostEntry, StructuredData } from "@/types";

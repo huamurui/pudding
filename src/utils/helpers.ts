@@ -2,7 +2,36 @@
  * 工具函数
  */
 
+import { siteConfig } from "@/config/site.config";
 import type { PostEntry } from "@/types";
+
+/**
+ * 统一的 URL 拼接方法
+ * @param path 路径，可以是字符串或数组
+ * @returns 完整的 URL，包含 base 路径
+ */
+export function buildUrl(path: string | string[]): string {
+  const base = siteConfig.base || "";
+  
+  let relativePath: string;
+  if (Array.isArray(path)) {
+    relativePath = path.filter(Boolean).join("/");
+  } else {
+    relativePath = path;
+  }
+  
+  if (!relativePath) {
+    return base || "/";
+  }
+  
+  const cleanPath = relativePath.replace(/^\/+|\/+$/g, "");
+  
+  if (!base) {
+    return `/${cleanPath}`;
+  }
+  
+  return `${base}/${cleanPath}`.replace(/\/+/g, "/");
+}
 
 /**
  * 从 HTML 中提取摘要
@@ -54,14 +83,14 @@ export function formatDate(date: Date | string, format: "iso" | "local" = "iso")
  * 生成文章 URL
  */
 export function getPostUrl(postId: string, basePath: string = "/posts"): string {
-  return `${basePath}/${postId}/`;
+  return buildUrl([basePath, postId, ""]);
 }
 
 /**
  * 生成标签 URL
  */
 export function getTagUrl(tag: string, basePath: string = "/tags"): string {
-  return `${basePath}/${tag}/`;
+  return buildUrl([basePath, tag, ""]);
 }
 
 /**
@@ -90,7 +119,7 @@ export function isHomePage(pathname: string): boolean {
  */
 export function generateBreadcrumbItems(postId: string, isCategory: boolean = false): Array<{ label: string; href: string }> {
   const items: Array<{ label: string; href: string }> = [
-    { label: "Home", href: "/" }
+    { label: "Home", href: buildUrl("") }
   ];
 
   const pathParts = postId.split("/").filter(Boolean);
@@ -103,17 +132,17 @@ export function generateBreadcrumbItems(postId: string, isCategory: boolean = fa
     if (isCategory && i === pathParts.length - 1) {
       items.push({
         label: part.replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase()),
-        href: `/posts${currentPath}/`
+        href: buildUrl(["posts", currentPath, ""])
       });
     } else if (!isCategory && i === pathParts.length - 1) {
       items.push({
         label: part.replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase()),
-        href: currentPath
+        href: buildUrl(currentPath)
       });
     } else {
       items.push({
         label: part.replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase()),
-        href: `/posts${currentPath}/`
+        href: buildUrl(["posts", currentPath, ""])
       });
     }
   }

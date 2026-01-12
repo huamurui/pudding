@@ -1,7 +1,7 @@
 ---
 import ThemeToggle from "./ThemeToggle/ThemeToggle.svelte";
 import { siteConfig } from "@/config/site.config";
-import { isPostPage } from "@/utils/helpers";
+import { isPostPage, buildUrl } from "@/utils/helpers";
 import { SCROLL_THRESHOLD } from "@/utils/constants";
 import Search from "./Search.svelte";
 import { getCollection } from "astro:content";
@@ -24,14 +24,14 @@ const searchablePosts = allPosts.map((post) => ({
   id: post.id,
   title: post.data.title,
   excerpt: post.data.description || "无摘要",
-  url: `/posts/${post.id}`,
+  url: buildUrl(["posts", post.id, ""]),
 }));
 ---
 
 <header class="header" id="header">
   <div class="header-container">
     <div class="brand">
-      <a href="/" class="logo-link">
+      <a href={buildUrl("")} class="logo-link">
         <span class="logo">{t('common.brand')}</span>
       </a>
     </div>
@@ -44,7 +44,7 @@ const searchablePosts = allPosts.map((post) => ({
               navItems.map((item) => (
                 <li class="nav-item">
                   <a
-                    href={item.href}
+                    href={buildUrl(item.href)}
                     class="nav-link"
                     class:list={{
                       "is-active":

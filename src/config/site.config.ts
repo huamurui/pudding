@@ -4,6 +4,8 @@ export interface SiteConfig {
   name: string;
   description: string;
   url: string;
+  base: string;
+  site: string;
   keywords: Array<string>;
   author: {
     name: string;
@@ -37,6 +39,8 @@ export const siteConfig: SiteConfig = {
   name: "Site Name",
   description: "Site Description",
   url: "https://yoursite.com",
+  site: "https://huamurui.github.io",
+  base: "/pudding",
   keywords: ["astro", "blog", "theme", "pudding"],
   author: {
     name: "Your Name",
@@ -44,15 +48,15 @@ export const siteConfig: SiteConfig = {
     github: "https://github.com/your",
   },
   navItems: [
-    { href: "/", labelKey: "header.nav.home" },
-    { href: "/timeline", labelKey: "header.nav.timeline" },
-    { href: "/about", labelKey: "header.nav.about" },
+    { href: "./", labelKey: "home" },
+    { href: "./timeline", labelKey: "timeline" },
+    { href: "./about", labelKey: "about" },
   ],
   socialLinks: [
     { nameKey: "social.github", href: "https://github.com/your" },
     { nameKey: "social.email", href: "mailto:your@email.com" },
-    { nameKey: "social.rss", href: "/rss.xml" },
-    { nameKey: "social.sitemap", href: "/sitemap-index.xml" },
+    { nameKey: "social.rss", href: "./rss.xml" },
+    { nameKey: "social.sitemap", href: "./sitemap-index.xml" },
   ],
   theme: {
     light: {

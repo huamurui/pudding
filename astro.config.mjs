@@ -7,11 +7,12 @@ import remarkLinkPreview from './src/plugin/remark-link-preview.js';
 import sitemap from '@astrojs/sitemap';
 import svelte from '@astrojs/svelte';
 import path from 'path';
+import { siteConfig } from "./src/config/site.config.ts";
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://huamurui.github.io',
-  base: '/pudding',
+  site: siteConfig.site,
+  base: siteConfig.base,
   integrations: [svelte(), sitemap()],
   markdown: {
     remarkPlugins: [remarkMath, remarkSpoiler, remarkLinkPreview],
@@ -28,8 +29,7 @@ export default defineConfig({
   vite: {
     resolve: {
       alias: {
-        '@': path.resolve('./src'),
-        '~': path.resolve('./src'),
+        '@': path.resolve('./src')
       },
     },
   },

@@ -1,5 +1,7 @@
 ---
 import { getCollection, type CollectionEntry } from "astro:content";
+import { siteConfig } from "@/config/site.config";
+import { buildUrl } from "@/utils/helpers";
 
 type TagPostsMap = Map<string, CollectionEntry<"posts">[]>;
 const post = Astro.props.post as CollectionEntry<"posts"> | null;
@@ -46,7 +48,7 @@ const sortedTags = Array.from(tagsPosts.keys()).sort((a, b) =>
       <div class="tags-container">
         {sortedTags.map((tag) => (
           <a 
-            href={`/tags/${tag}`}
+            href={buildUrl(["tags", tag, ""])}
             class="post-tag"
             data-tag={tag}
           >

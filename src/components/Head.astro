@@ -2,6 +2,7 @@
 import { siteConfig } from "@/config/site.config";
 import type { StructuredData } from "@/types";
 import { t } from "@/utils/i18n";
+import { buildUrl } from "@/utils/helpers";
 
 interface Props {
   pageTitle: string;
@@ -28,10 +29,10 @@ import { ClientRouter } from "astro:transitions";
 
 <head>
   <meta charset="utf-8" />
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="icon" type="image/svg+xml" href={buildUrl("favicon.svg")} />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="generator" content={Astro.generator} />
-  <link rel="sitemap" href="/sitemap-index.xml" />
+  <link rel="sitemap" href={buildUrl("sitemap-index.xml")} />
 
   <title>{pageTitle}</title>
   <meta name="description" content={description} />
