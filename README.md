@@ -59,25 +59,19 @@ export const siteConfig: SiteConfig = {
     name: "Your Name",
     email: "your@email.com",
   },
+  // Theme colors configuration
+  theme: {
+    light: {
+      primary: "#5e7eff",
+    },
+    dark: {
+      primary: "#ff9eb6",
+    },
+  },
   locale: "en-US", // or "zh-CN"
   // Add more language support in `src/config/i18n.config.ts`
   // ... more config
 };
-```
-
-### Theme Colors
-
-Modify theme colors in `src/config/site.config.ts`:
-
-```typescript
-theme: {
-  light: {
-    primary: "#5e7eff",
-  },
-  dark: {
-    primary: "#ff9eb6",
-  },
-}
 ```
 
 ## Features Guide
@@ -112,6 +106,27 @@ Tags are automatically extracted from post frontmatter, generating tag pages and
 
 Add `pinned: true` to post frontmatter to pin it to the top of post lists. Pinned posts display with a 📌 icon and special styling.
 
+### Markdown Extensions
+
+#### link-card
+
+Supports inserting link cards in markdown. For example:
+
+```markdown
+[Link Card](https://example.com)
+```
+
+This generates a link card pointing to `https://example.com`.
+
+#### spoiler
+
+Supports spoiler content with different styles:
+
+```markdown
+||| black-spoiler |||
+|| blur-spoiler ||
+```
+
 ## Development
 
 ### Adding New Posts
@@ -131,3 +146,5 @@ MIT
 ## Credits
 
 Built with [Astro](https://astro.build/)
+
+Inspired by many other blog themes' designs and implementations, especially [fuwari](https://github.com/saicaca/fuwari).
