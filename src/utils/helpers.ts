@@ -84,3 +84,39 @@ export function isPostPage(pathname: string, postPath: string = "/posts"): boole
 export function isHomePage(pathname: string): boolean {
   return pathname === "/" || pathname === "/index.html";
 }
+
+/**
+ * 生成面包屑导航项（基于文件目录）
+ */
+export function generateBreadcrumbItems(postId: string, isCategory: boolean = false): Array<{ label: string; href: string }> {
+  const items: Array<{ label: string; href: string }> = [
+    { label: "Home", href: "/" }
+  ];
+
+  const pathParts = postId.split("/").filter(Boolean);
+  
+  let currentPath = "";
+  for (let i = 0; i < pathParts.length; i++) {
+    const part = pathParts[i];
+    currentPath += `/${part}`;
+    
+    if (isCategory && i === pathParts.length - 1) {
+      items.push({
+        label: part.replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase()),
+        href: `/posts${currentPath}/`
+      });
+    } else if (!isCategory && i === pathParts.length - 1) {
+      items.push({
+        label: part.replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase()),
+        href: currentPath
+      });
+    } else {
+      items.push({
+        label: part.replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase()),
+        href: `/posts${currentPath}/`
+      });
+    }
+  }
+
+  return items;
+}

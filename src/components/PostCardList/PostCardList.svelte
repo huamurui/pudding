@@ -6,7 +6,11 @@
   export let posts = [];
   export let selectedTags = null;
 
-  const postsArr = typeof posts === "function" ? posts() : posts || [];
+  const postsArr = (typeof posts === "function" ? posts() : posts || []).sort((a, b) => {
+    if (a.pinned && !b.pinned) return -1;
+    if (!a.pinned && b.pinned) return 1;
+    return new Date(b.date).getTime() - new Date(a.date).getTime();
+  });
 </script>
 
 {#if postsArr.length === 0}
@@ -14,14 +18,14 @@
 {:else}
   <ul class="posts-list">
     {#each postsArr as post, index (post.id)}
-      <li class="post-item-con">
+      <li class="post-item-con" class:pinned={post.pinned}>
         <div class="post-item">
           <a href={post.url} class="post-link">
             <h2
               class="post-title"
               style={`view-transition-name: ${sanitizeViewTransitionName(post.id)}`}
             >
-              {post.title}
+              {post.pinned ? '📌 ' : ''}{post.title}
             </h2>
             <time
               class="post-date"
@@ -133,6 +137,11 @@
     color: var(--text-secondary);
     margin: 32px 0;
   }
+
+  /* .post-item-con.pinned .post-item {
+    border-left: 3px solid var(--theme-color);
+    background-color: var(--color-theme-mix-5);
+  } */
 
   @media (max-width: 768px) {
     .post-link {

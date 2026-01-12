@@ -1,0 +1,125 @@
+---
+import PostList from "@/components/PostList/PostList.svelte";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { getCollection, type CollectionEntry } from "astro:content";
+import "@/components/PostList/PostList.css";
+import { t } from "@/utils/i18n";
+import Breadcrumb from "@/components/Breadcrumb.astro";
+import { generateBreadcrumbItems } from "@/utils/helpers";
+
+type StaticPath = {
+  params: {
+    category: string;
+  };
+  props: {
+    category: string;
+    posts: CollectionEntry<"posts">[];
+  };
+};
+
+export async function getStaticPaths(): Promise<StaticPath[]> {
+  const posts = await getCollection("posts");
+  const categories = new Map<string, CollectionEntry<"posts">[]>();
+
+  for (const post of posts) {
+    const pathParts = post.id.split("/");
+    if (pathParts.length > 1) {
+      const category = pathParts[0];
+      if (!categories.has(category)) {
+        categories.set(category, []);
+      }
+      categories.get(category)!.push(post);
+    }
+  }
+
+  return Array.from(categories.entries()).map(
+    ([category, posts]): StaticPath => ({
+      params: { category },
+      props: { category, posts },
+    }),
+  );
+}
+
+interface Props {
+  category: string;
+  posts: CollectionEntry<"posts">[];
+}
+
+const { category, posts } = Astro.props;
+
+const breadcrumbItems = generateBreadcrumbItems(category, true);
+const categoryTitle = category.replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+const sortedPosts = [...posts].sort(
+  (a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime(),
+);
+---
+
+<BaseLayout pageTitle={`Category ⬝ ${categoryTitle}`} description={`Posts in ${categoryTitle}`}>
+  <div style={{ "max-width": "800px", margin: "100px auto" }}>
+    <Breadcrumb items={breadcrumbItems} />
+    
+    <section class="year-section">
+      <div class="year-posts">
+        <article class="timeline-post">
+          <div class="post-content">
+            <div class="post-info year">
+              <span class="post-date year">{categoryTitle}</span>
+              <div class="timeline-connector year">
+                <div class="post-marker year"></div>
+              </div>
+              <span class="inline-tag">{posts.length} {t('common.category.count')}</span>
+            </div>
+          </div>
+        </article>
+        <PostList posts={sortedPosts} />
+      </div>
+    </section>
+  </div>
+  <style>
+    .inline-tag {
+      display: inline-block;
+      background-color: var(--color-accent);
+      color: var(--color-on-accent);
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      margin-left: 12px;
+    }
+
+    .post-info.year:hover {
+      background-color: transparent;
+    }
+
+    .post-date.year {
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    .timeline-connector.year::before {
+      display: none;
+    }
+
+    .post-marker.year {
+      transform: scale(1.5);
+      background-color: var(--theme-color);
+    }
+
+    .post-info:hover .post-marker.year {
+      width: 6px;
+      height: 6px;
+      transform: scale(2);
+      background-color: var(--theme-color);
+    }
+
+    @media (max-width: 600px) {
+      .timeline-container {
+        padding-left: 30px;
+      }
+
+      .year-section::before,
+      .year-marker::before {
+        left: -20px;
+      }
+    }
+  </style>
+</BaseLayout>

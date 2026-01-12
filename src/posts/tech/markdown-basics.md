@@ -3,6 +3,7 @@ title: "Markdown Basics — Example"
 date: 2025-06-01
 tags: ["tech","markdown","example"]
 description: "A simple Markdown file demonstrating headings, lists, links and images."
+pinned: true
 ---
 
 # Markdown Basics

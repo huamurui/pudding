@@ -24,6 +24,9 @@ export interface I18nConfig {
     timeline: {
       count: string;
     };
+    category: {
+      count: string;
+    };
   };
   header: {
     nav: {
@@ -77,6 +80,9 @@ export const i18nConfig: Record<string, I18nConfig> = {
       },
       timeline: {
         count: 'posts'
+      },
+      category: {
+        count: 'posts'
       }
     },
     header: {
@@ -129,6 +135,9 @@ export const i18nConfig: Record<string, I18nConfig> = {
         count: 'posts'
       },
       timeline: {
+        count: 'posts'
+      },
+      category: {
         count: 'posts'
       }
     },

@@ -22,7 +22,8 @@ const postsWithExcerpt: PostData[] = await Promise.all(
       date: post.data.date,
       tags: post.data.tags || [],
       url: getPostUrl(post.id),
-      excerptHtml: extractExcerptFromHtml(html)
+      excerptHtml: extractExcerptFromHtml(html),
+      pinned: post.data.pinned || false
     };
   })
 );

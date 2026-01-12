@@ -1,9 +1,10 @@
 ---
 import ToC from "@/components/ToC.astro";
+import Breadcrumb from "@/components/Breadcrumb.astro";
 import { getCollection, render, type CollectionEntry } from "astro:content";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { siteConfig } from "@/config/site.config";
-import { extractExcerptFromHtml, calculateReadingTime, formatDate, sanitizeViewTransitionName } from "@/utils/helpers";
+import { extractExcerptFromHtml, calculateReadingTime, formatDate, sanitizeViewTransitionName, generateBreadcrumbItems } from "@/utils/helpers";
 import { generatePostStructuredData } from "@/utils/structured-data";
 import { ANIMATION_DURATION, EASING, READING_SPEED } from "@/utils/constants";
 import type { PostFrontmatter, PostEntry, StructuredData } from "@/types";
@@ -48,11 +49,15 @@ const anim = {
   new: { name: "title-new", duration: ANIMATION_DURATION.slow, easing: EASING.smooth, fillMode: "both" },
 };
 const customTransition = { forwards: anim, backwards: anim };
+
+const breadcrumbItems = generateBreadcrumbItems(post.id);
 ---
 
 <BaseLayout postFrontmatter={{ ...post.data, description } as PostFrontmatter} post={post} structuredData={structuredData}>
   <article class="blog-post-container">
     <div class="blog-post-content">
+      <Breadcrumb items={breadcrumbItems} />
+      
       <header class="post-header">
         <h1 class="post-title" transition:name={sanitizeViewTransitionName(post.id)} transition:animate={customTransition}>{post.data.title}</h1>
         <!-- <p class="post-description">{post.data.description}</p> -->

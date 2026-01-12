@@ -32,6 +32,7 @@ export interface PostData {
   tags: string[];
   description?: string;
   excerptHtml: string;
+  pinned?: boolean;
 }
 
 /** 文章集合条目 */
