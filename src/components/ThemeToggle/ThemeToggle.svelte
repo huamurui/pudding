@@ -64,8 +64,7 @@
 >
   <span class="theme-options">
     <span
-      class="nav-link"
-      class:is-active={theme === "light"}
+      class="nav-link light"
       aria-hidden={theme !== "light"}
       on:click|stopPropagation={(e) => switchToTheme("light")}
     >
@@ -75,8 +74,7 @@
     <span aria-hidden="true">/</span>
 
     <span
-      class="nav-link"
-      class:is-active={theme === "dark"}
+      class="nav-link dark"
       aria-hidden={theme !== "dark"}
       on:click|stopPropagation={(e) => switchToTheme("dark")}
     >
@@ -110,9 +108,6 @@
     transition: all 0.3s ease;
   }
 
-  .theme-toggle-container[aria-pressed="true"] .theme-toggle-indicator {
-    transform: translateX(calc(100% + 3px));
-  }
 
   .theme-toggle-container:focus-visible {
     outline: 2px solid rgba(var(--theme-color), 0.8);

@@ -11,6 +11,17 @@
   background-color: var(--shiki-dark-bg) !important;
 }
 
+html[data-theme="dark"] .theme-toggle-indicator {
+  transform: translateX(calc(100% + 3px));
+}
+
+html[data-theme="dark"] .theme-options .nav-link.dark {
+  color: var(--primary-color)
+}
+
+html[data-theme="light"] .theme-options .nav-link.light {
+  color: var(--primary-color)
+}
 
 .astro-code {
   border: 1px solid var(--border-color);

@@ -40,11 +40,5 @@ const structuredData = generatePostListStructuredData(
 
 ---
 <BaseLayout structuredData={structuredData}>
-  <div style={{
-    maxWidth: '800px',
-    margin: '0 auto',
-    padding: '2rem 1rem',
-  }}>
-    <PostCardList posts={posts} />
-  </div>
+  <PostCardList posts={posts} />
 </BaseLayout>
