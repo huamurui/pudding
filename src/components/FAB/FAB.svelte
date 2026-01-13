@@ -98,9 +98,9 @@ button {
 
 .floating-action-button {
   position: fixed;
-  width: 51px;
-  height: 51px;
-  border-radius: 51px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50px;
   background-color: var(--primary-color);
   color: var(--bg-primary);
   font-weight: bold;

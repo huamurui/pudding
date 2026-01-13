@@ -104,7 +104,7 @@ export function sanitizeViewTransitionName(id: string): string {
  * 检查是否为文章页面
  */
 export function isPostPage(pathname: string, postPath: string = "/posts"): boolean {
-  return pathname.startsWith(postPath);
+  return pathname.includes(postPath);
 }
 
 /**

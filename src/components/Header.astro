@@ -13,10 +13,7 @@ interface Props {
 
 const { pageTitle } = Astro.props as Props;
 
-const navItems = siteConfig.navItems.map((item) => ({
-  ...item,
-  label: t(`header.nav.${item.href.replace('/', '') || 'home'}`)
-}));
+const navItems = siteConfig.navItems
 
 const isPostsPage = isPostPage(Astro.url.pathname);
 const allPosts = await getCollection("posts");

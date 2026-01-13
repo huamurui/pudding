@@ -16,6 +16,7 @@ export interface SiteConfig {
   navItems: Array<{
     href: string;
     labelKey: string;
+    label:string;
   }>;
   socialLinks: Array<{
     nameKey: string;
@@ -48,9 +49,9 @@ export const siteConfig: SiteConfig = {
     github: "https://github.com/your",
   },
   navItems: [
-    { href: "./", labelKey: "home" },
-    { href: "./timeline", labelKey: "timeline" },
-    { href: "./about", labelKey: "about" },
+    { href: "./", labelKey: "home", label:"home" },
+    { href: "./timeline", labelKey: "timeline", label:"timeline"  },
+    { href: "./about", labelKey: "about", label:"about"  },
   ],
   socialLinks: [
     { nameKey: "social.github", href: "https://github.com/your" },
@@ -66,5 +67,5 @@ export const siteConfig: SiteConfig = {
       primary: "#ff9eb6",
     },
   },
-  locale: "zh-CN",
+  locale: "en-US"
 };
