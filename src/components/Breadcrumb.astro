@@ -1,5 +1,6 @@
 ---
 import { t } from "@/utils/i18n";
+import { generateDirectoryStructure } from "@/utils/helpers";
 
 interface BreadcrumbItem {
   label: string;
@@ -11,33 +12,185 @@ interface Props {
 }
 
 const { items } = Astro.props;
+
+// 生成路径映射，用于下拉菜单
+const pathMap = new Map();
+items.forEach((item, index) => {
+  if (index > 0) {
+    const path = items.slice(1, index + 1).map(i => i.label.toLowerCase().replace(/\s+/g, "-")).join("/");
+    pathMap.set(item.label, path);
+  }
+});
+
+// 生成实际的目录结构数据
+const directoryStructure = await generateDirectoryStructure();
 ---
 
-<nav class="breadcrumb" aria-label="Breadcrumb">
+<nav class="breadcrumb" aria-label="Breadcrumb" data-pathmap={JSON.stringify(Object.fromEntries(pathMap))} data-directory-structure={JSON.stringify(directoryStructure)}>
   <ol class="breadcrumb-list">
     {items.map((item, index) => (
       <li class="breadcrumb-item">
         {index < items.length - 1 ? (
-          <a href={item.href} class="breadcrumb-link">
-            {item.label}
-          </a>
+          <div class="breadcrumb-item-container">
+            <a href={item.href} class="breadcrumb-link">
+              {item.label}
+            </a>
+            <button class="breadcrumb-dropdown-btn" aria-expanded="false" aria-haspopup="true" data-label={item.label}>
+              <span class="breadcrumb-separator">&gt;</span>
+              <div class="breadcrumb-dropdown">
+                <ul class="breadcrumb-dropdown-menu">
+                </ul>
+              </div>
+            </button>
+          </div>
         ) : (
           <span class="breadcrumb-current">{item.label}</span>
-        )}
-        {index < items.length - 1 && (
-          <span class="breadcrumb-separator">/</span>
         )}
       </li>
     ))}
   </ol>
 </nav>
 
+<script is:inline>
+  // 使用 MutationObserver 来确保在动态内容加载后也能正确绑定事件
+  function initBreadcrumbDropdowns() {
+    const dropdownBtns = document.querySelectorAll('.breadcrumb-dropdown-btn');
+    const breadcrumbNav = document.querySelector('.breadcrumb');
+    if (!breadcrumbNav) return;
+    
+    const pathMap = new Map(Object.entries(JSON.parse(breadcrumbNav.dataset.pathmap || '{}')));
+    const directoryStructure = JSON.parse(breadcrumbNav.dataset.directoryStructure || '{}');
+    
+    // 根据路径获取子项
+    function getChildrenFromPath(path) {
+      const pathParts = path.split('/').filter(Boolean);
+      let current = directoryStructure;
+      
+      for (const part of pathParts) {
+        if (current[part] && current[part].type === 'directory') {
+          current = current[part].children;
+        } else {
+          return [];
+        }
+      }
+      
+      return Object.entries(current).map(([key, value]) => {
+        // 构建完整路径
+        const fullPath = [...pathParts, key].join('/');
+        return {
+          label: value.label,
+          href: value.type === 'directory' 
+            ? `/posts/${fullPath}/` 
+            : `/posts/${fullPath}`,
+          type: value.type
+        };
+      });
+    }
+    
+    // 加载下拉菜单内容
+    async function loadDropdownContent(btn, label) {
+      const menu = btn.querySelector('.breadcrumb-dropdown-menu');
+      if (!menu) return;
+      
+      // 清空现有内容
+      menu.innerHTML = '';
+      
+      // 获取路径对应的子项
+      const path = pathMap.get(label) || '';
+      try {
+        // 使用实际的目录结构数据
+        const children = getChildrenFromPath(path);
+        
+        if (children.length > 0) {
+          children.forEach(child => {
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            a.href = child.href;
+            a.textContent = child.label;
+            a.title = child.type === 'directory' ? 'Directory' : 'File';
+            // 阻止下拉菜单项的点击事件冒泡，防止关闭下拉菜单
+            a.addEventListener('click', (e) => {
+              e.stopPropagation();
+            });
+            li.appendChild(a);
+            menu.appendChild(li);
+          });
+        } else {
+          const li = document.createElement('li');
+          const span = document.createElement('span');
+          span.textContent = 'No items';
+          span.style.padding = '8px 16px';
+          span.style.color = 'var(--text-muted)';
+          li.appendChild(span);
+          menu.appendChild(li);
+        }
+      } catch (error) {
+        console.error('Error loading dropdown content:', error);
+        const li = document.createElement('li');
+        const span = document.createElement('span');
+        span.textContent = 'Error loading items';
+        span.style.padding = '8px 16px';
+        span.style.color = 'var(--color-error)';
+        li.appendChild(span);
+        menu.appendChild(li);
+      }
+    }
+    
+    // 重新绑定所有按钮的点击事件
+    dropdownBtns.forEach(btn => {
+      // 移除现有的事件监听器，避免重复绑定
+      const newBtn = btn.cloneNode(true);
+      btn.parentNode.replaceChild(newBtn, btn);
+      
+      const label = newBtn.dataset.label;
+      
+      // 绑定新的点击事件
+      newBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // 加载下拉菜单内容
+        await loadDropdownContent(newBtn, label);
+        
+        // 切换下拉菜单显示状态
+        const expanded = newBtn.getAttribute('aria-expanded') === 'true';
+        newBtn.setAttribute('aria-expanded', (!expanded).toString());
+        
+        // 关闭其他下拉菜单
+        document.querySelectorAll('.breadcrumb-dropdown-btn').forEach(otherBtn => {
+          if (otherBtn !== newBtn) {
+            otherBtn.setAttribute('aria-expanded', 'false');
+          }
+        });
+      });
+    });
+    
+    // 点击其他地方关闭下拉菜单
+    document.addEventListener('click', (e) => {
+      // 检查点击的元素是否在下拉菜单内
+      if (!e.target.closest('.breadcrumb-dropdown') && !e.target.closest('.breadcrumb-dropdown-btn')) {
+        document.querySelectorAll('.breadcrumb-dropdown-btn').forEach(btn => {
+          btn.setAttribute('aria-expanded', 'false');
+        });
+      }
+    });
+  }
+  
+  // 初始加载时初始化
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initBreadcrumbDropdowns);
+  } else {
+    initBreadcrumbDropdowns();
+  }
+  
+  // 在 Astro 页面加载后重新初始化
+  document.addEventListener('astro:page-load', initBreadcrumbDropdowns);
+</script>
+
 <style>
   .breadcrumb {
     margin-bottom: 1.5rem;
     padding: 0.75rem 1rem;
-    /* background-color: var(--color-theme-mix-5); */
-    /* border-left: 3px solid var(--theme-color); */
   }
 
   .breadcrumb-list {
@@ -47,7 +200,6 @@ const { items } = Astro.props;
     margin: 0;
     padding: 0;
     flex-wrap: wrap;
-    gap: 0.5rem;
   }
 
   .breadcrumb-item {
@@ -56,16 +208,21 @@ const { items } = Astro.props;
     font-size: 0.9rem;
   }
 
+  .breadcrumb-item-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+/* 
+  ul.breadcrumb-dropdown-menu li {
+    white-space: nowrap;
+  } */
+
   .breadcrumb-link {
     color: var(--text-secondary);
     text-decoration: none;
     transition: color 0.2s ease;
   }
-
-  .breadcrumb-link:hover {
-    color: var(--theme-color);
-  }
-
   .breadcrumb-current {
     color: var(--text-primary);
     font-weight: 500;
@@ -74,21 +231,50 @@ const { items } = Astro.props;
   .breadcrumb-separator {
     color: var(--text-muted);
     margin: 0 0.5rem;
-    opacity: 0.6;
+    opacity: 0.8;
+    font-size: 1rem;
   }
 
-  @media (max-width: 640px) {
-    .breadcrumb {
-      padding: 0.5rem 0.75rem;
-      font-size: 0.85rem;
-    }
+  .breadcrumb-dropdown-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+    position: relative;
+  }
 
-    .breadcrumb-list {
-      gap: 0.25rem;
-    }
+  .breadcrumb-dropdown-btn:hover .breadcrumb-separator {
+    color: var(--theme-color);
+  }
 
-    .breadcrumb-separator {
-      margin: 0 0.25rem;
-    }
+  .breadcrumb-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 4px;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    min-width: 100px;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: all 0.2s ease;
+  }
+
+  .breadcrumb-dropdown-btn[aria-expanded="true"] .breadcrumb-dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .breadcrumb-dropdown-menu {
+    padding: 0 6px 0 24px;
+    margin: 0;
   }
 </style>
