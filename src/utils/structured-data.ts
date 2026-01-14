@@ -33,17 +33,27 @@ export function generatePostStructuredData(
         "@type": "ImageObject", 
         "url": `${origin}/favicon.svg` 
       }
-    }
+    },
+    "url": postUrl,
+    "articleSection": post.data.tags?.[0] || "",
+    "keywords": post.data.tags?.join(", ") || ""
   };
 }
 
 export function generateWebsiteStructuredData(origin: string): StructuredData {
   return {
-    "@context": "https://schema.org",
     "@type": "WebSite",
     "url": origin,
     "name": siteConfig.name,
     "description": siteConfig.description,
+    "publisher": {
+      "@type": "Organization",
+      "name": siteConfig.name,
+      "logo": { 
+        "@type": "ImageObject", 
+        "url": `${origin}/favicon.svg` 
+      }
+    }
   };
 }
 
@@ -65,11 +75,34 @@ export function generatePostListStructuredData(
   return {
     "@context": "https://schema.org",
     "@graph": [
-      generateWebsiteStructuredData(origin),
+      {
+        "@type": "WebSite",
+        "url": origin,
+        "name": siteConfig.name,
+        "description": siteConfig.description,
+        "publisher": {
+          "@type": "Organization",
+          "name": siteConfig.name,
+          "logo": { 
+            "@type": "ImageObject", 
+            "url": `${origin}/favicon.svg` 
+          }
+        }
+      },
       { 
         "@type": "CollectionPage", 
         "name": "Recent posts", 
-        "mainEntity": itemList 
+        "url": origin,
+        "description": siteConfig.description,
+        "mainEntity": itemList,
+        "publisher": {
+          "@type": "Organization",
+          "name": siteConfig.name,
+          "logo": { 
+            "@type": "ImageObject", 
+            "url": `${origin}/favicon.svg` 
+          }
+        }
       }
     ]
   };

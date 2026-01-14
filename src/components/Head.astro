@@ -20,7 +20,7 @@ const {
   structuredData = null,
 } = Astro.props as Props;
 // 将 JSON-LD 转为字符串并对可能的闭合 </script> 标签进行转义以避免提早结束脚本
-const structuredDataHtml = structuredData
+const structuredDataJson = structuredData
   ? JSON.stringify(structuredData).replace(/<\/script/gi, "<\\/script")
   : null;
 
@@ -75,8 +75,8 @@ import { ClientRouter } from "astro:transitions";
     media="(prefers-color-scheme: dark)"
   />
   {
-    structuredDataHtml && (
-      <script type="application/ld+json" set:html={structuredDataHtml} />
+    structuredDataJson && (
+      <script type="application/ld+json" set:html={structuredDataJson} />
     )
   }
 
