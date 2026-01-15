@@ -36,7 +36,7 @@ export async function getStaticPaths(): Promise<StaticPath[]> {
     ([category, posts]): StaticPath => ({
       params: { category },
       props: { category, posts },
-    }),
+    })
   );
 }
 
@@ -48,34 +48,49 @@ interface Props {
 const { category, posts } = Astro.props;
 
 const breadcrumbItems = generateBreadcrumbItems(category, true);
-const categoryTitle = category.replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+const categoryTitle = category.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
 const sortedPosts = [...posts].sort(
-  (a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime(),
+  (a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime()
 );
 ---
 
 <BaseLayout pageTitle={`Category ⬝ ${categoryTitle}`} description={`Posts in ${categoryTitle}`}>
-  <article style={{ "max-width": "800px", margin: "0px auto" }}>
-    <Breadcrumb client:idle items={breadcrumbItems} />
-    
-    <section class="year-section">
-      <div class="year-posts">
-        <article class="timeline-post">
-          <div class="post-content">
-            <div class="post-info year">
-              <span class="post-date year">{categoryTitle}</span>
-              <div class="timeline-connector year">
-                <div class="post-marker year"></div>
+  <article class="blog-post-container">
+    <div class="blog-post-content">
+      <Breadcrumb client:idle items={breadcrumbItems} />
+      <section class="year-section">
+        <div class="year-posts">
+          <article class="timeline-post">
+            <div class="post-content">
+              <div class="post-info year">
+                <span class="post-date year">{categoryTitle}</span>
+                <div class="timeline-connector year">
+                  <div class="post-marker year"></div>
+                </div>
+                <span class="inline-tag">{posts.length} {t("common.category.count")}</span>
               </div>
-              <span class="inline-tag">{posts.length} {t('common.category.count')}</span>
             </div>
-          </div>
-        </article>
-        <PostList posts={sortedPosts} />
-      </div>
-    </section>
-  </div>
+          </article>
+          <PostList posts={sortedPosts} />
+        </div>
+      </section>
+    </div>
+  </article>
   <style>
+    /* 文章容器 */
+    .blog-post-container {
+      display: flex;
+      gap: 3rem;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+
+    /* 主要内容区域 */
+    .blog-post-content {
+      flex: 1;
+      min-width: 0;
+      max-width: 800px;
+    }
     .inline-tag {
       display: inline-block;
       background-color: var(--color-accent);
