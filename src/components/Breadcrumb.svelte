@@ -160,7 +160,7 @@
                       <span class="no-items">Loading...</span>
                     </li>
                   {:else}
-                    {#if childrenCache.has(item.label) && childrenCache.get(item.label)?.length > 0}
+                    {#if childrenCache.has(item.label) && (childrenCache.get(item.label) || []).length > 0}
                       {#each childrenCache.get(item.label) as child}
                         <li>
                           <a
