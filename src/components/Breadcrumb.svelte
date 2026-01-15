@@ -104,7 +104,7 @@
 
   const loadDirectoryStructure = async () => {
     try {
-      const response = await fetch('/data/dir-data.json');
+      const response = await fetch(siteConfig.base+'/data/dir-data.json');
       if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
       const structure = await response.json();
       directoryStructure = structure;
