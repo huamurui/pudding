@@ -67,7 +67,3 @@
     });
   });
 </script>
-
-<style>
-  /* Intentionally empty — styles live in CSS files */
-</style>

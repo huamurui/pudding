@@ -121,7 +121,6 @@ export function isHomePage(pathname: string): boolean {
 export async function generateDirectoryStructure() {
   const posts = await getCollection("posts");
   const structure: Record<string, any> = {};
-
   for (const post of posts) {
     const pathParts = post.id.split("/").filter(Boolean);
     let current = structure;
@@ -141,7 +140,6 @@ export async function generateDirectoryStructure() {
       }
     }
   }
-
   return structure;
 }
 

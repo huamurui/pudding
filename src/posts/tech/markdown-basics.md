@@ -33,6 +33,6 @@ Here is a link to the project: https://github.com/huamurui
 
 And an example image (placeholder):
 
-![Placeholder image](/og-default.jpg)
+<!-- ![Placeholder image](/og-default.jpg) -->
 
 End of basics.
