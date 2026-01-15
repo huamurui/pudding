@@ -11,9 +11,13 @@ description: "Demonstrates remark/rehype plugin effects such as spoilers and lin
 
 The following text uses a spoiler block. If your site has a remark-spoiler plugin, it should hide the content until revealed.
 
-::: spoiler Click to reveal
+spoiler Click to reveal:  
+||| 
 Hidden content goes here. This is a test of the spoiler plugin.
-:::
+|||
+||
+Hidden content goes here. This is a test of the spoiler plugin.
+||
 
 ## Link preview
 
