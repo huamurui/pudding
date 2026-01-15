@@ -6,11 +6,37 @@ const pageTitle = "About";
 ---
 
 <BaseLayout pageTitle={pageTitle}>
-  <header class="about-hero">
-    <h1 class="title">About Pudding</h1>
-    <p>A modern, simple Astro blog theme. </p>
-  </header>
-  <div class="github">
-    <p>Check out <a class="nav-link" style="color: var(--primary-color);" href="https://github.com/huamurui/pudding">GitHub repository</a></p>
-  </div>
+  <article class="blog-post-container">
+    <div class="blog-post-content">
+      <header class="about-hero">
+        <h1 class="title">About Pudding</h1>
+        <p>A modern, simple Astro blog theme.</p>
+      </header>
+      <div class="github">
+        <p>
+          Check out <a
+            class="nav-link"
+            style="color: var(--primary-color);"
+            href="https://github.com/huamurui/pudding">GitHub repository</a
+          >
+        </p>
+      </div>
+    </div>
+  </article>
+  <style>
+    /* 文章容器 */
+    .blog-post-container {
+      display: flex;
+      gap: 3rem;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+
+    /* 主要内容区域 */
+    .blog-post-content {
+      flex: 1;
+      min-width: 0;
+      max-width: 800px;
+    }
+  </style>
 </BaseLayout>
