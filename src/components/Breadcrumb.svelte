@@ -43,7 +43,6 @@
       newPathMap.set(item.label, path);
     });
     pathMap = newPathMap;
-    console.log('路径映射生成完成（含一级目录）：', newPathMap);
   };
 
   const computeChildrenFromPath = (path: string): BreadcrumbItem[] => {
