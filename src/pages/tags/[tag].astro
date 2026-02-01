@@ -1,51 +1,51 @@
 ---
-import { type CollectionEntry, getCollection } from "astro:content";
-import BaseLayout from "@/layouts/BaseLayout.astro";
-import PostList from "@/components/PostList/PostList.svelte";
-import '@/components/PostList/PostList.css';
-import { t } from "@/utils/i18n";
+import { type CollectionEntry, getCollection } from 'astro:content'
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import PostList from '@/components/PostList/PostList.svelte'
+import '@/components/PostList/PostList.css'
+import { t } from '@/utils/i18n'
 type StaticPath = {
   params: {
     tag: string;
   };
   props: {
     tag: string;
-    posts: CollectionEntry<"posts">[];
+    posts: CollectionEntry<'posts'>[];
   };
 };
 
 export async function getStaticPaths(): Promise<StaticPath[]> {
-  const posts = await getCollection("posts");
-  const tags = new Map<string, CollectionEntry<"posts">[]>();
+  const posts = await getCollection('posts')
+  const tags = new Map<string, CollectionEntry<'posts'>[]>()
 
   for (const post of posts) {
     for (const tag of post.data.tags || []) {
       if (!tags.has(tag)) {
-        tags.set(tag, []);
+        tags.set(tag, [])
       }
-      tags.get(tag)!.push(post);
+      tags.get(tag)!.push(post)
     }
   }
 
   return Array.from(tags.entries()).map(
     ([tag, posts]): StaticPath => ({
       params: { tag },
-      props: { tag, posts },
-    }),
-  );
+      props: { tag, posts }
+    })
+  )
 }
 
 // 定义页面属性类型
 interface Props {
   tag: string;
-  posts: CollectionEntry<"posts">[];
+  posts: CollectionEntry<'posts'>[];
 }
 
 const { tag, posts } = Astro.props as Props;
 ---
 
 <BaseLayout pageTitle={`Tag ⬝ ${tag}`} description={`Posts tagged with ${tag}`}>
-  <div style={{ "max-width": "800px", margin: "100px auto" }}>
+  <div style={{ 'max-width': '800px', margin: '100px auto' }}>
     <section class="year-section">
       <div class="year-posts">
         <article class="timeline-post">

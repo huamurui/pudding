@@ -15,7 +15,7 @@ const { headings = [] } = Astro.props as Props;
 <nav class="blog-toc main-toc" aria-label="文章目录">
   <ul class="toc-list" id="toc-list">
     {
-      headings.filter(item=>item.depth < 5).map((heading) => (
+      headings.filter(item => item.depth < 5).map((heading) => (
         <li class={`toc-item toc-item-depth-${heading.depth -1}`}>
           <a
             href={`#${heading.slug}`}
@@ -254,26 +254,26 @@ const { headings = [] } = Astro.props as Props;
 </style>
 
 <script>
-  (function () {
-    let cleanupFn: (() => void) | null = null;
+(function() {
+  let cleanupFn: (() => void) | null = null
 
-    function setup() {
-      if (cleanupFn) { try { cleanupFn(); } catch (e) {} }
+  function setup() {
+    if (cleanupFn) { try { cleanupFn() } catch (e) {} }
 
-      // 1：DOM
-      const DOM = {
-        indicator: document.getElementById("toc-indicator"),
-      mainTocLinks: document.querySelectorAll<HTMLAnchorElement>(".toc-link"),
-        tocList: document.getElementById("toc-list"),
+    // 1：DOM
+    const DOM = {
+      indicator: document.getElementById('toc-indicator'),
+      mainTocLinks: document.querySelectorAll<HTMLAnchorElement>('.toc-link'),
+      tocList: document.getElementById('toc-list'),
 
-        scrollTocToggle: document.getElementById("scroll-toc-toggle"),
-        scrollToc: document.getElementById("scroll-toc"),
-        scrollTocContainer: document.querySelector(".scroll-toc-container"),
-      scrollTocLinks: document.querySelectorAll<HTMLAnchorElement>(".scroll-toc-link"),
-        scrollTocList: document.querySelector(".scroll-toc-list"),
+      scrollTocToggle: document.getElementById('scroll-toc-toggle'),
+      scrollToc: document.getElementById('scroll-toc'),
+      scrollTocContainer: document.querySelector('.scroll-toc-container'),
+      scrollTocLinks: document.querySelectorAll<HTMLAnchorElement>('.scroll-toc-link'),
+      scrollTocList: document.querySelector('.scroll-toc-list'),
 
-        toggleText: document.querySelector(".toggle-text"),
-      };
+      toggleText: document.querySelector('.toggle-text')
+    }
 
     // 2. State
     const state = {
@@ -286,292 +286,292 @@ const { headings = [] } = Astro.props as Props;
       }>,
       isProgrammaticScroll: false,
       activeIndex: -1,
-      visibleHeadings: new Set<number>(), 
+      visibleHeadings: new Set<number>(),
       lastScrollTop: 0,
       // constant
       config: {
         scrollThreshold: 100,
         headerOffset: 120,
         bottomThreshold: 100,
-        scrollRatio: 0.4,
-      },
-    };
+        scrollRatio: 0.4
+      }
+    }
 
     // 3. Events
-    let observer:IntersectionObserver | null = null;
+    let observer:IntersectionObserver | null = null
     function bindEvents() {
-      DOM.scrollTocToggle?.addEventListener("click", handleScrollTocToggle);
+      DOM.scrollTocToggle?.addEventListener('click', handleScrollTocToggle)
 
-      window.addEventListener("scroll", handleWindowScroll);
+      window.addEventListener('scroll', handleWindowScroll)
 
-      DOM.tocList?.addEventListener("scroll", updateIndicatorPosition);
+      DOM.tocList?.addEventListener('scroll', updateIndicatorPosition)
 
-      window.addEventListener("resize", handleWindowResize);
+      window.addEventListener('resize', handleWindowResize)
 
-      DOM.mainTocLinks.forEach(link => link.addEventListener("click", (e) => handleTocLinkClick(e, link)));
-      DOM.scrollTocLinks.forEach(link => link.addEventListener("click", (e) => handleTocLinkClick(e, link)));
+      DOM.mainTocLinks.forEach(link => link.addEventListener('click', (e) => handleTocLinkClick(e, link)))
+      DOM.scrollTocLinks.forEach(link => link.addEventListener('click', (e) => handleTocLinkClick(e, link)))
 
       observer = new IntersectionObserver(handleHeadingIntersection, {
-        threshold: 0.01,
-      });
-      state.headings.forEach(heading => heading.element && observer && observer.observe(heading.element));
+        threshold: 0.01
+      })
+      state.headings.forEach(heading => heading.element && observer && observer.observe(heading.element))
     }
 
     function cleanup() {
-      DOM.scrollTocToggle?.removeEventListener("click", handleScrollTocToggle);
-      window.removeEventListener("scroll", handleWindowScroll);
-      DOM.tocList?.removeEventListener("scroll", updateIndicatorPosition);
-      window.removeEventListener("resize", handleWindowResize);
+      DOM.scrollTocToggle?.removeEventListener('click', handleScrollTocToggle)
+      window.removeEventListener('scroll', handleWindowScroll)
+      DOM.tocList?.removeEventListener('scroll', updateIndicatorPosition)
+      window.removeEventListener('resize', handleWindowResize)
 
       if (observer) {
-        try { observer.disconnect(); } catch(e) {}
-        observer = null;
+        try { observer.disconnect() } catch(e) {}
+        observer = null
       }
 
       // remove per-link listeners by cloning nodes
-      Array.from(DOM.mainTocLinks).forEach(link => { const clone = link.cloneNode(true); link.parentNode && link.parentNode.replaceChild(clone, link); });
-      Array.from(DOM.scrollTocLinks).forEach(link => { const clone = link.cloneNode(true); link.parentNode && link.parentNode.replaceChild(clone, link); });
+      Array.from(DOM.mainTocLinks).forEach(link => { const clone = link.cloneNode(true); link.parentNode && link.parentNode.replaceChild(clone, link) })
+      Array.from(DOM.scrollTocLinks).forEach(link => { const clone = link.cloneNode(true); link.parentNode && link.parentNode.replaceChild(clone, link) })
     }
 
     // 4. Functions
     function init() {
-      const allLinks = [...DOM.mainTocLinks, ...DOM.scrollTocLinks];
+      const allLinks = [...DOM.mainTocLinks, ...DOM.scrollTocLinks]
       state.headings = Array.from(allLinks)
-        .filter((link, index, self) => 
-          self.findIndex(l => l.getAttribute("data-slug") === link.getAttribute("data-slug")) === index
+        .filter((link, index, self) =>
+          self.findIndex(l => l.getAttribute('data-slug') === link.getAttribute('data-slug')) === index
         )
         .map((link, index) => {
-          const slug = link.getAttribute("data-slug");
+          const slug = link.getAttribute('data-slug')
           return {
             slug,
             element: slug ? document.getElementById(slug) : null,
-            links: allLinks.filter(l => l.getAttribute("data-slug") === slug),
-            listItems: allLinks.filter(l => l.getAttribute("data-slug") === slug)
+            links: allLinks.filter(l => l.getAttribute('data-slug') === slug),
+            listItems: allLinks.filter(l => l.getAttribute('data-slug') === slug)
               .map(l => l.parentElement as HTMLLIElement),
-            index,
-          };
+            index
+          }
         })
-        .filter(item => item.element);
+        .filter(item => item.element)
 
-      bindEvents();
+      bindEvents()
 
-      updateActiveHeading();
-      updateIndicatorPosition();
+      updateActiveHeading()
+      updateIndicatorPosition()
 
-      const initialHash = window.location.hash.substring(1);
+      const initialHash = window.location.hash.substring(1)
       if (initialHash) {
-        setTimeout(() => scrollToHeading(initialHash), 100);
+        setTimeout(() => scrollToHeading(initialHash), 100)
       }
 
-      return cleanup;
+      return cleanup
     }
 
     function handleScrollTocToggle() {
-      if (!DOM.scrollTocToggle || !DOM.scrollToc) return;
-      const isExpanded = DOM.scrollTocToggle.getAttribute("aria-expanded") === "true";
-      DOM.scrollTocToggle.setAttribute("aria-expanded", (!isExpanded).toString());
-      DOM.scrollToc.classList.toggle("expanded", !isExpanded);
+      if (!DOM.scrollTocToggle || !DOM.scrollToc) return
+      const isExpanded = DOM.scrollTocToggle.getAttribute('aria-expanded') === 'true'
+      DOM.scrollTocToggle.setAttribute('aria-expanded', (!isExpanded).toString())
+      DOM.scrollToc.classList.toggle('expanded', !isExpanded)
       // 展开时确保活跃项在可视区域
-      if (!isExpanded) adjustScrollTocScroll();
+      if (!isExpanded) adjustScrollTocScroll()
     }
 
 
     function handleWindowScroll() {
-      if (!DOM.scrollTocContainer) return;
-      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-      
+      if (!DOM.scrollTocContainer) return
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+
       if (scrollTop > state.config.scrollThreshold && scrollTop > state.lastScrollTop) {
-        DOM.scrollTocContainer.classList.add("visible");
-      } 
+        DOM.scrollTocContainer.classList.add('visible')
+      }
       else if (scrollTop <= state.config.scrollThreshold) {
-        DOM.scrollTocContainer.classList.remove("visible");
+        DOM.scrollTocContainer.classList.remove('visible')
       }
 
-      state.lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+      state.lastScrollTop = scrollTop <= 0 ? 0 : scrollTop
     }
 
 
     function handleHeadingIntersection(entries: IntersectionObserverEntry[]) {
       entries.forEach(entry => {
-        const heading = state.headings.find(h => h.element === entry.target);
-        if (!heading) return;
-        entry.isIntersecting 
-          ? state.visibleHeadings.add(heading.index) 
-          : state.visibleHeadings.delete(heading.index);
+        const heading = state.headings.find(h => h.element === entry.target)
+        if (!heading) return
+        entry.isIntersecting
+          ? state.visibleHeadings.add(heading.index)
+          : state.visibleHeadings.delete(heading.index)
         if (!state.isProgrammaticScroll) {updateActiveHeading(); updateIndicatorPosition()};
-      });
+      })
     }
 
     function handleTocLinkClick(e: MouseEvent, link: HTMLAnchorElement) {
-      e.preventDefault();
-      const slug = link.getAttribute("data-slug");
-      slug && scrollToHeading(slug);
+      e.preventDefault()
+      const slug = link.getAttribute('data-slug')
+      slug && scrollToHeading(slug)
     }
 
 
     function scrollToHeading(slug: string) {
-      const element = document.getElementById(slug);
-      if (!element || !DOM.scrollToc || !DOM.scrollTocToggle) return;
+      const element = document.getElementById(slug)
+      if (!element || !DOM.scrollToc || !DOM.scrollTocToggle) return
 
-      state.isProgrammaticScroll = true;
+      state.isProgrammaticScroll = true
 
-      const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - state.config.headerOffset;
-      window.scrollTo({ top: offsetPosition, behavior: "smooth" });
+      const elementPosition = element.getBoundingClientRect().top
+      const offsetPosition = elementPosition + window.pageYOffset - state.config.headerOffset
+      window.scrollTo({ top: offsetPosition, behavior: 'smooth' })
 
       if (window.location.hash !== `#${slug}`) {
-        window.history.replaceState(null, "", `#${slug}`);
+        window.history.replaceState(null, '', `#${slug}`)
       }
 
-      DOM.scrollToc.classList.remove("expanded");
-      DOM.scrollTocToggle.setAttribute("aria-expanded", "false");
+      DOM.scrollToc.classList.remove('expanded')
+      DOM.scrollTocToggle.setAttribute('aria-expanded', 'false')
 
       setTimeout(() => {
-        state.isProgrammaticScroll = false;
-        updateActiveHeading();
-        adjustTocListScroll();
-        adjustScrollTocScroll();
-      }, 200);
+        state.isProgrammaticScroll = false
+        updateActiveHeading()
+        adjustTocListScroll()
+        adjustScrollTocScroll()
+      }, 200)
     }
 
     function updateActiveHeading() {
-      const visible = Array.from(state.visibleHeadings).sort((a, b) => a - b);
-      let newActiveIndex = -1;
+      const visible = Array.from(state.visibleHeadings).sort((a, b) => a - b)
+      let newActiveIndex = -1
 
-      state.headings.forEach(h => h.listItems.forEach(item => item.classList.remove("visible")));
-      visible.forEach(index => state.headings[index].listItems.forEach(item => item.classList.add("visible")));
+      state.headings.forEach(h => h.listItems.forEach(item => item.classList.remove('visible')))
+      visible.forEach(index => state.headings[index].listItems.forEach(item => item.classList.add('visible')))
 
       if (visible.length > 0) {
         const fullyVisible = visible.find(index => {
-          const rect = state.headings[index].element!.getBoundingClientRect();
-          return rect.top >= 0 && rect.bottom <= window.innerHeight;
-        });
+          const rect = state.headings[index].element!.getBoundingClientRect()
+          return rect.top >= 0 && rect.bottom <= window.innerHeight
+        })
         if (fullyVisible !== undefined) {
-          newActiveIndex = fullyVisible;
+          newActiveIndex = fullyVisible
         } else {
-          const viewportThird = window.innerHeight / 3;
-          let closestToThird = visible[0];
+          const viewportThird = window.innerHeight / 3
+          let closestToThird = visible[0]
           let minDistance = Math.abs(
             state.headings[closestToThird].element!.getBoundingClientRect().top - viewportThird
-          );
+          )
           visible.forEach(index => {
             const distance = Math.abs(
               state.headings[index].element!.getBoundingClientRect().top - viewportThird
-            );
+            )
             if (distance < minDistance) {
-              minDistance = distance;
-              closestToThird = index;
+              minDistance = distance
+              closestToThird = index
             }
-          });
-          newActiveIndex = closestToThird;
+          })
+          newActiveIndex = closestToThird
         }
       } else {
-        const scrollPosition = window.scrollY;
+        const scrollPosition = window.scrollY
         const candidates = [...state.headings]
           .filter(h => h.element!.offsetTop <= scrollPosition + state.config.scrollThreshold)
-          .sort((a, b) => b.element!.offsetTop - a.element!.offsetTop);
-        newActiveIndex = candidates.length > 0 ? candidates[0].index : (state.headings.length > 0 ? 0 : -1);
+          .sort((a, b) => b.element!.offsetTop - a.element!.offsetTop)
+        newActiveIndex = candidates.length > 0 ? candidates[0].index : (state.headings.length > 0 ? 0 : -1)
       }
 
       if (
         window.innerHeight + window.scrollY >= document.body.offsetHeight - state.config.bottomThreshold &&
         state.headings.length > 0
       ) {
-        newActiveIndex = state.headings.length - 1;
+        newActiveIndex = state.headings.length - 1
       }
 
       if (newActiveIndex !== -1 && newActiveIndex !== state.activeIndex) {
-        state.activeIndex = newActiveIndex;
-        state.headings.forEach(h => h.listItems.forEach(item => item.classList.remove("active")));
-        state.headings[state.activeIndex].listItems.forEach(item => item.classList.add("active"));
+        state.activeIndex = newActiveIndex
+        state.headings.forEach(h => h.listItems.forEach(item => item.classList.remove('active')))
+        state.headings[state.activeIndex].listItems.forEach(item => item.classList.add('active'))
         if (DOM.toggleText) {
-          DOM.toggleText.textContent = state.headings[state.activeIndex].element?.textContent || "当前章节";
+          DOM.toggleText.textContent = state.headings[state.activeIndex].element?.textContent || '当前章节'
         }
         // updateIndicatorPosition();
-        adjustTocListScroll();
-        adjustScrollTocScroll();
+        adjustTocListScroll()
+        adjustScrollTocScroll()
       }
     }
 
     function updateIndicatorPosition() {
-      if (!DOM.indicator || !DOM.tocList || window.innerWidth <= 968 || state.activeIndex === -1) return;
-      
+      if (!DOM.indicator || !DOM.tocList || window.innerWidth <= 968 || state.activeIndex === -1) return
+
       // 找到 visible或active 类的第一个元素
-      const visibleItems = DOM.tocList.querySelectorAll(".toc-item.visible, .toc-item.active");
+      const visibleItems = DOM.tocList.querySelectorAll('.toc-item.visible, .toc-item.active')
       if (visibleItems.length === 0) {
-        DOM.indicator.style.opacity = "0";
-        return;
+        DOM.indicator.style.opacity = '0'
+        return
       }
-      const firstVisibleItem = visibleItems[0] as HTMLElement;
-      const lastVisibleItem = visibleItems[visibleItems.length - 1] as HTMLElement;
-      const firstOffsetTop = firstVisibleItem.offsetTop;
-      const lastOffsetTop = lastVisibleItem.offsetTop;
-      const lastItemHeight = lastVisibleItem.clientHeight;
-      const tocListScrollTop = DOM.tocList.scrollTop;
-      DOM.indicator.style.top = `${firstOffsetTop - tocListScrollTop}px`;
-      DOM.indicator.style.height = `${(lastOffsetTop + lastItemHeight) - firstOffsetTop}px`;
-      DOM.indicator.style.opacity = "1";
+      const firstVisibleItem = visibleItems[0] as HTMLElement
+      const lastVisibleItem = visibleItems[visibleItems.length - 1] as HTMLElement
+      const firstOffsetTop = firstVisibleItem.offsetTop
+      const lastOffsetTop = lastVisibleItem.offsetTop
+      const lastItemHeight = lastVisibleItem.clientHeight
+      const tocListScrollTop = DOM.tocList.scrollTop
+      DOM.indicator.style.top = `${firstOffsetTop - tocListScrollTop}px`
+      DOM.indicator.style.height = `${(lastOffsetTop + lastItemHeight) - firstOffsetTop}px`
+      DOM.indicator.style.opacity = '1'
     }
 
     function adjustTocListScroll() {
-      if (!DOM.tocList || window.innerWidth <= 968) return;
-      
-      const activeTocItem = DOM.tocList.querySelector(".toc-item.active");
-      if (!activeTocItem) return;
+      if (!DOM.tocList || window.innerWidth <= 968) return
 
-      const tocListClientHeight = DOM.tocList.clientHeight;
-      const activeItemOffsetTop = (activeTocItem as HTMLElement).offsetTop;
-      const activeItemHeight = (activeTocItem as HTMLElement).clientHeight;
-      const tocListScrollHeight = DOM.tocList.scrollHeight;
+      const activeTocItem = DOM.tocList.querySelector('.toc-item.active')
+      if (!activeTocItem) return
 
-      if (tocListScrollHeight <= tocListClientHeight) return;
+      const tocListClientHeight = DOM.tocList.clientHeight
+      const activeItemOffsetTop = (activeTocItem as HTMLElement).offsetTop
+      const activeItemHeight = (activeTocItem as HTMLElement).clientHeight
+      const tocListScrollHeight = DOM.tocList.scrollHeight
 
-      const targetScrollTop = activeItemOffsetTop - (tocListClientHeight - activeItemHeight) * state.config.scrollRatio;
+      if (tocListScrollHeight <= tocListClientHeight) return
+
+      const targetScrollTop = activeItemOffsetTop - (tocListClientHeight - activeItemHeight) * state.config.scrollRatio
       DOM.tocList.scrollTo({
         top: Math.max(0, targetScrollTop), // 避免负数值（滚到顶部）
-        behavior: "smooth",
-      });
+        behavior: 'smooth'
+      })
     }
 
     function adjustScrollTocScroll() {
-      if (!DOM.scrollToc || !DOM.scrollTocList || window.innerWidth > 968 || !DOM.scrollToc.classList.contains("expanded")) return;
-      
-      const activeScrollTocItem = DOM.scrollTocList.querySelector(".scroll-toc-item.active");
-      if (!activeScrollTocItem) return;
+      if (!DOM.scrollToc || !DOM.scrollTocList || window.innerWidth > 968 || !DOM.scrollToc.classList.contains('expanded')) return
 
-      const scrollTocClientHeight = DOM.scrollToc.clientHeight;
-      const activeItemOffsetTop = (activeScrollTocItem as HTMLElement).offsetTop;
-      const activeItemHeight = (activeScrollTocItem as HTMLElement).clientHeight;
-      const scrollTocScrollHeight = DOM.scrollTocList.scrollHeight;
+      const activeScrollTocItem = DOM.scrollTocList.querySelector('.scroll-toc-item.active')
+      if (!activeScrollTocItem) return
 
-      if (scrollTocScrollHeight <= scrollTocClientHeight) return;
+      const scrollTocClientHeight = DOM.scrollToc.clientHeight
+      const activeItemOffsetTop = (activeScrollTocItem as HTMLElement).offsetTop
+      const activeItemHeight = (activeScrollTocItem as HTMLElement).clientHeight
+      const scrollTocScrollHeight = DOM.scrollTocList.scrollHeight
 
-      const targetScrollTop = activeItemOffsetTop - (scrollTocClientHeight - activeItemHeight) * state.config.scrollRatio;
+      if (scrollTocScrollHeight <= scrollTocClientHeight) return
+
+      const targetScrollTop = activeItemOffsetTop - (scrollTocClientHeight - activeItemHeight) * state.config.scrollRatio
       DOM.scrollToc.scrollTo({
         top: Math.max(0, targetScrollTop),
-        behavior: "smooth",
-      });
+        behavior: 'smooth'
+      })
     }
 
     function handleWindowResize() {
-      updateIndicatorPosition();
-      adjustTocListScroll();
-      adjustScrollTocScroll();
+      updateIndicatorPosition()
+      adjustTocListScroll()
+      adjustScrollTocScroll()
     }
 
-      cleanupFn = init();
-    }
+    cleanupFn = init()
+  }
 
-    // initial
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', setup);
-    } else {
-      setup();
-    }
+  // initial
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setup)
+  } else {
+    setup()
+  }
 
-    // reinitialize after client-side navigation
-    document.addEventListener('astro:page-load', () => { setTimeout(setup, 50); });
-    // after swap, trigger a light resize so indicator updates
-    document.addEventListener('astro:after-swap', () => { setTimeout(() => { try { window.dispatchEvent(new Event('resize')); } catch(e) {} }, 50); });
-  })();
+  // reinitialize after client-side navigation
+  document.addEventListener('astro:page-load', () => { setTimeout(setup, 50) })
+  // after swap, trigger a light resize so indicator updates
+  document.addEventListener('astro:after-swap', () => { setTimeout(() => { try { window.dispatchEvent(new Event('resize')) } catch(e) {} }, 50) })
+})()
 </script>

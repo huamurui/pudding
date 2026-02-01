@@ -1,36 +1,36 @@
 ---
-import { getCollection, type CollectionEntry } from "astro:content";
-import { siteConfig } from "@/config/site.config";
-import type { PostEntry } from "@/types";
-import Tag from "./Tag.astro";
-import { t } from "@/utils/i18n";
+import { getCollection, type CollectionEntry } from 'astro:content'
+import { siteConfig } from '@/config/site.config'
+import type { PostEntry } from '@/types'
+import Tag from './Tag.astro'
+import { t } from '@/utils/i18n'
 
 interface Props {
   intro?: string; // 一句话简介（可选）
   post?: PostEntry | null; // post
 }
 
-const { intro = siteConfig.description, post = null } = Astro.props as Props;
+const { intro = siteConfig.description, post = null } = Astro.props as Props
 
-const allBlogPosts: CollectionEntry<"posts">[] = await getCollection("posts");
+const allBlogPosts: CollectionEntry<'posts'>[] = await getCollection('posts')
 
-const tagCountMap: Map<string, number> = new Map();
+const tagCountMap: Map<string, number> = new Map()
 
 allBlogPosts.map((post) => {
   const tags: string[] = Array.isArray(post.data.tags)
     ? post.data.tags
     : post.data.tags
       ? [post.data.tags]
-      : [];
+      : []
 
   // 更新标签计数
   tags.forEach((tag) => {
     if (tagCountMap.has(tag)) {
-      tagCountMap.set(tag, tagCountMap.get(tag)! + 1);
+      tagCountMap.set(tag, tagCountMap.get(tag)! + 1)
     } else {
-      tagCountMap.set(tag, 1);
+      tagCountMap.set(tag, 1)
     }
-  });
+  })
 });
 ---
 
@@ -51,7 +51,7 @@ allBlogPosts.map((post) => {
     <div class="stat-item">📝 {allBlogPosts.length} {t('sidebar.stats.posts')}</div>
     <div class="stat-item">🏷️ {Array.from(tagCountMap).length} {t('sidebar.stats.tags')}</div>
     <div class="stat-item">
-      {new Date().toISOString().split("T")[0]}
+      {new Date().toISOString().split('T')[0]}
       {t('sidebar.stats.updated')}
     </div>
   </div>

@@ -108,7 +108,7 @@ export const i18nConfig: Record<string, I18nConfig> = {
       email: 'Email',
       rss: 'RSS',
       sitemap: 'Sitemap'
-    },
+    }
 
   },
   'en-US': {
@@ -164,37 +164,37 @@ export const i18nConfig: Record<string, I18nConfig> = {
       email: 'Email',
       rss: 'RSS',
       sitemap: 'Sitemap'
-    },
+    }
   }
-};
+}
 
 export type SupportedLocale = keyof typeof i18nConfig;
 
-export const defaultLocale: SupportedLocale = 'zh-CN';
+export const defaultLocale: SupportedLocale = 'zh-CN'
 
 export function getLocale(locale?: string): SupportedLocale {
   if (locale && locale in i18nConfig) {
-    return locale as SupportedLocale;
+    return locale as SupportedLocale
   }
-  return defaultLocale;
+  return defaultLocale
 }
 
 export function t(locale: SupportedLocale, path: string, params?: Record<string, string | number>): string {
-  const config = i18nConfig[locale];
-  const keys = path.split('.');
-  let value: any = config;
-  
+  const config = i18nConfig[locale]
+  const keys = path.split('.')
+  let value: any = config
+
   for (const key of keys) {
-    value = value?.[key];
+    value = value?.[key]
     if (value === undefined) {
-      console.warn(`i18n: Missing translation for "${path}" in locale "${locale}"`);
-      return path;
+      console.warn(`i18n: Missing translation for "${path}" in locale "${locale}"`)
+      return path
     }
   }
-  
+
   if (typeof value === 'string' && params) {
-    return value.replace(/\{(\w+)\}/g, (_, key) => params[key]?.toString() || `{${key}}`);
+    return value.replace(/\{(\w+)\}/g, (_, key) => params[key]?.toString() || `{${key}}`)
   }
-  
-  return value;
+
+  return value
 }

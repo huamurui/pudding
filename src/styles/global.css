@@ -1,9 +1,5 @@
 @import url('./tokens.css');
 @import url('./md.css');
-/* @import url('../components/base/base.css'); */
-
-/* src/styles/global.css */
-
 
 [data-theme="dark"] .astro-code,
 [data-theme="dark"] .astro-code span {
@@ -23,14 +19,14 @@ html[data-theme="light"] .theme-options .nav-link.light {
   color: var(--primary-color)
 }
 
-.astro-code {
-  border: 1px solid var(--border-color);
-  border-radius: 0.5rem;
-  padding: 1.5rem;
-  background-color: var(--bg-primary);
-  box-shadow: var(--shadow);
-  margin: 1rem 0;
+.os-scrollbar-vertical .os-scrollbar-handle {
+  background-color: var(--color-theme-mix-20);
 }
+
+.os-scrollbar-vertical .os-scrollbar-handle:hover {
+  background-color: var(--color-theme-mix-80-text);
+}
+
 
 body {
   background-color: var(--bg-primary);
@@ -53,8 +49,6 @@ body {
   background-color: color-mix(in srgb, var(--theme-color) 20%, transparent);
   text-shadow: none;
 }
-
-/* 选中然后失焦的呢 */
 
 h1::after,
 h2::after,
@@ -81,12 +75,12 @@ h6:hover::after {
   transform: translateX(10px);
 }
 
+.search-results mark {
+  background-color: color-mix(in srgb, var(--theme-color) 30%, transparent);
+  color: inherit;
+  padding: 0;
+}
 
-/* *::-webkit-scrollbar {
-  width: 8px;
-} */
-
-/* 导航菜单 */
 .nav {
   display: flex;
   align-items: center;
@@ -99,7 +93,6 @@ h6:hover::after {
   padding: 0;
   gap: 1.5rem;
 }
-
 
 .nav-link {
   color: var(--text-primary);
@@ -181,7 +174,6 @@ h6:hover::after {
   color: var(--theme-color);
 }
 
-
 .post-tags {
   display: flex;
   flex-wrap: wrap;
@@ -211,10 +203,6 @@ h6:hover::after {
   border-color: var(--theme-color);
 }
 
-
-/* 
-  之前尝试将所以 a 标签都加上类似的 hover 效果... 但直接弄其实不太好。
-*/
 @media (min-width: 768px) {
   .nav-link {
     margin: 0;
@@ -258,4 +246,22 @@ h6:hover::after {
 ul.breadcrumb-dropdown-menu li {
   white-space: nowrap;
   text-align: left;
+}
+
+.expressive-code {
+  --ec-bdColor: var(--border-color);
+  --ec-bgColor: var(--bg-secondary);
+  --ec-textColor: var(--text-primary);
+  --ec-titleColor: var(--text-secondary);
+  --ec-icoColor: var(--text-secondary);
+  --ec-borderRadius: 8px;
+  margin: 1.5rem 0;
+}
+
+.expressive-code .frame pre {
+  max-height: 500px;
+  overflow: auto;
+  border: none;
+  border-radius: 8px;
+  font-family: "JetBrains Mono Variable", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace ;
 }

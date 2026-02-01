@@ -1,34 +1,37 @@
 ---
-import ThemeToggle from "./ThemeToggle.svelte";
-import { siteConfig } from "@/config/site.config";
-import { isPostPage, buildUrl } from "@/utils/helpers";
-import { SCROLL_THRESHOLD } from "@/utils/constants";
-import Search from "./Search.svelte";
-import { getCollection } from "astro:content";
-import { t } from "@/utils/i18n";
+import ThemeToggle from './ThemeToggle.svelte'
+import { siteConfig } from '@/config/site.config'
+import { isPostPage, buildUrl } from '@/utils/helpers'
+import { SCROLL_THRESHOLD } from '@/utils/constants'
+import Search from './Search.svelte'
+import { getCollection } from 'astro:content'
+import { t } from '@/utils/i18n'
 
 interface Props {
   pageTitle: string;
 }
 
-const { pageTitle } = Astro.props as Props;
+const { pageTitle } = Astro.props as Props
 
 const navItems = siteConfig.navItems
 
-const isPostsPage = isPostPage(Astro.url.pathname);
-const allPosts = await getCollection("posts");
+const isPostsPage = isPostPage(Astro.url.pathname)
+const allPosts = await getCollection('posts')
 const searchablePosts = allPosts.map((post) => ({
   id: post.id,
   title: post.data.title,
-  excerpt: post.data.description || "无摘要",
-  url: buildUrl(["posts", post.id, ""]),
+  excerpt: post.data.description || '无摘要',
+  url: buildUrl(['posts', post.id, '']),
+  content: post.body || '',
+  description: post.data.description,
+  tags: post.data.tags
 }));
 ---
 
 <header class="header" id="header">
   <div class="header-container">
     <div class="brand">
-      <a href={buildUrl("")} class="logo-link">
+      <a href={buildUrl('')} class="logo-link">
         <span class="logo">{t('common.brand')}</span>
       </a>
     </div>
@@ -44,9 +47,9 @@ const searchablePosts = allPosts.map((post) => ({
                     href={buildUrl(item.href)}
                     class="nav-link"
                     class:list={{
-                      "is-active":
-                        Astro.url.pathname.replace("/", "") ===
-                        item.href.replace("/", ""),
+                      'is-active':
+                        Astro.url.pathname.replace('/', '') ===
+                        item.href.replace('/', '')
                     }}
                   >
                     {item.label}
@@ -88,91 +91,91 @@ const searchablePosts = allPosts.map((post) => ({
 </header>
 
 <script>
-  (function () {
-    // 滚动状态变量（保持在外部以保存状态）
-    let lastScrollTop = 0;
-    let currentDirection = "down";
-    let directionChange = false;
-    let scrollDistance = 0;
-    const threshold = 50;
-    let showingNav = true; // 当前是否显示导航（而非标题）
+(function() {
+  // 滚动状态变量（保持在外部以保存状态）
+  let lastScrollTop = 0
+  let currentDirection = 'down'
+  let directionChange = false
+  let scrollDistance = 0
+  const threshold = 50
+  let showingNav = true // 当前是否显示导航（而非标题）
 
-    document.addEventListener("click", (e) => {
-      const toggle =
-        e.target instanceof Element ? e.target.closest("#menu-toggle") : null;
-      if (!toggle) return;
-      const nav = document.getElementById("nav");
-      const header = document.getElementById("header");
-      const scrollContainer = document.getElementById("scroll-container");
-      const isExpanded = toggle.getAttribute("aria-expanded") === "true";
-      toggle.setAttribute("aria-expanded", (!isExpanded).toString());
-      nav?.classList.toggle("nav-open");
-      scrollContainer?.classList.toggle("nav-open");
-      header?.classList.toggle("menu-open");
-    });
+  document.addEventListener('click', (e) => {
+    const toggle =
+        e.target instanceof Element ? e.target.closest('#menu-toggle') : null
+    if (!toggle) return
+    const nav = document.getElementById('nav')
+    const header = document.getElementById('header')
+    const scrollContainer = document.getElementById('scroll-container')
+    const isExpanded = toggle.getAttribute('aria-expanded') === 'true'
+    toggle.setAttribute('aria-expanded', (!isExpanded).toString())
+    nav?.classList.toggle('nav-open')
+    scrollContainer?.classList.toggle('nav-open')
+    header?.classList.toggle('menu-open')
+  })
 
-    // 滚动处理函数：每次运行时重新查询相关 DOM 元素以应对 SPA 替换
-    function handleScroll() {
-      if (window.innerWidth <= 768) return;
+  // 滚动处理函数：每次运行时重新查询相关 DOM 元素以应对 SPA 替换
+  function handleScroll() {
+    if (window.innerWidth <= 768) return
 
-      const header = document.getElementById("header");
-      const pageTitle = document.getElementById("page-title");
-      const scrollContainer = document.getElementById("scroll-container");
-      const isPostsPage = !!pageTitle;
+    const header = document.getElementById('header')
+    const pageTitle = document.getElementById('page-title')
+    const scrollContainer = document.getElementById('scroll-container')
+    const isPostsPage = !!pageTitle
 
-      header?.classList.toggle("scrolled", window.scrollY > 10);
+    header?.classList.toggle('scrolled', window.scrollY > 10)
 
-      if (!header || !isPostsPage || !pageTitle || !scrollContainer) return;
+    if (!header || !isPostsPage || !pageTitle || !scrollContainer) return
 
-      const scrollTop = window.scrollY;
-      const newDirection = scrollTop > lastScrollTop ? "down" : "up";
+    const scrollTop = window.scrollY
+    const newDirection = scrollTop > lastScrollTop ? 'down' : 'up'
 
-      if (newDirection !== currentDirection) {
-        currentDirection = newDirection;
-        directionChange = true;
-        scrollDistance = 0;
-      }
-
-      if (directionChange) {
-        scrollDistance += Math.abs(scrollTop - lastScrollTop);
-      }
-
-      if (scrollDistance >= threshold) {
-        if (currentDirection === "down" && showingNav) {
-          showingNav = false;
-          scrollContainer.style.transform = "translateY(-100%)";
-        } else if (currentDirection === "up" && !showingNav) {
-          showingNav = true;
-          scrollContainer.style.transform = "translateY(0)";
-        }
-        directionChange = false;
-      }
-
-      lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+    if (newDirection !== currentDirection) {
+      currentDirection = newDirection
+      directionChange = true
+      scrollDistance = 0
     }
 
-    let scrollListenerAttached = false;
-    function ensureScrollListener() {
-      if (scrollListenerAttached) return;
-      window.addEventListener("scroll", handleScroll, { passive: true });
-      scrollListenerAttached = true;
+    if (directionChange) {
+      scrollDistance += Math.abs(scrollTop - lastScrollTop)
     }
 
-    document.addEventListener("astro:page-load", () => {
-      lastScrollTop = 0;
-      currentDirection = "down";
-      directionChange = false;
-      scrollDistance = 0;
-      showingNav = true;
-      const scrollContainer = document.getElementById("scroll-container");
-      if (scrollContainer) scrollContainer.style.transform = "translateY(0)";
-      setTimeout(handleScroll, 50);
-      ensureScrollListener();
-    });
+    if (scrollDistance >= threshold) {
+      if (currentDirection === 'down' && showingNav) {
+        showingNav = false
+        scrollContainer.style.transform = 'translateY(-100%)'
+      } else if (currentDirection === 'up' && !showingNav) {
+        showingNav = true
+        scrollContainer.style.transform = 'translateY(0)'
+      }
+      directionChange = false
+    }
 
-    ensureScrollListener();
-    handleScroll();
-  })();
+    lastScrollTop = scrollTop <= 0 ? 0 : scrollTop
+  }
+
+  let scrollListenerAttached = false
+  function ensureScrollListener() {
+    if (scrollListenerAttached) return
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    scrollListenerAttached = true
+  }
+
+  document.addEventListener('astro:page-load', () => {
+    lastScrollTop = 0
+    currentDirection = 'down'
+    directionChange = false
+    scrollDistance = 0
+    showingNav = true
+    const scrollContainer = document.getElementById('scroll-container')
+    if (scrollContainer) scrollContainer.style.transform = 'translateY(0)'
+    setTimeout(handleScroll, 50)
+    ensureScrollListener()
+  })
+
+  ensureScrollListener()
+  handleScroll()
+})()
 </script>
 
 <style>

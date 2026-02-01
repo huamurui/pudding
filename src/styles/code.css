@@ -6,7 +6,7 @@ pre.astro-code .code-toolbar { position: absolute; right: 0.5rem; top: 0.5rem; d
 
 /* collapsed state: limit height and make scrollable */
 pre.astro-code.code-collapsed { max-height: 360px; overflow: auto; }
-pre.astro-code.code-collapsed::after { content: ""; pointer-events: none; position: absolute; left: 0; right: 0; bottom: 0; height: 3rem; background: linear-gradient(180deg, rgba(255,255,255,0), var(--bg-primary)); border-radius: 0 0 8px 8px; }
+pre.astro-code.code-collapsed::after { content: ""; pointer-events: none; position: absolute; left: 0; right: 0; bottom: 0; height: 3rem; background:  rgba(255,255,255,0, var(--bg-primary)); border-radius: 0 0 8px 8px; }
 
 /* when expanded remove fade */
 pre.astro-code.code-expanded { max-height: none; overflow: visible; }

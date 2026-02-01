@@ -1,54 +1,52 @@
 ---
-import ToC from "@/components/ToC.astro";
-import Breadcrumb from "@/components/Breadcrumb.svelte";
-import { getCollection, render, type CollectionEntry } from "astro:content";
-import BaseLayout from "@/layouts/BaseLayout.astro";
-import { siteConfig } from "@/config/site.config";
-import { extractExcerptFromHtml, calculateReadingTime, formatDate, sanitizeViewTransitionName, generateBreadcrumbItems, getTagUrl } from "@/utils/helpers";
-import { generatePostStructuredData } from "@/utils/structured-data";
-import { ANIMATION_DURATION, EASING, READING_SPEED } from "@/utils/constants";
-import type { PostFrontmatter, PostEntry, StructuredData } from "@/types";
-import "/node_modules/katex/dist/katex.min.css";
-import { t } from "@/utils/i18n";
+import ToC from '@/components/ToC.astro'
+import Breadcrumb from '@/components/Breadcrumb.svelte'
+import { getCollection, render, type CollectionEntry } from 'astro:content'
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import { extractExcerptFromHtml, formatDate, sanitizeViewTransitionName, generateBreadcrumbItems, countWords } from '@/utils/helpers'
+import { generatePostStructuredData } from '@/utils/structured-data'
+import { ANIMATION_DURATION, EASING } from '@/utils/constants'
+import type { PostFrontmatter } from '@/types'
+import '/node_modules/katex/dist/katex.min.css'
 
 type StaticPath = {
   params: {
     slug: string;
   };
   props: {
-    post: CollectionEntry<"posts">;
+    post: CollectionEntry<'posts'>;
   };
 };
 
 export async function getStaticPaths(): Promise<StaticPath[]> {
-  const posts = await getCollection("posts");
+  const posts = await getCollection('posts')
   return posts.map((post) => ({
     params: { slug: post.id },
-    props: { post },
-  }));
+    props: { post }
+  }))
 }
 
-import { experimental_AstroContainer } from "astro/container";
-const container = await experimental_AstroContainer.create();
+import { experimental_AstroContainer } from 'astro/container'
+const container = await experimental_AstroContainer.create()
 
 interface Props {
-  post: CollectionEntry<"posts">;
+  post: CollectionEntry<'posts'>;
 }
 
-const { post } = Astro.props as Props;
-const { Content, headings } = await render(post);
+const { post } = Astro.props as Props
+const { Content, headings } = await render(post)
 
-const post_str = await container.renderToString(Content);
-const description = extractExcerptFromHtml(post_str);
+const post_str = await container.renderToString(Content)
+const description = extractExcerptFromHtml(post_str)
 
-const structuredData = generatePostStructuredData(post, description, Astro.url.origin);
+const structuredData = generatePostStructuredData(post, description, Astro.url.origin)
 
 // page-specific title morph animation
 const anim = {
-  old: { name: "title-old", duration: ANIMATION_DURATION.slow, easing: EASING.smooth, fillMode: "both" },
-  new: { name: "title-new", duration: ANIMATION_DURATION.slow, easing: EASING.smooth, fillMode: "both" },
-};
-const customTransition = { forwards: anim, backwards: anim };
+  old: { name: 'title-old', duration: ANIMATION_DURATION.slow, easing: EASING.smooth, fillMode: 'both' },
+  new: { name: 'title-new', duration: ANIMATION_DURATION.slow, easing: EASING.smooth, fillMode: 'both' }
+}
+const customTransition = { forwards: anim, backwards: anim }
 
 const breadcrumbItems = generateBreadcrumbItems(post.id);
 ---
@@ -57,7 +55,7 @@ const breadcrumbItems = generateBreadcrumbItems(post.id);
   <article class="blog-post-container">
     <div class="blog-post-content">
       <Breadcrumb client:idle items={breadcrumbItems} />
-      
+
       <header class="post-header">
         <h1 class="post-title" transition:name={sanitizeViewTransitionName(post.id)} transition:animate={customTransition}>{post.data.title}</h1>
         <!-- <p class="post-description">{post.data.description}</p> -->
@@ -70,7 +68,7 @@ const breadcrumbItems = generateBreadcrumbItems(post.id);
           </time>
           <span class="meta-separator">•</span>
           <span class="reading-time">
-            {calculateReadingTime(post.body || "", READING_SPEED)} {t('common.posts.readingTime')}
+            {countWords(post.body || '')} {'words'}
           </span>
         </div>
         <!-- <div class="post-tags">
@@ -109,33 +107,33 @@ const breadcrumbItems = generateBreadcrumbItems(post.id);
 
   {headings && headings.length > 0 && <ToC slot="aside" headings={headings} />}
   <script is:inline>
-    (function () {
+    (function() {
       function initBlur() {
         document.querySelectorAll('.blur-wrapper').forEach(btn => {
           // 防止重复绑定
-          if (btn.dataset.spoilerInitialized === 'true') return;
-          btn.dataset.spoilerInitialized = 'true';
+          if (btn.dataset.spoilerInitialized === 'true') return
+          btn.dataset.spoilerInitialized = 'true'
 
           btn.addEventListener('click', (e) => {
-            e.stopPropagation(); // 阻止冒泡
-            const wrapper = btn.closest('.blur-wrapper');
-            if (!wrapper) return;
-            const isHidden = wrapper.dataset.hidden === 'true';
-            wrapper.dataset.hidden = (!isHidden).toString();
-          });
-        });
+            e.stopPropagation() // 阻止冒泡
+            const wrapper = btn.closest('.blur-wrapper')
+            if (!wrapper) return
+            const isHidden = wrapper.dataset.hidden === 'true'
+            wrapper.dataset.hidden = (!isHidden).toString()
+          })
+        })
       }
 
       // 初始加载时绑定
       if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initBlur);
+        document.addEventListener('DOMContentLoaded', initBlur)
       } else {
-        initBlur();
+        initBlur()
       }
 
       // 在客户端路由切换后重新绑定（等待内容插入）
-      document.addEventListener('astro:page-load', () => setTimeout(initBlur, 50));
-    })();
+      document.addEventListener('astro:page-load', () => setTimeout(initBlur, 50))
+    })()
   </script>
 </BaseLayout>
 

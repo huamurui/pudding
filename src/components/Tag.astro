@@ -1,54 +1,47 @@
 ---
-import { getCollection, type CollectionEntry } from "astro:content";
-import { siteConfig } from "@/config/site.config";
-import { buildUrl } from "@/utils/helpers";
+import { getCollection, type CollectionEntry } from 'astro:content'
+import { buildUrl } from '@/utils/helpers'
 
-type TagPostsMap = Map<string, CollectionEntry<"posts">[]>;
-const post = Astro.props.post as CollectionEntry<"posts"> | null;
-const posts: CollectionEntry<"posts">[] = await getCollection("posts");
-const tagsPosts: TagPostsMap = new Map();
+type TagPostsMap = Map<string, CollectionEntry<'posts'>[]>;
+const post = Astro.props.post as CollectionEntry<'posts'> | null
+const posts: CollectionEntry<'posts'>[] = await getCollection('posts')
+const tagsPosts: TagPostsMap = new Map()
 
-// 按标签分组文章，并按时间排序（最新在前）
 for (const post of posts) {
   for (const tag of post.data.tags || []) {
-    const existingPosts = tagsPosts.get(tag) || [];
-    // 添加并按日期排序
+    const existingPosts = tagsPosts.get(tag) || []
     const updatedPosts = [...existingPosts, post].sort(
       (a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime()
-    );
-    tagsPosts.set(tag, updatedPosts);
+    )
+    tagsPosts.set(tag, updatedPosts)
   }
 }
 
 if(post){
-  // 如果传入了 post，则只展示该 post 的标签
-  const postTags = post.data.tags || [];
-  const filteredTagsPosts: TagPostsMap = new Map();
+  const postTags = post.data.tags || []
+  const filteredTagsPosts: TagPostsMap = new Map()
   for (const tag of postTags) {
     if (tagsPosts.has(tag)) {
-      filteredTagsPosts.set(tag, tagsPosts.get(tag)!);
+      filteredTagsPosts.set(tag, tagsPosts.get(tag)!)
     }
   }
-  // 使用过滤后的标签映射
-  tagsPosts.clear();
+  tagsPosts.clear()
   for (const [tag, posts] of filteredTagsPosts.entries()) {
-    tagsPosts.set(tag, posts);
+    tagsPosts.set(tag, posts)
   }
 }
 
-// 按标签名称排序
 const sortedTags = Array.from(tagsPosts.keys()).sort((a, b) =>
-  a.localeCompare(b),
+  a.localeCompare(b)
 );
 ---
 
   <div class="tags-page">
-    <!-- 标签导航栏 - 可点击跳转到对应标签 -->
     <div class="tags-nav">
       <div class="tags-container">
         {sortedTags.map((tag) => (
-          <a 
-            href={buildUrl(["tags", tag, ""])}
+          <a
+            href={buildUrl(['tags', tag, ''])}
             class="post-tag"
             data-tag={tag}
           >
@@ -63,7 +56,6 @@ const sortedTags = Array.from(tagsPosts.keys()).sort((a, b) =>
   </div>
 
 <style>
-  /* 标签导航栏 */
   .tags-nav {
     background-color: var(--bg-primary);
     padding: 8px 0;
@@ -71,7 +63,6 @@ const sortedTags = Array.from(tagsPosts.keys()).sort((a, b) =>
     box-shadow: 0 2px 4px var(--shadow);
   }
 
-  /* 标签折叠按钮 - 默认隐藏 */
   .tags-toggle {
     display: none;
     width: 100%;

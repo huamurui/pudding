@@ -6,8 +6,11 @@
   interface Post {
     id: string;
     title: string;
-    excerpt: string;
+    excerpt?: string;
     url: string;
+    content: string;
+    description?: string;
+    tags?: string[];
   }
 
   type SearchablePosts = readonly Post[];
@@ -17,12 +20,19 @@
   let isSearchOpen = false;
   let searchResults: FuseResult<Post>[] = [];
   let fuse: Fuse<Post>;
+  let searchWorker: Worker | null = null;
+  let isWorkerReady = false;
   const fuseOptions: IFuseOptions<Post> = {
     includeScore: true,
-    threshold: 0.3,
+    includeMatches: true,
+    threshold: 0.4,
+    ignoreLocation: true,
+    minMatchCharLength: 2,
     keys: [
-      { name: "title", weight: 2 },
-      { name: "excerpt", weight: 1 },
+      { name: "title", weight: 3 },
+      { name: "description", weight: 2 },
+      { name: "content", weight: 1 },
+      { name: "tags", weight: 1 },
     ],
   };
 
@@ -30,10 +40,116 @@
 
   onMount(() => {
     document.addEventListener("click", handleClickOutside);
+    
+    try {
+      // 初始化 Web Worker (使用 Vite 支持的方式，并指定为模块类型)
+      searchWorker = new Worker(new URL('../workers/search-worker.ts', import.meta.url), { type: 'module' });
+      
+      searchWorker.onmessage = (e) => {
+        const { type, payload } = e.data;
+        
+        switch (type) {
+          case 'INITIALIZED':
+            isWorkerReady = true;
+            break;
+          case 'SEARCH_RESULTS':
+            searchResults = payload.slice(0, 5);
+            break;
+          case 'ERROR':
+            console.error('Search Worker Error:', payload);
+            // 降级到主线程搜索
+            if (fuse && searchQuery) {
+              searchResults = fuse.search(searchQuery).slice(0, 5);
+            }
+            break;
+        }
+      };
+      
+      searchWorker.onerror = (error) => {
+        console.error('Search Worker Error:', error);
+        isWorkerReady = false;
+      };
+    } catch (error) {
+      console.error('Failed to create search worker:', error);
+      isWorkerReady = false;
+    }
+    
+    // 初始化 Fuse 实例（主线程备用）
+    fuse = new Fuse(searchablePosts as Post[], fuseOptions);
+    
+    // 发送初始化消息到 Worker
+    if (searchWorker) {
+      // 创建可序列化的 options 副本，移除不可序列化的属性
+      const serializableOptions = {
+        includeScore: true,
+        includeMatches: true,
+        threshold: 0.4,
+        ignoreLocation: true,
+        minMatchCharLength: 2,
+        keys: [
+          { name: "title", weight: 3 },
+          { name: "description", weight: 2 },
+          { name: "content", weight: 1 },
+          { name: "tags", weight: 1 },
+        ],
+      };
+      
+      // 创建可序列化的文章数据副本，只包含必要属性
+      const serializablePosts = searchablePosts.map(post => ({
+        id: post.id,
+        title: post.title,
+        content: post.content,
+        description: post.description || '',
+        tags: post.tags || [],
+        url: post.url
+      }));
+      
+      // todo . 现在未使用 worker
+      // searchWorker.postMessage({
+      //   type: 'INIT',
+      //   payload: {
+      //     posts: serializablePosts,
+      //     options: serializableOptions
+      //   }
+      // });
+    }
+    
     return () => {
       document.removeEventListener("click", handleClickOutside);
+      if (searchWorker) {
+        searchWorker.terminate();
+        searchWorker = null;
+      }
     };
   });
+
+  // 高亮显示匹配的文本
+  const highlightMatch = (text: string, query: string): string => {
+    if (!query) return text;
+    
+    const regex = new RegExp(`(${query})`, "gi");
+    return text.replace(regex, "<mark>$1</mark>");
+  };
+
+  // 生成显示摘要，包含匹配的内容
+  const generateExcerpt = (post: Post, query: string): string => {
+    if (!query) return post.description || post.content.slice(0, 150) + "...";
+    
+    const content = post.content.toLowerCase();
+    const queryLower = query.toLowerCase();
+    const matchIndex = content.indexOf(queryLower);
+    
+    if (matchIndex === -1) return post.description || post.content.slice(0, 150) + "...";
+    
+    const start = Math.max(0, matchIndex - 50);
+    const end = Math.min(content.length, matchIndex + query.length + 50);
+    let excerpt = post.content.slice(start, end);
+    
+    if (start > 0) excerpt = "..." + excerpt;
+    if (end < post.content.length) excerpt = excerpt + "...";
+    
+    return highlightMatch(excerpt, query);
+  };
 
   const handleClickOutside = (e: MouseEvent) => {
     const searchContainer = document.querySelector(".search-container");
@@ -52,8 +168,20 @@
       searchResults = [];
       return;
     }
-    const results = fuse.search(inputValue);
-    searchResults = results.slice(0, 5);
+    
+    // 使用 Web Worker 搜索，如果可用
+    if (isWorkerReady && searchWorker) {
+      searchWorker.postMessage({
+        type: 'SEARCH',
+        payload: {
+          query: inputValue
+        }
+      });
+    } else {
+      // 降级到主线程搜索
+      const results = fuse.search(inputValue);
+      searchResults = results.slice(0, 5);
+    }
   };
 
   const toggleSearch = () => {
@@ -123,20 +251,16 @@
           {#each searchResults as result}
             <li class="search-result-item">
               <a
-                href={result.item.url}
-                on:click={() => {
-                  isSearchOpen = false;
-                  searchQuery = "";
-                }}
-                aria-label={t('common.search.ariaLabel.viewArticle', { title: result.item.title })}
-              >
-                <h4 class="result-title">{result.item.title}</h4>
-                {#if result.item.excerpt}
-                  <p class="result-excerpt">
-                    {result.item.excerpt.slice(0, 80)}...
-                  </p>
-                {/if}
-              </a>
+              href={result.item.url}
+              on:click={() => {
+                isSearchOpen = false;
+                searchQuery = "";
+              }}
+              aria-label={t('common.search.ariaLabel.viewArticle', { title: result.item.title })}
+            >
+              <h4 class="result-title">{@html highlightMatch(result.item.title, searchQuery)}</h4>
+              <p class="result-excerpt">{@html generateExcerpt(result.item, searchQuery)}</p>
+            </a>
             </li>
           {/each}
         </ul>
@@ -248,14 +372,20 @@
     font-size: 0.8rem;
     color: var(--text-secondary);
     margin: 0;
-    white-space: nowrap;
+    white-space: normal;
     overflow: hidden;
-    text-overflow: ellipsis;
+  }
+
+  mark {
+    background-color: var(--theme-color-light);
+    color: var(--text-primary);
+    padding: 0.1em 0.2em;
+    border-radius: 3px;
   }
 
   @media (max-width: 768px) {
     .search-dropdown {
-      width: 280px;
+      width: 320px;
       right: -9rem;
     }
   }

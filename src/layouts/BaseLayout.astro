@@ -1,21 +1,19 @@
 ---
-import "@/styles/global.css";
-import "@/styles/link-card.css";
-import "@/styles/code.css";
-import { getCollection } from "astro:content";
-import { siteConfig } from "@/config/site.config";
-import { isPostPage, isHomePage } from "@/utils/helpers";
-import type { PostFrontmatter, PostEntry, StructuredData } from "@/types";
-import Head from "@/components/Head.astro";
-import Header from "@/components/Header.astro";
-import Footer from "@/components/Footer.astro";
-import FAB from "@/components/FAB.svelte";
-import CodeEnhancer from "@/components/CodeEnhancer.svelte";
-import Sidebar from "@/components/Sidebar.astro";
-import { t } from "@/utils/i18n";
+import '@/styles/global.css'
+import '@/styles/link-card.css'
+import '@/styles/code.css'
+import 'overlayscrollbars/styles/overlayscrollbars.css'
+import { siteConfig } from '@/config/site.config'
+import { isPostPage, isHomePage } from '@/utils/helpers'
+import type { PostFrontmatter, PostEntry, StructuredData } from '@/types'
+import Head from '@/components/Head.astro'
+import Header from '@/components/Header.astro'
+import Footer from '@/components/Footer.astro'
+import FAB from '@/components/FAB.svelte'
+import Sidebar from '@/components/Sidebar.astro'
 
 // 判断是否为文章页面
-const isPostsPage = isPostPage(Astro.url.pathname);
+const isPostsPage = isPostPage(Astro.url.pathname)
 
 interface Props {
   pageTitle?: string;
@@ -33,23 +31,23 @@ let {
   ogImage = '',
   canonicalUrl = Astro.url.href,
   post = null,
-  structuredData = null,
-} = Astro.props as Props;
+  structuredData = null
+} = Astro.props as Props
 
-let description = siteConfig.description;
+let description = siteConfig.description
 if (postFrontmatter?.description) {
   // Override default description with post-specific one
   // and erase any HTML tags
-  description = postFrontmatter.description.replace(/<[^>]*>/g, "");
+  description = postFrontmatter.description.replace(/<[^>]*>/g, '')
 }
 if (postFrontmatter?.image?.url) {
-  ogImage = postFrontmatter.image.url;
+  ogImage = postFrontmatter.image.url
 }
 if (postFrontmatter?.url) {
-  canonicalUrl = Astro.url.origin + postFrontmatter.url;
+  canonicalUrl = Astro.url.origin + postFrontmatter.url
 }
 if (postFrontmatter?.title) {
-  pageTitle = `${postFrontmatter.title} | ${siteConfig.name}`;
+  pageTitle = `${postFrontmatter.title} | ${siteConfig.name}`
 }
 
 const isHome = isHomePage(Astro.url.pathname);
@@ -92,7 +90,7 @@ const isHome = isHomePage(Astro.url.pathname);
 
       /* 侧边栏 */
       .blog-post-sidebar {
-        width: 280px;
+        width: 320px;
         flex-shrink: 0;
         position: sticky;
         top: 5rem;
@@ -140,7 +138,7 @@ const isHome = isHomePage(Astro.url.pathname);
       <aside>
         <div
           class="blog-post-sidebar"
-          style={isPostsPage ? "position: static" : ";"}
+          style={isPostsPage ? 'position: static' : ';'}
         >
           <Sidebar post={post}/>
         </div>
@@ -150,7 +148,30 @@ const isHome = isHomePage(Astro.url.pathname);
       </aside>
     </div>
     <Footer />
-    <CodeEnhancer client:idle />
     <FAB client:idle />
+    <script>
+      import { OverlayScrollbars } from 'overlayscrollbars'
+      function changeBars() {
+        // const tocList = document.querySelector<HTMLAnchorElement>('.toc-list')
+        // if (tocList) {
+        //   OverlayScrollbars(tocList, {
+        //     scrollbars: {
+        //       visibility: 'auto',
+        //       autoHide: 'scroll',
+        //       autoHideDelay: 800
+        //     }
+        //   })
+        // }
+        OverlayScrollbars(document.body, {
+          scrollbars: {
+            visibility: 'auto',
+            autoHide: 'scroll',
+            autoHideDelay: 800
+          }
+        })
+      }
+      document.addEventListener('DOMContentLoaded',changeBars)
+      document.addEventListener('astro:page-load', changeBars)
+    </script>
   </body>
 </html>

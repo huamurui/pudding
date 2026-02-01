@@ -2,7 +2,7 @@
  * 全局类型定义
  */
 
-import type { CollectionEntry } from "astro:content";
+import type { CollectionEntry } from 'astro:content'
 
 /** 文章图片 */
 export interface PostImage {
@@ -36,12 +36,12 @@ export interface PostData {
 }
 
 /** 文章集合条目 */
-export type PostEntry = CollectionEntry<"posts">;
+export type PostEntry = CollectionEntry<'posts'>;
 
 /** 结构化数据 */
 export interface StructuredData {
-  "@context"?: string;
-  "@type"?: string;
+  '@context'?: string;
+  '@type'?: string;
   [key: string]: unknown;
 }
 

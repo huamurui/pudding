@@ -1,11 +1,11 @@
 ---
-import PostList from "@/components/PostList/PostList.svelte";
-import BaseLayout from "@/layouts/BaseLayout.astro";
-import { getCollection, type CollectionEntry } from "astro:content";
-import "@/components/PostList/PostList.css";
-import { t } from "@/utils/i18n";
-import Breadcrumb from "@/components/Breadcrumb.svelte";
-import { generateBreadcrumbItems } from "@/utils/helpers";
+import PostList from '@/components/PostList/PostList.svelte'
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import { getCollection, type CollectionEntry } from 'astro:content'
+import '@/components/PostList/PostList.css'
+import { t } from '@/utils/i18n'
+import Breadcrumb from '@/components/Breadcrumb.svelte'
+import { generateBreadcrumbItems } from '@/utils/helpers'
 
 type StaticPath = {
   params: {
@@ -13,42 +13,42 @@ type StaticPath = {
   };
   props: {
     category: string;
-    posts: CollectionEntry<"posts">[];
+    posts: CollectionEntry<'posts'>[];
   };
 };
 
 export async function getStaticPaths(): Promise<StaticPath[]> {
-  const posts = await getCollection("posts");
-  const categories = new Map<string, CollectionEntry<"posts">[]>();
+  const posts = await getCollection('posts')
+  const categories = new Map<string, CollectionEntry<'posts'>[]>()
 
   for (const post of posts) {
-    const pathParts = post.id.split("/");
+    const pathParts = post.id.split('/')
     if (pathParts.length > 1) {
-      const category = pathParts[0];
+      const category = pathParts[0]
       if (!categories.has(category)) {
-        categories.set(category, []);
+        categories.set(category, [])
       }
-      categories.get(category)!.push(post);
+      categories.get(category)!.push(post)
     }
   }
 
   return Array.from(categories.entries()).map(
     ([category, posts]): StaticPath => ({
       params: { category },
-      props: { category, posts },
+      props: { category, posts }
     })
-  );
+  )
 }
 
 interface Props {
   category: string;
-  posts: CollectionEntry<"posts">[];
+  posts: CollectionEntry<'posts'>[];
 }
 
-const { category, posts } = Astro.props;
+const { category, posts } = Astro.props
 
-const breadcrumbItems = generateBreadcrumbItems(category, true);
-const categoryTitle = category.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
+const breadcrumbItems = generateBreadcrumbItems(category, true)
+const categoryTitle = category.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())
 const sortedPosts = [...posts].sort(
   (a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime()
 );
@@ -67,7 +67,7 @@ const sortedPosts = [...posts].sort(
                 <div class="timeline-connector year">
                   <div class="post-marker year"></div>
                 </div>
-                <span class="inline-tag">{posts.length} {t("common.category.count")}</span>
+                <span class="inline-tag">{posts.length} {t('common.category.count')}</span>
               </div>
             </div>
           </article>
