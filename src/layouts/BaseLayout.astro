@@ -2,7 +2,6 @@
 import '@/styles/global.css'
 import '@/styles/link-card.css'
 import '@/styles/code.css'
-import 'overlayscrollbars/styles/overlayscrollbars.css'
 import { siteConfig } from '@/config/site.config'
 import { isPostPage, isHomePage } from '@/utils/helpers'
 import type { PostFrontmatter, PostEntry, StructuredData } from '@/types'
@@ -53,7 +52,10 @@ if (postFrontmatter?.title) {
 const isHome = isHomePage(Astro.url.pathname);
 ---
 
-<html lang="zh-CN">
+<!DOCTYPE html>
+<html lang={siteConfig.locale}
+  data-overlayscrollbars-initialize
+>
   <Head
     pageTitle={pageTitle}
     description={description}
@@ -62,7 +64,7 @@ const isHome = isHomePage(Astro.url.pathname);
     structuredData={structuredData}
   />
 
-  <body>
+  <body data-overlayscrollbars-initialize>
     <style>
       /* View transition keyframes for title morphing */
       @keyframes title-old {
@@ -150,28 +152,40 @@ const isHome = isHomePage(Astro.url.pathname);
     <Footer />
     <FAB client:idle />
     <script>
-      import { OverlayScrollbars } from 'overlayscrollbars'
-      function changeBars() {
-        // const tocList = document.querySelector<HTMLAnchorElement>('.toc-list')
-        // if (tocList) {
-        //   OverlayScrollbars(tocList, {
-        //     scrollbars: {
-        //       visibility: 'auto',
-        //       autoHide: 'scroll',
-        //       autoHideDelay: 800
-        //     }
-        //   })
-        // }
-        OverlayScrollbars(document.body, {
-          scrollbars: {
-            visibility: 'auto',
-            autoHide: 'scroll',
-            autoHideDelay: 800
-          }
-        })
-      }
-      document.addEventListener('DOMContentLoaded',changeBars)
-      document.addEventListener('astro:page-load', changeBars)
+    import { OverlayScrollbars } from 'overlayscrollbars'
+    import 'overlayscrollbars/styles/overlayscrollbars.css'
+    function changeBars() {
+      // const tocList = document.querySelector<HTMLAnchorElement>('.toc-list')
+      const bodyElement = document.querySelector('body')
+      if (!bodyElement) return
+      OverlayScrollbars({
+        target: bodyElement,
+        cancel: {
+          nativeScrollbarsOverlaid: false    // don't initialize the overlay scrollbar if there is a native one
+        }
+      }, {
+        scrollbars: {
+          autoHide: 'move',
+          autoHideDelay: 500,
+          autoHideSuspend: false
+        }
+      })
+      // if(!tocList) return
+      // OverlayScrollbars({
+      //   target: tocList,
+      //   cancel: {
+      //     nativeScrollbarsOverlaid: true
+      //   }
+      // }, {
+      //   scrollbars: {
+      //     autoHide: 'move',
+      //     autoHideDelay: 500,
+      //     autoHideSuspend: false
+      //   }
+      // })
+    }
+    changeBars()
+    document.addEventListener('astro:after-swap', changeBars)
     </script>
   </body>
 </html>
