@@ -17,6 +17,6 @@ export const GET:APIRoute = async(context) => {
       link: getPostUrl(post.id)
     })),
     customData: '<language>zh-cn</language>',
-    stylesheet: '/rss.xsl'
+    stylesheet: siteConfig.base + '/rss.xsl'
   })
 }
