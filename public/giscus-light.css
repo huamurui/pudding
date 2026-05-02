@@ -1,0 +1,20 @@
+/* Giscus Jelly Theme - Light Mode */
+@import url('https://giscus.app/themes/light.css');
+
+main {
+  --color-accent-fg: #5e7eff;
+  --color-accent-emphasis: #5e7eff;
+  --color-btn-primary-bg: #5e7eff;
+  --color-btn-primary-hover-bg: #4d6eef;
+  --color-btn-primary-border: transparent;
+  --radius-buttons: 10px;
+  --radius-inputs: 10px;
+}
+
+.giscus-active-discussion {
+  border-radius: 16px;
+}
+
+.reply-box {
+  border-radius: 12px !important;
+}

@@ -20,11 +20,8 @@ const allPosts = await getCollection('posts')
 const searchablePosts = allPosts.map((post) => ({
   id: post.id,
   title: post.data.title,
-  excerpt: post.data.description || '无摘要',
   url: buildUrl(['posts', post.id, '']),
-  content: post.body || '',
-  description: post.data.description,
-  tags: post.data.tags
+  // 不再在这里传递 content，改用异步加载索引
 }));
 ---
 
@@ -71,7 +68,7 @@ const searchablePosts = allPosts.map((post) => ({
     </div>
 
     <div class="header-actions">
-      <Search client:idle searchablePosts={searchablePosts} />
+      <Search client:load searchablePosts={searchablePosts} />
       <ThemeToggle client:load />
 
       <button

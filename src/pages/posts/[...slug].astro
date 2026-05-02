@@ -1,8 +1,11 @@
 ---
 import ToC from '@/components/ToC.astro'
 import Breadcrumb from '@/components/Breadcrumb.svelte'
+import ReadingProgress from '@/components/ReadingProgress.svelte'
+import Comments from '@/components/Comments.svelte'
 import { getCollection, render, type CollectionEntry } from 'astro:content'
 import BaseLayout from '@/layouts/BaseLayout.astro'
+import { Image } from 'astro:assets'
 import { extractExcerptFromHtml, formatDate, sanitizeViewTransitionName, generateBreadcrumbItems, countWords } from '@/utils/helpers'
 import { generatePostStructuredData } from '@/utils/structured-data'
 import { ANIMATION_DURATION, EASING } from '@/utils/constants'
@@ -39,7 +42,8 @@ const { Content, headings } = await render(post)
 const post_str = await container.renderToString(Content)
 const description = extractExcerptFromHtml(post_str)
 
-const structuredData = generatePostStructuredData(post, description, Astro.url.origin)
+const breadcrumbItems = generateBreadcrumbItems(post.id);
+const structuredData = generatePostStructuredData(post, description, Astro.url.origin, breadcrumbItems)
 
 // page-specific title morph animation
 const anim = {
@@ -47,11 +51,10 @@ const anim = {
   new: { name: 'title-new', duration: ANIMATION_DURATION.slow, easing: EASING.smooth, fillMode: 'both' }
 }
 const customTransition = { forwards: anim, backwards: anim }
-
-const breadcrumbItems = generateBreadcrumbItems(post.id);
 ---
 
 <BaseLayout postFrontmatter={{ ...post.data, description } as PostFrontmatter} post={post} structuredData={structuredData}>
+  <ReadingProgress client:load />
   <article class="blog-post-container">
     <div class="blog-post-content">
       <Breadcrumb client:idle items={breadcrumbItems} />
@@ -85,10 +88,14 @@ const breadcrumbItems = generateBreadcrumbItems(post.id);
       {
         post.data.image && (
           <figure class="post-image">
-            <img
+            <Image
               src={post.data.image.url}
               alt={post.data.image.alt || post.data.title}
-              loading="lazy"
+              width={1200}
+              height={600}
+              class="banner-image"
+              loading="eager" 
+              decoding="async"
             />
             {post.data.image.alt && (
               <figcaption>{post.data.image.alt}</figcaption>
@@ -97,16 +104,21 @@ const breadcrumbItems = generateBreadcrumbItems(post.id);
         )
       }
 
-      <div class="post-content">
+      <div class="post-content markdown-body">
         <Content />
       </div>
 
-      <footer class="post-footer"></footer>
+      <footer class="post-footer">
+      </footer>
     </div>
   </article>
 
   {headings && headings.length > 0 && <ToC slot="aside" headings={headings} />}
-  <script is:inline>
+  <div slot="bottom" class="comments-wrapper">
+    <Comments client:visible />
+  </div>
+
+  <script>
     (function() {
       function initBlur() {
         document.querySelectorAll('.blur-wrapper').forEach(btn => {
@@ -134,6 +146,21 @@ const breadcrumbItems = generateBreadcrumbItems(post.id);
       // 在客户端路由切换后重新绑定（等待内容插入）
       document.addEventListener('astro:page-load', () => setTimeout(initBlur, 50))
     })()
+
+    // Medium Zoom Initialization
+    import mediumZoom from 'medium-zoom'
+    
+    function initZoom() {
+      const isDark = document.documentElement.classList.contains('dark')
+      const zoom = mediumZoom('.post-content img, .post-image img', {
+        margin: 24,
+        background: isDark ? '#121212' : '#ffffff',
+      })
+    }
+
+    document.addEventListener('astro:page-load', initZoom)
+    // Initial load
+    initZoom()
   </script>
 </BaseLayout>
 
@@ -199,6 +226,30 @@ const breadcrumbItems = generateBreadcrumbItems(post.id);
     width: 100%;
     height: auto;
     display: block;
+    /* transition: transform 0.3s ease; */ /* Removed to avoid conflict with medium-zoom */
+    background-color: var(--color-bg-tertiary);
+  }
+
+  .post-image:hover img {
+    /* transform: scale(1.02); */ /* Removed to avoid conflict with medium-zoom */
+  }
+
+  /* Post content images optimization */
+  .post-content :global(img) {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 1.5rem auto;
+    display: block;
+    cursor: zoom-in;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    background-color: var(--color-bg-tertiary);
+    /* transition: transform 0.3s ease, box-shadow 0.3s ease; */ /* Removed to avoid conflict with medium-zoom */
+    transition: box-shadow 0.3s ease;
+  }
+
+  .post-content :global(img:hover) {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   }
 
   .post-image figcaption {
@@ -251,7 +302,7 @@ const breadcrumbItems = generateBreadcrumbItems(post.id);
 
   @media (max-width: 640px) {
     .blog-post-container {
-      padding: 1rem 0.5rem;
+     /* padding: 1rem 0.5rem; */
     }
 
     .post-title {
@@ -267,5 +318,11 @@ const breadcrumbItems = generateBreadcrumbItems(post.id);
     .meta-separator {
       display: none;
     }
+  }
+
+  .comments-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem 4rem;
   }
 </style>

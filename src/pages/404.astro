@@ -1,0 +1,117 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import { buildUrl } from '@/utils/helpers'
+import { t } from '@/utils/i18n'
+---
+
+<BaseLayout pageTitle="404 - Not Found">
+  <div class="error-container">
+    <div class="pudding-wrapper">
+      <svg class="pudding" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <!-- Pudding Body -->
+        <path d="M20,80 Q20,40 50,40 Q80,40 80,80" fill="var(--primary-color)" />
+        <!-- Pudding Top -->
+        <circle cx="50" cy="45" r="15" fill="color-mix(in srgb, var(--primary-color) 80%, black)" />
+        <!-- Face -->
+        <circle cx="40" cy="65" r="3" fill="white" />
+        <circle cx="60" cy="65" r="3" fill="white" />
+        <path d="M45,72 Q50,75 55,72" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" />
+      </svg>
+      <div class="pudding-shadow"></div>
+    </div>
+
+    <h1 class="error-code">404</h1>
+    <p class="error-message">哎呀，布丁被偷吃了，页面不见了喵...</p>
+    
+    <a href={buildUrl('')} class="home-button">
+      回到首页
+    </a>
+  </div>
+</BaseLayout>
+
+<style>
+  .error-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    text-align: center;
+    padding: 2rem;
+  }
+
+  .pudding-wrapper {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    margin-bottom: 2rem;
+  }
+
+  .pudding {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 10px 20px rgba(var(--primary-color-rgb), 0.2));
+    animation: jellyBounce 2s infinite ease-in-out;
+    transform-origin: bottom center;
+  }
+
+  .pudding-shadow {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 10px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    filter: blur(4px);
+    animation: shadowScale 2s infinite ease-in-out;
+  }
+
+  @keyframes jellyBounce {
+    0%, 100% { transform: scale(1, 1) translateY(0); }
+    30% { transform: scale(1.1, 0.9) translateY(0); }
+    50% { transform: scale(0.9, 1.1) translateY(-40px); }
+    70% { transform: scale(1.05, 0.95) translateY(0); }
+  }
+
+  @keyframes shadowScale {
+    0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.3; }
+    50% { transform: translateX(-50%) scale(0.5); opacity: 0.1; }
+  }
+
+  .error-code {
+    font-size: 6rem;
+    font-weight: 900;
+    margin: 0;
+    background: linear-gradient(135deg, var(--primary-color), var(--color-theme-hover));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    opacity: 0.2;
+    line-height: 1;
+  }
+
+  .error-message {
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+    margin: 1rem 0 2.5rem;
+    font-weight: 500;
+  }
+
+  .home-button {
+    padding: 0.8rem 2.5rem;
+    background-color: var(--primary-color);
+    color: white;
+    text-decoration: none;
+    border-radius: 999px;
+    font-weight: 700;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 4px 15px color-mix(in srgb, var(--primary-color) 30%, transparent);
+  }
+
+  .home-button:hover {
+    transform: scale(1.05) translateY(-2px);
+    box-shadow: 0 8px 25px color-mix(in srgb, var(--primary-color) 40%, transparent);
+    filter: brightness(1.1);
+  }
+</style>

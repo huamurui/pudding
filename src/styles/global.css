@@ -1,10 +1,28 @@
-@import url('./tokens.css');
-@import url('./md.css');
+/* 这里的 import 已移至 BaseLayout.astro 以优化渲染性能 */
 
 [data-theme="dark"] .astro-code,
 [data-theme="dark"] .astro-code span {
   color: var(--shiki-dark) !important;
   background-color: var(--shiki-dark-bg) !important;
+}
+
+/* 暗色模式下降低图片亮度，避免刺眼 */
+[data-theme="dark"] img:not(.medium-zoom-image--opened) {
+  filter: brightness(.8) contrast(1.1);
+}
+
+.medium-zoom-overlay {
+  z-index: 2000;
+}
+
+.medium-zoom-image--opened {
+  z-index: 2001;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
 }
 
 html[data-theme="dark"] .theme-toggle-indicator {
@@ -33,11 +51,15 @@ body {
   color: var(--text-primary);
   transition: background-color 0.3s ease, color 0.3s ease;
   margin: 0;
+  font-family: var(--font-family-base);
+  -webkit-tap-highlight-color: transparent;
+  /* 移除全量计算，改用简单透明 */
 }
 
-* {
-  -webkit-tap-highlight-color: color-mix(in srgb, var(--theme-color) 20%, transparent);
-  font-family: var(--font-family-base);
+/* 仅在需要的地方应用 tap highlight */
+a,
+button {
+  -webkit-tap-highlight-color: var(--color-theme-mix-20);
 }
 
 ::selection {
@@ -56,12 +78,13 @@ h3::after,
 h4::after,
 h5::after,
 h6::after {
-  content: '#';
+  content: '✦';
   color: var(--primary-color);
   position: absolute;
   opacity: 0;
-  transform: translateX(20px);
-  transition: all 0.1s ease;
+  /* 初始状态在远处，很小，且倒转 180 度 */
+  transform: translateX(30px) rotate(180deg) scale(0.5);
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
   font-weight: inherit;
 }
 
@@ -72,7 +95,8 @@ h4:hover::after,
 h5:hover::after,
 h6:hover::after {
   opacity: 1;
-  transform: translateX(10px);
+  /* 悬停时旋转正过来，变大，并靠近标题 */
+  transform: translateX(10px) rotate(0deg) scale(1.1);
 }
 
 .search-results mark {
@@ -112,17 +136,6 @@ h6:hover::after {
   color: var(--theme-color);
 }
 
-.nav-link::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 0;
-  height: 2px;
-  background-color: var(--theme-color);
-  transition: width 0.3s ease;
-}
-
 .tags {
   display: flex;
   flex-wrap: wrap;
@@ -137,21 +150,23 @@ h6:hover::after {
   padding: 0.5rem 1rem;
   font-size: 0.9rem;
   background-color: var(--bg-tertiary);
-  transition: all 0.2s ease;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .tag:hover {
-  background-color: var(--theme-color);
+  background-color: color-mix(in srgb, var(--theme-color) 8%, transparent);
   border-color: var(--theme-color);
+  transform: translateY(-1px) scale(1.02);
 }
 
 .tag a {
   color: var(--text-secondary);
   text-decoration: none;
+  transition: color 0.2s;
 }
 
 .tag:hover a {
-  color: white;
+  color: var(--theme-color);
 }
 
 .post-tag {
@@ -165,13 +180,20 @@ h6:hover::after {
   font-size: 14px;
   color: var(--text-primary);
   white-space: nowrap;
-  transition: all 0.2s ease;
+
+  /* 防止内部文章标签意外继承 a 标签高亮引发的 WebKit flex 容器溢出 Bug */
+  -webkit-box-decoration-break: slice;
+  box-decoration-break: slice;
+  background-image: none;
+
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .post-tag:hover,
 .post-tag.active {
-  background-color: color-mix(in srgb, var(--theme-color) 15%, transparent);
+  background-color: color-mix(in srgb, var(--theme-color) 10%, transparent);
   color: var(--theme-color);
+  transform: translateY(-1px) scale(1.02);
 }
 
 .post-tags {
@@ -184,12 +206,14 @@ h6:hover::after {
 }
 
 .inline-tag {
+  display: inline-block;
   font-size: 13px;
-  padding: 2px 8px;
+  padding: 2px 4px;
+  margin: 0 4px;
   color: var(--text-secondary);
-  border-radius: 4px;
+  border-radius: 6px;
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s ease, color 0.2s ease;
 }
 
 .post-info:hover .inline-tag {
@@ -220,11 +244,11 @@ h6:hover::after {
     left: 50%;
     width: calc(100% + 16px);
     height: 100%;
-    border-radius: 8px;
+    border-radius: 12px;
     transform: translate(-50%, -50%) scale(0.8);
     transition:
-      transform 0.1s ease,
-      background-color 0.1s ease;
+      transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+      background-color 0.2s ease;
     z-index: -1;
   }
 
@@ -233,10 +257,10 @@ h6:hover::after {
     transform: translate(-50%, -50%) scale(1);
   }
 
-  .nav-link:active:before {
+  /* .nav-link:active:before {
     transform: translate(-50%, -50%) scale(0.95);
     background-color: var(--color-theme-mix-20);
-  }
+  } */
 
   .nav-link:active {
     color: var(--color-theme-mix-80-text);
@@ -263,5 +287,5 @@ ul.breadcrumb-dropdown-menu li {
   overflow: auto;
   border: none;
   border-radius: 8px;
-  font-family: "JetBrains Mono Variable", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace ;
+  font-family: "JetBrains Mono Variable", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }

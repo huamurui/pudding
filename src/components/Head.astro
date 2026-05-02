@@ -10,6 +10,7 @@ interface Props {
   ogImage?: string;
   canonicalUrl?: string;
   structuredData?: StructuredData | null;
+  needGiscus?: boolean;
 }
 
 const {
@@ -17,7 +18,8 @@ const {
   description = siteConfig.description,
   ogImage = '',
   canonicalUrl = Astro.url.href,
-  structuredData = null
+  structuredData = null,
+  needGiscus = false
 } = Astro.props as Props
 const structuredDataJson = structuredData
   ? JSON.stringify(structuredData).replace(/<\/script/gi, '<\\/script')
@@ -79,41 +81,115 @@ import { ClientRouter } from 'astro:transitions';
     )
   }
 
-  <!-- <link rel="preload" href="/fonts/main-font.woff2" as="font" type="font/woff2" crossorigin /> -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jetbrains-mono@1.0.6/css/jetbrains-mono.min.css">
+  <link 
+    rel="preload" 
+    href="/fonts/Nunito/static/Nunito-Regular.ttf" 
+    as="font" 
+    type="font/ttf" 
+    crossorigin 
+  />
+  <link 
+    rel="preload" 
+    href="/fonts/Nunito/static/Nunito-Bold.ttf" 
+    as="font" 
+    type="font/ttf" 
+    crossorigin 
+  />
+  <link 
+    rel="preload" 
+    href="/fonts/ChillRoundFRegular/862367d4db6a95f86fc8b4fb4cf3b1e7.woff2" 
+    as="font" 
+    type="font/woff2" 
+    crossorigin 
+  />
+  <link 
+    rel="preload" 
+    href="/fonts/ChillRoundFRegular/596b1e644d3ea13847eaac7729c256b1.woff2" 
+    as="font" 
+    type="font/woff2" 
+    crossorigin 
+  />
+
+  <!-- 为文章页预载代码字体 -->
+  {needGiscus && (
+    <link 
+      rel="preload" 
+      href="/fonts/JetBrainsMono/fonts/variable/JetBrainsMono[wght].ttf" 
+      as="font" 
+      type="font/ttf" 
+      crossorigin 
+    />
+  )}
+
+  <!-- 引入字体 (本地切片加载) -->
+  <link 
+    rel="stylesheet" 
+    href="/fonts/ChillRoundFRegular/result.css" 
+    media="print" 
+    onload="this.setAttribute('media','all')" 
+  />
+  <link 
+    rel="stylesheet" 
+    href="/fonts/ChillRoundFBold/result.css" 
+    media="print" 
+    onload="this.setAttribute('media','all')" 
+  />
+  
+  <!-- 预连接外部资源 (仅在需要时) -->
+  {needGiscus && (
+    <>
+      <link rel="preconnect" href="https://giscus.app" crossorigin />
+      <link rel="dns-prefetch" href="https://giscus.app" />
+    </>
+  )}
+
+  <style is:inline>
+    /* Localized Nunito */
+    @font-face {
+      font-family: 'Nunito';
+      src: url('/fonts/Nunito/static/Nunito-Regular.ttf') format('truetype');
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Nunito';
+      src: url('/fonts/Nunito/static/Nunito-Bold.ttf') format('truetype');
+      font-weight: 700;
+      font-style: normal;
+      font-display: swap;
+    }
+    /* Localized JetBrains Mono */
+    @font-face {
+      font-family: 'JetBrains Mono';
+      src: url('/fonts/JetBrainsMono/fonts/variable/JetBrainsMono[wght].ttf') format('truetype');
+      font-weight: 400 700; /* 缩小范围，减少计算 */
+      font-style: normal;
+      font-display: swap;
+    }
+  </style>
+
   <script is:inline>
   (function() {
-    try {
-      const savedTheme = localStorage.getItem('theme')
-      const systemPrefersDark = window.matchMedia(
-        '(prefers-color-scheme: dark)'
-      ).matches
-      const theme = savedTheme || (systemPrefersDark ? 'dark' : 'light')
+    function getTheme() {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme) return savedTheme;
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    const theme = getTheme();
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+    document.documentElement.setAttribute('data-theme', theme);
 
-      document.documentElement.classList.add(theme)
-      document.documentElement.setAttribute('data-theme', theme)
-  } catch (e) {
-      console.error('主题设置错误:', e)
-  }
-  })()
-  </script>
+    // 兼容 SPA 模式
+    const applyTheme = (doc = document) => {
+      const theme = getTheme();
+      doc.documentElement.classList.toggle('dark', theme === 'dark');
+      doc.documentElement.setAttribute('data-theme', theme);
+    };
 
-  <script is:inline>
-    document.addEventListener('astro:before-swap', (event) => {
-      try {
-        const savedTheme = localStorage.getItem('theme')
-        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-        const theme = savedTheme || (systemPrefersDark ? 'dark' : 'light')
-        const el = event.newDocument && event.newDocument.documentElement
-        if (el) {
-          el.classList.remove('light', 'dark')
-          el.classList.add(theme)
-          el.setAttribute('data-theme', theme)
-        }
-      } catch (e) {
-        console.error('Theme Settring err:', e)
-      }
-    })
+    document.addEventListener('astro:after-swap', () => applyTheme());
+    document.addEventListener('astro:before-swap', (ev) => applyTheme(ev.newDocument));
+  })();
   </script>
 
   <ClientRouter />

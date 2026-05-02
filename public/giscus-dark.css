@@ -1,0 +1,28 @@
+/* Giscus Jelly Theme - Dark Mode */
+@import url('https://giscus.app/themes/dark.css');
+
+main {
+  --color-accent-fg: #ff9eb6;
+  --color-accent-emphasis: #ff9eb6;
+  --color-btn-primary-bg: #ff9eb6;
+  --color-btn-primary-hover-bg: #ff8aa8;
+  --color-btn-primary-border: transparent;
+  
+  /* Overrides for better contrast in our dark theme */
+  --color-fg-default: #e9ecef;
+  --color-fg-muted: #cdcdcd;
+  --color-border-default: rgba(255, 255, 255, 0.1);
+  --color-canvas-default: transparent;
+  --color-canvas-overlay: #1e1e1e;
+  
+  --radius-buttons: 10px;
+  --radius-inputs: 10px;
+}
+
+.giscus-active-discussion {
+  border-radius: 16px;
+}
+
+.reply-box {
+  border-radius: 12px !important;
+}

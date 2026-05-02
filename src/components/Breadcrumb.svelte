@@ -147,11 +147,14 @@
             <button
               class="breadcrumb-dropdown-btn"
               type="button"
+              aria-label={`查看 ${item.label} 下的子目录`}
               aria-expanded={activeDropdownLabel === item.label}
               aria-haspopup="true"
               on:click={(e) => toggleDropdown(item.label, e)}
             >
-              <span class="breadcrumb-separator">&gt;</span>
+              <span class="breadcrumb-separator">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              </span>
               <div class="breadcrumb-dropdown">
                 <ul class="breadcrumb-dropdown-menu">
                   {#if !isDirectoryLoaded}
@@ -191,8 +194,9 @@
 
 <style>
   .breadcrumb {
-    margin-bottom: 1.5rem;
-    padding: 0.75rem 1rem;
+    margin-bottom: 2rem;
+    padding: 0.4rem 0;
+    width: fit-content;
   }
 
   .breadcrumb-list {
@@ -202,6 +206,7 @@
     margin: 0;
     padding: 0;
     flex-wrap: wrap;
+    gap: 0.1rem;
   }
 
   .breadcrumb-item {
@@ -219,18 +224,34 @@
   .breadcrumb-link {
     color: var(--text-secondary);
     text-decoration: none;
-    transition: color 0.2s ease;
+    padding: 0.3rem 0.8rem;
+    border-radius: 999px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    font-weight: 600;
   }
+
+  .breadcrumb-link:hover {
+    color: var(--primary-color);
+    background-color: color-mix(in srgb, var(--primary-color) 12%, transparent);
+    transform: translateY(-1px);
+  }
+
   .breadcrumb-current {
     color: var(--text-primary);
-    font-weight: 500;
+    font-weight: 700;
+    padding: 0.3rem 0.6rem;
   }
 
   .breadcrumb-separator {
     color: var(--text-muted);
-    margin: 0 0.5rem;
-    opacity: 0.8;
-    font-size: 1rem;
+    margin: 0 0.1rem;
+    opacity: 0.6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.3rem;
+    border-radius: 50%;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
   .breadcrumb-dropdown-btn {
@@ -242,37 +263,78 @@
     padding: 0;
     margin: 0;
     position: relative;
+    border-radius: 50%;
+    outline: none;
   }
 
   .breadcrumb-dropdown-btn:hover .breadcrumb-separator {
-    color: var(--theme-color);
+    color: var(--primary-color);
+    background-color: color-mix(in srgb, var(--primary-color) 15%, transparent);
+    opacity: 1;
+    transform: scale(1.1);
   }
 
   .breadcrumb-dropdown {
     position: absolute;
-    top: 100%;
-    left: 0;
-    margin-top: 4px;
+    top: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%) translateY(-10px) scale(0.95);
     background-color: var(--bg-primary);
     border: 1px solid var(--border-color);
-    border-radius: 6px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    min-width: 100px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    min-width: 140px;
     z-index: 1000;
     opacity: 0;
     visibility: hidden;
-    transform: translateY(-8px);
-    transition: all 0.2s ease;
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    padding: 0.4rem;
   }
 
   .breadcrumb-dropdown-btn[aria-expanded="true"] .breadcrumb-dropdown {
     opacity: 1;
     visibility: visible;
-    transform: translateY(0);
+    transform: translateX(-50%) translateY(0) scale(1);
   }
 
   .breadcrumb-dropdown-menu {
-    padding: 0 6px 0 24px;
+    list-style: none;
+    padding: 0;
     margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .breadcrumb-dropdown-menu li {
+    margin: 0;
+  }
+
+  .breadcrumb-dropdown-menu a {
+    display: block;
+    padding: 0.6rem 0.8rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 500;
+  }
+
+  .breadcrumb-dropdown-menu a:hover {
+    color: var(--primary-color);
+    background-color: color-mix(in srgb, var(--primary-color) 12%, transparent);
+  }
+
+  .no-items {
+    display: block;
+    padding: 0.6rem 0.8rem;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-style: italic;
   }
 </style>

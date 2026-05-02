@@ -27,7 +27,7 @@ export function buildUrl(path: string | string[]): string {
   const cleanPath = relativePath.replace(/^\/+|\/+$/g, '')
 
   if (!base) {
-    return `/${cleanPath}`
+    return `/${cleanPath}`.replace(/\/+/g, '/')
   }
 
   return `${base}/${cleanPath}`.replace(/\/+/g, '/')

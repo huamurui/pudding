@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Fuse, { type FuseResult, type IFuseOptions } from "fuse.js";
+  import Fuse from "fuse.js";
   import { onMount } from "svelte";
   import { t } from "@/utils/i18n";
 
@@ -18,11 +18,13 @@
 
   let searchQuery = "";
   let isSearchOpen = false;
-  let searchResults: FuseResult<Post>[] = [];
-  let fuse: Fuse<Post>;
+  let searchResults: any[] = [];
+  let fuse: any;
   let searchWorker: Worker | null = null;
   let isWorkerReady = false;
-  const fuseOptions: IFuseOptions<Post> = {
+  let isIndexLoading = false;
+  let isIndexLoaded = false;
+  const fuseOptions: any = {
     includeScore: true,
     includeMatches: true,
     threshold: 0.4,
@@ -36,7 +38,23 @@
     ],
   };
 
-  fuse = new Fuse(searchablePosts as Post[], fuseOptions);
+  const loadFullIndex = async () => {
+    if (isIndexLoaded || isIndexLoading) return;
+    isIndexLoading = true;
+    try {
+      // 仅动态导入索引数据
+      const res = await fetch('/search-index.json');
+      const data = await res.json();
+      
+      searchablePosts = data;
+      fuse = new Fuse(searchablePosts as any[], fuseOptions);
+      isIndexLoaded = true;
+    } catch (e) {
+      console.error('Failed to load search index:', e);
+    } finally {
+      isIndexLoading = false;
+    }
+  };
 
   onMount(() => {
     document.addEventListener("click", handleClickOutside);
@@ -187,6 +205,7 @@
   const toggleSearch = () => {
     isSearchOpen = !isSearchOpen;
     if (isSearchOpen) {
+      loadFullIndex(); // 点击时开始加载索引
       setTimeout(() => {
         const searchInput =
           document.querySelector<HTMLInputElement>(".search-input");
@@ -237,8 +256,9 @@
       <input
         class="search-input"
         type="text"
-        placeholder="搜索文章..."
+        placeholder={isIndexLoading ? "正在加载索引..." : "搜索文章..."}
         value={searchQuery}
+        disabled={isIndexLoading}
         on:input={handleSearchInput}
         on:keydown={handleSearchKeydown}
         aria-label="输入关键词搜索文章"
@@ -285,60 +305,97 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0.25rem;
-    border-radius: 4px;
-    transition: background-color 0.2s ease;
+    padding: 0.4rem;
+    border-radius: 50%;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
   .search-toggle:hover,
   .search-toggle:focus-visible {
-    /* 补充：按钮聚焦样式，提升键盘导航体验 */
-    background-color: rgba(0, 0, 0, 0.05);
-    outline: 2px solid rgba(var(--theme-color), 0.8);
-    outline-offset: 2px;
+    background-color: color-mix(in srgb, var(--primary-color) 12%, transparent);
+    color: var(--primary-color);
+    transform: scale(1.1);
+    outline: none;
   }
 
   .search-dropdown {
     position: absolute;
-    top: calc(100% + 8px);
+    top: calc(100% + 12px);
     right: 0;
-    width: 320px;
-    background-color: var(--bg-primary);
+    width: 360px;
+    background-color: color-mix(in srgb, var(--bg-primary) 95%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--border-color);
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    padding: 0.75rem;
+    border-radius: 16px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+    padding: 1rem;
     z-index: 1000;
+    
+    /* Pop animation */
+    animation: searchPop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    transform-origin: top right;
+  }
+
+  @keyframes searchPop {
+    from {
+      opacity: 0;
+      transform: translateY(-10px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
   }
 
   .search-input {
     width: 100%;
-    padding: 0.5rem 0.75rem;
-    background-color: var(--bg-primary);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
+    padding: 0.8rem 1.2rem;
+    background-color: var(--bg-secondary);
+    border: 2px solid transparent;
+    border-radius: 10px;
     color: var(--text-primary);
-    font-size: 0.9rem;
-    margin-bottom: 0.75rem;
+    font-size: 1rem;
+    margin-bottom: 1rem;
     outline: none;
-    transition: border-color 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
     box-sizing: border-box;
+    font-weight: 500;
   }
 
   .search-input:focus {
-    border-color: var(--theme-color);
+    background-color: var(--bg-primary);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary-color) 15%, transparent);
+  }
+
+  .search-input::placeholder {
+    color: var(--text-muted);
+    font-weight: 400;
   }
 
   .search-results {
     list-style: none;
     margin: 0;
     padding: 0;
-    max-height: 240px;
+    max-height: 320px;
     overflow-y: auto;
+    
+    /* Custom scrollbar for results */
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-color) transparent;
+  }
+  
+  .search-results::-webkit-scrollbar {
+    width: 6px;
+  }
+  .search-results::-webkit-scrollbar-thumb {
+    background-color: var(--border-color);
+    border-radius: 3px;
   }
 
   .search-result-item {
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.4rem;
   }
 
   .search-result-item:last-child {
@@ -347,46 +404,60 @@
 
   .search-result-item a {
     text-decoration: none;
-    color: var(--text-primary);
     display: block;
-    padding: 0.5rem;
-    border-radius: 4px;
-    transition: background-color 0.2s ease;
+    padding: 0.8rem 1rem;
+    border-radius: 8px;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border: 1px solid transparent;
+    background-color: transparent;
   }
 
   .search-result-item a:hover,
   .search-result-item a:focus-visible {
-    /* 补充：链接聚焦样式，提升键盘导航体验 */
-    background-color: rgba(0, 0, 0, 0.05);
+    background-color: color-mix(in srgb, var(--primary-color) 8%, transparent);
+    border-color: color-mix(in srgb, var(--primary-color) 20%, transparent);
     outline: none;
   }
 
   .result-title {
-    font-size: 0.9rem;
-    font-weight: 500;
-    margin: 0 0 0.25rem 0;
-    color: var(--theme-color);
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 0 0 0.4rem 0;
+    color: var(--text-primary);
+    line-height: 1.4;
+    transition: color 0.2s;
+  }
+
+  .search-result-item a:hover .result-title {
+    color: var(--primary-color);
   }
 
   .result-excerpt {
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     color: var(--text-secondary);
     margin: 0;
     white-space: normal;
     overflow: hidden;
+    line-height: 1.6;
   }
 
-  mark {
-    background-color: var(--theme-color-light);
-    color: var(--text-primary);
-    padding: 0.1em 0.2em;
-    border-radius: 3px;
+  /* Stunning highlight mark */
+  :global(.search-results mark) {
+    background-color: color-mix(in srgb, var(--primary-color) 15%, transparent);
+    color: var(--primary-color);
+    padding: 0.1em 0.3em;
+    border-radius: 4px;
+    font-weight: 800;
+    box-shadow: 0 2px 0 color-mix(in srgb, var(--primary-color) 30%, transparent);
   }
 
   @media (max-width: 768px) {
     .search-dropdown {
-      width: 320px;
-      right: -9rem;
+      position: fixed;
+      top: 70px;
+      left: 1rem;
+      right: 1rem;
+      width: auto;
     }
   }
 </style>

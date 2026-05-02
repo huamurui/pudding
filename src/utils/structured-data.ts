@@ -6,12 +6,12 @@ import { getPostUrl } from './helpers'
 export function generatePostStructuredData(
   post: PostEntry,
   description: string,
-  origin: string
+  origin: string,
+  breadcrumbs?: Array<{ label: string; href: string }>
 ): StructuredData {
   const postUrl = new URL(getPostUrl(post.id), origin).toString()
 
-  return {
-    '@context': 'https://schema.org',
+  const blogPosting = {
     '@type': 'BlogPosting',
     mainEntityOfPage: {
       '@type': 'WebPage',
@@ -19,7 +19,7 @@ export function generatePostStructuredData(
     },
     headline: post.data.title,
     description: post.data.description || description,
-    image: post.data.image?.url || '',
+    image: post.data.image?.url ? new URL(post.data.image.url, origin).toString() : '',
     author: {
       '@type': 'Person',
       name: post.data.author || siteConfig.author.name
@@ -38,22 +38,51 @@ export function generatePostStructuredData(
     articleSection: post.data.tags?.[0] || '',
     keywords: post.data.tags?.join(', ') || ''
   }
+
+  const breadcrumbList = breadcrumbs && breadcrumbs.length > 0 ? {
+    '@type': 'BreadcrumbList',
+    itemListElement: breadcrumbs.map((crumb, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: crumb.label,
+      item: new URL(crumb.href, origin).toString()
+    }))
+  } : null;
+
+  const graph = breadcrumbList ? [blogPosting, breadcrumbList] : [blogPosting];
+
+  return {
+    '@context': 'https://schema.org',
+    '@graph': graph
+  }
 }
 
 export function generateWebsiteStructuredData(origin: string): StructuredData {
+  const siteNavigationElements = siteConfig.navItems.map(item => ({
+    '@type': 'SiteNavigationElement',
+    name: item.label,
+    url: new URL(item.href, origin).toString()
+  }))
+
   return {
-    '@type': 'WebSite',
-    url: origin,
-    name: siteConfig.name,
-    description: siteConfig.description,
-    publisher: {
-      '@type': 'Organization',
-      name: siteConfig.name,
-      logo: {
-        '@type': 'ImageObject',
-        url: `${origin}/favicon.svg`
-      }
-    }
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebSite',
+        url: origin,
+        name: siteConfig.name,
+        description: siteConfig.description,
+        publisher: {
+          '@type': 'Organization',
+          name: siteConfig.name,
+          logo: {
+            '@type': 'ImageObject',
+            url: `${origin}/favicon.svg`
+          }
+        }
+      },
+      ...siteNavigationElements
+    ]
   }
 }
 
@@ -71,6 +100,12 @@ export function generatePostListStructuredData(
       name: p.title
     }))
   }
+
+  const siteNavigationElements = siteConfig.navItems.map(item => ({
+    '@type': 'SiteNavigationElement',
+    name: item.label,
+    url: new URL(item.href, origin).toString()
+  }))
 
   return {
     '@context': 'https://schema.org',
@@ -103,7 +138,8 @@ export function generatePostListStructuredData(
             url: `${origin}/favicon.svg`
           }
         }
-      }
+      },
+      ...siteNavigationElements
     ]
   }
 }

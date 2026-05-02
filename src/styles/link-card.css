@@ -1,79 +1,137 @@
 .link-card {
-    border: 1px solid var(--color-primary-mix-20);
-    border-radius: 8px;
-    overflow: hidden;
-    margin: 1rem 0;
-    padding: 10px;
-    background: var(--card-bg);
+    margin: 1.5rem 0;
+    max-width: 100%;
+    box-sizing: border-box;
+    /* 清除 figure 默认的外边距 */
+    padding: 0;
 }
 
-.link-card__link {
+.link-card a.link-card__link {
     display: flex;
+    flex-direction: row-reverse; /* 将图片移到右侧，类似 Notion 风格 */
     text-decoration: none;
     color: inherit;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    
+    /* 清除外部 a 标签样式干扰 */
+    font-weight: inherit;
+    -webkit-box-decoration-break: slice;
+    box-decoration-break: slice;
+    background-image: none;
+    padding: 0;
+    margin: 0;
+}
+
+.link-card a.link-card__link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    border-color: var(--color-primary-mix-20);
+}
+
+.link-card__body {
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+    flex: 1;
+}
+
+.link-card__title {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--text-primary);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: color 0.2s;
+}
+
+.link-card a.link-card__link:hover .link-card__title {
+    color: var(--color-primary);
+}
+
+.link-card__desc {
+    margin: 0 0 0.75rem 0;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.link-card__meta {
+    display: flex;
+    align-items: center;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.link-card__meta::before {
+    content: '';
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin-right: 6px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238c8c8c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71'%3E%3C/path%3E%3Cpath d='M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71'%3E%3C/path%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
 .link-card__img-wrapper {
-    flex: 0 0 120px;
-    height: 100%;
-    overflow: hidden;
+    flex: 0 0 220px; /* 加宽图片区域使比例更协调 */
+    background: var(--bg-tertiary);
+    position: relative;
+    border-left: 1px solid var(--border-color); /* 图片在右侧时的边框 */
 }
 
 .link-card__img {
-    width: 120px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
 }
 
-.link-card__body {
-    padding: 0.75rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    min-width: 0;
-}
-
-.link-card__title {
-    margin: 0;
-    font-size: 1rem;
-    line-height: 1.2;
-    color: var(--text);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.link-card__desc {
-    margin: 0.5rem 0 0;
-    color: var(--text-secondary);
-    font-size: 0.95rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-}
-
-.link-card__meta {
-    margin-top: 0.5rem;
-    color: var(--muted);
-    font-size: 0.85rem;
-}
-
 @media (max-width: 640px) {
-    .link-card__link {
-        flex-direction: column;
+    .link-card a.link-card__link {
+        flex-direction: column-reverse; /* 手机端：图片在上，文字在下 */
     }
 
     .link-card__img-wrapper {
+        flex: none;
         width: 100%;
-        height: 180px;
+        height: 160px;
+        border-left: none;
+        border-bottom: 1px solid var(--border-color);
     }
 
     .link-card__img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
+        position: relative;
+    }
+    
+    .link-card__body {
+        padding: 1rem;
     }
 }
