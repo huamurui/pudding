@@ -35,7 +35,7 @@ export const GET: APIRoute = async () => {
 
   // 3. 拼接完整的 XML
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>
+<?xml-stylesheet type="text/xsl" href="${siteConfig.base}/sitemap.xsl"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${staticPages}
 ${postPages}

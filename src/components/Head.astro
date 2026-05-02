@@ -83,28 +83,28 @@ import { ClientRouter } from 'astro:transitions';
 
   <link 
     rel="preload" 
-    href="/fonts/Nunito/static/Nunito-Regular.ttf" 
+    href={buildUrl("/fonts/Nunito/static/Nunito-Regular.ttf")} 
     as="font" 
     type="font/ttf" 
     crossorigin 
   />
   <link 
     rel="preload" 
-    href="/fonts/Nunito/static/Nunito-Bold.ttf" 
+    href={buildUrl("/fonts/Nunito/static/Nunito-Bold.ttf")} 
     as="font" 
     type="font/ttf" 
     crossorigin 
   />
   <link 
     rel="preload" 
-    href="/fonts/ChillRoundFRegular/862367d4db6a95f86fc8b4fb4cf3b1e7.woff2" 
+    href={buildUrl("/fonts/ChillRoundFRegular/862367d4db6a95f86fc8b4fb4cf3b1e7.woff2")} 
     as="font" 
     type="font/woff2" 
     crossorigin 
   />
   <link 
     rel="preload" 
-    href="/fonts/ChillRoundFRegular/596b1e644d3ea13847eaac7729c256b1.woff2" 
+    href={buildUrl("/fonts/ChillRoundFRegular/596b1e644d3ea13847eaac7729c256b1.woff2")} 
     as="font" 
     type="font/woff2" 
     crossorigin 
@@ -114,7 +114,7 @@ import { ClientRouter } from 'astro:transitions';
   {needGiscus && (
     <link 
       rel="preload" 
-      href="/fonts/JetBrainsMono/fonts/variable/JetBrainsMono[wght].ttf" 
+      href={buildUrl("/fonts/JetBrainsMono/fonts/variable/JetBrainsMono[wght].ttf")} 
       as="font" 
       type="font/ttf" 
       crossorigin 
@@ -124,13 +124,13 @@ import { ClientRouter } from 'astro:transitions';
   <!-- 引入字体 (本地切片加载) -->
   <link 
     rel="stylesheet" 
-    href="/fonts/ChillRoundFRegular/result.css" 
+    href={buildUrl("/fonts/ChillRoundFRegular/result.css")} 
     media="print" 
     onload="this.setAttribute('media','all')" 
   />
   <link 
     rel="stylesheet" 
-    href="/fonts/ChillRoundFBold/result.css" 
+    href={buildUrl("/fonts/ChillRoundFBold/result.css")} 
     media="print" 
     onload="this.setAttribute('media','all')" 
   />
@@ -143,18 +143,22 @@ import { ClientRouter } from 'astro:transitions';
     </>
   )}
 
-  <style is:inline>
+  <style is:inline define:vars={{
+    nunitoRegular: buildUrl('/fonts/Nunito/static/Nunito-Regular.ttf'),
+    nunitoBold: buildUrl('/fonts/Nunito/static/Nunito-Bold.ttf'),
+    jetbrainsMono: buildUrl('/fonts/JetBrainsMono/fonts/variable/JetBrainsMono[wght].ttf')
+  }}>
     /* Localized Nunito */
     @font-face {
       font-family: 'Nunito';
-      src: url('/fonts/Nunito/static/Nunito-Regular.ttf') format('truetype');
+      src: url(var(--nunitoRegular)) format('truetype');
       font-weight: 400;
       font-style: normal;
       font-display: swap;
     }
     @font-face {
       font-family: 'Nunito';
-      src: url('/fonts/Nunito/static/Nunito-Bold.ttf') format('truetype');
+      src: url(var(--nunitoBold)) format('truetype');
       font-weight: 700;
       font-style: normal;
       font-display: swap;
@@ -162,7 +166,7 @@ import { ClientRouter } from 'astro:transitions';
     /* Localized JetBrains Mono */
     @font-face {
       font-family: 'JetBrains Mono';
-      src: url('/fonts/JetBrainsMono/fonts/variable/JetBrainsMono[wght].ttf') format('truetype');
+      src: url(var(--jetbrainsMono)) format('truetype');
       font-weight: 400 700; /* 缩小范围，减少计算 */
       font-style: normal;
       font-display: swap;
