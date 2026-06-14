@@ -7,6 +7,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
+    "build:infos": "node scripts/generate-sasayai.mjs && node scripts/build-backlinks.mjs && astro build",
     "astro": "astro",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
@@ -20,18 +21,30 @@
     "fuse.js": "^7.1.0",
     "katex": "^0.16.27",
     "medium-zoom": "^1.1.0",
+    "nprogress": "^0.2.0",
     "overlayscrollbars": "^2.13.0",
     "rehype-katex": "^7.0.1",
     "remark-math": "^6.0.0",
-    "svelte": "^5.46.1",
-    "unist-util-visit": "^5.0.0"
+    "sharp": "^0.34.5",
+    "svelte": "^5.46.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
+    "@types/nprogress": "^0.2.3",
     "@typescript-eslint/parser": "^8.53.1",
     "eslint": "^9.39.2",
     "eslint-plugin-astro": "^1.5.0",
     "eslint-plugin-jsx-a11y": "^6.10.2",
-    "typescript-eslint": "^8.52.0"
+    "glob": "^13.0.6",
+    "remark": "^15.0.1",
+    "remark-parse": "^11.0.0",
+    "typescript-eslint": "^8.52.0",
+    "unist-util-visit": "^5.0.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "sharp"
+    ]
   }
 }

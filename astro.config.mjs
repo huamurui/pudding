@@ -4,7 +4,8 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import remarkSpoiler from './src/plugin/remark-spoiler.js';
 import remarkLinkPreview from './src/plugin/remark-link-preview.js';
-import sitemap from '@astrojs/sitemap';
+import remarkImageOptimize from './src/plugin/remark-image-optimize.js';
+
 import svelte from '@astrojs/svelte';
 import expressiveCode from 'astro-expressive-code';
 import path from 'path';
@@ -13,9 +14,18 @@ import { siteConfig } from "./src/config/site.config.ts";
 export default defineConfig({
   site: siteConfig.site,
   base: siteConfig.base,
+  image: {
+    domains: [
+      'docs.astro.build',
+      'images.unsplash.com',
+      'avatars.githubusercontent.com',
+      'raw.githubusercontent.com',
+      'res.cloudinary.com'
+    ],
+  },
   integrations: [
     svelte(),
-    sitemap(),
+
     expressiveCode({
       themes: ['tokyo-night', 'one-light'],
       styleOverrides: {
@@ -39,7 +49,7 @@ export default defineConfig({
     }),
   ],
   markdown: {
-    remarkPlugins: [remarkMath, remarkSpoiler, remarkLinkPreview],
+    remarkPlugins: [remarkMath, remarkSpoiler, remarkLinkPreview, remarkImageOptimize],
     rehypePlugins: [rehypeKatex],
   },
   vite: {

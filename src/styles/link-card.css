@@ -8,7 +8,8 @@
 
 .link-card a.link-card__link {
     display: flex;
-    flex-direction: row-reverse; /* 将图片移到右侧，类似 Notion 风格 */
+    flex-direction: row-reverse;
+    /* 将图片移到右侧，类似 Notion 风格 */
     text-decoration: none;
     color: inherit;
     background: var(--bg-secondary);
@@ -17,7 +18,7 @@
     overflow: hidden;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-    
+
     /* 清除外部 a 标签样式干扰 */
     font-weight: inherit;
     -webkit-box-decoration-break: slice;
@@ -34,7 +35,7 @@
 }
 
 .link-card__body {
-    padding: 1.25rem 1.5rem;
+    padding: 0.6rem 1.5rem;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -43,13 +44,14 @@
 }
 
 .link-card__title {
-    margin: 0 0 0.5rem 0;
+    /* margin: 0 0 0.5rem 0; */
+    margin: 0 !important;
+    padding: 0;
     font-size: 1.05rem;
     font-weight: 700;
-    line-height: 1.4;
     color: var(--text-primary);
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -61,10 +63,12 @@
 }
 
 .link-card__desc {
-    margin: 0 0 0.75rem 0;
+    /* margin: 0 0 0.75rem 0; */
+    margin: 0 !important;
+    padding: 0;
     color: var(--text-secondary);
     font-size: 0.9rem;
-    line-height: 1.5;
+    /* line-height: 1.5; */
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -98,10 +102,18 @@
 }
 
 .link-card__img-wrapper {
-    flex: 0 0 220px; /* 加宽图片区域使比例更协调 */
+    flex: 0 0 220px;
+    /* 加宽图片区域使比例更协调 */
     background: var(--bg-tertiary);
     position: relative;
-    border-left: 1px solid var(--border-color); /* 图片在右侧时的边框 */
+    border-left: 1px solid var(--border-color);
+    margin: 0 !important;
+    /* 图片在右侧时的边框 */
+
+}
+
+.link-card__img-wrapper img {
+    margin: 0 !important;
 }
 
 .link-card__img {
@@ -116,7 +128,8 @@
 
 @media (max-width: 640px) {
     .link-card a.link-card__link {
-        flex-direction: column-reverse; /* 手机端：图片在上，文字在下 */
+        flex-direction: column-reverse;
+        /* 手机端：图片在上，文字在下 */
     }
 
     .link-card__img-wrapper {
@@ -130,7 +143,7 @@
     .link-card__img {
         position: relative;
     }
-    
+
     .link-card__body {
         padding: 1rem;
     }

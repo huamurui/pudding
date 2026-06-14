@@ -4,6 +4,7 @@ import '@/styles/global.css'
 import '@/styles/md.css'
 import '@/styles/link-card.css'
 import '@/styles/code.css'
+import '@/styles/preview.css'
 import 'overlayscrollbars/styles/overlayscrollbars.css'
 import { siteConfig } from '@/config/site.config'
 import { isPostPage, isHomePage } from '@/utils/helpers'
@@ -158,11 +159,11 @@ const isHome = isHomePage(Astro.url.pathname);
     <FAB client:only="svelte" />
     <script>
       import { OverlayScrollbars } from 'overlayscrollbars'
-      
+
       const changeBars = () => {
         const bodyElement = document.querySelector('body')
         if (!bodyElement) return
-        
+
         OverlayScrollbars(bodyElement, {
           scrollbars: {
             theme: 'os-theme-dark',
@@ -181,6 +182,248 @@ const isHome = isHomePage(Astro.url.pathname);
       }
 
       document.addEventListener('astro:page-load', scheduleInit)
+    </script>
+    <script>
+(function() {
+  let openTimer, closeTimer
+  const popupStack = [] // Array of { element, level, link, isHovered }
+  const cache = new Map()
+
+  function getLevel(el) {
+    const parentPopup = el.closest('.link-preview-popup')
+    return parentPopup ? parseInt(parentPopup.dataset.level) + 1 : 0
+  }
+
+  function checkAndHide() {
+    clearTimeout(closeTimer)
+    closeTimer = setTimeout(() => {
+      // Find the highest level that is still being hovered
+      let highestActiveLevel = -1
+      for (let i = popupStack.length - 1; i >= 0; i--) {
+        const p = popupStack[i]
+        // A popup is active if it's hovered OR its triggering link is hovered
+        // OR any of its children are active
+        if (p.isHovered || p.isLinkHovered || (i < popupStack.length - 1 && highestActiveLevel > i)) {
+          highestActiveLevel = i
+        }
+      }
+
+      // Close everything above the highest active level
+      while (popupStack.length > highestActiveLevel + 1) {
+        const p = popupStack.pop()
+        p.element.classList.remove('is-visible')
+        setTimeout(() => p.element.remove(), 200)
+      }
+    }, 300)
+  }
+
+  function createPopup(level, link) {
+    // If level already exists in stack, reuse or clear above it
+    if (popupStack[level]) {
+      // If it's a different link, we should ideally clear above it
+      if (popupStack[level].link !== link) {
+        while(popupStack.length > level) {
+          const p = popupStack.pop()
+          p.element.remove()
+        }
+      } else {
+        return popupStack[level].element
+      }
+    }
+
+    const div = document.createElement('div')
+    div.className = 'link-preview-popup'
+    div.dataset.level = level
+    div.style.zIndex = 1000 + level
+    document.body.appendChild(div)
+
+    const popupObj = {
+      element: div,
+      level,
+      link,
+      isHovered: false,
+      isLinkHovered: true
+    }
+    popupStack[level] = popupObj
+
+    div.onmouseenter = () => {
+      popupObj.isHovered = true
+      clearTimeout(closeTimer)
+    }
+    div.onmouseleave = () => {
+      popupObj.isHovered = false
+      checkAndHide()
+    }
+
+    return div
+  }
+
+  async function fetchPostContent(id) {
+    if (cache.has(id)) return cache.get(id)
+    try {
+      const res = await fetch(`/api/post-content/${id}.html?v=${Date.now()}`)
+      if (!res.ok) throw new Error('Not found')
+      const htmlText = await res.text()
+
+      const parser = new DOMParser()
+      const doc = parser.parseFromString(htmlText, 'text/html')
+      const wrapper = doc.getElementById('preview-wrapper')
+
+      if (!wrapper) throw new Error('Invalid content')
+
+      const data = {
+        title: wrapper.getAttribute('data-title'),
+        html: wrapper.innerHTML,
+        date: wrapper.getAttribute('data-date')
+      }
+
+      cache.set(id, data)
+      return data
+    } catch (e) {
+      return null
+    }
+  }
+
+  async function showPreview(link) {
+    // Manually resolve relative paths to avoid the browser's trailing slash bias
+    const rawHref = link.getAttribute('href')
+    const base = window.location.origin + window.location.pathname.replace(/\/$/, '')
+    const url = new URL(rawHref, base)
+
+    const pathname = url.pathname.replace(/\/$/, '')
+    const match = pathname.match(/\/posts\/(.+)$/)
+    if (!match) return
+
+    const postId = match[1]
+    const hash = url.hash
+    const level = getLevel(link)
+
+    clearTimeout(openTimer)
+    openTimer = setTimeout(async() => {
+      const activePopup = createPopup(level, link)
+
+      const rect = link.getBoundingClientRect()
+      const popupWidth = Math.min(550, window.innerWidth - 30)
+      const top = rect.bottom + window.scrollY + 10
+      // For recursive popups, we might want to offset them slightly if they are level > 0
+      const xOffset = level > 0 ? 20 : 0
+      const left = Math.min(
+        Math.max(15, rect.left + window.scrollX - (popupWidth / 2) + (rect.width / 2) + xOffset),
+        window.innerWidth - popupWidth - 15
+      )
+
+      activePopup.style.top = `${top}px`
+      activePopup.style.left = `${left}px`
+
+      if (!activePopup.classList.contains('is-visible') || activePopup.dataset.currentPost !== postId) {
+        activePopup.innerHTML = '<div class="link-preview-loading">Loading...</div>'
+      }
+      activePopup.classList.add('is-visible')
+
+      const post = await fetchPostContent(postId)
+      if (!post || post.error) {
+        activePopup.innerHTML = '<div class="link-preview-loading">Unavailable</div>'
+        return
+      }
+
+      // 仅在文章改变时更新内容，避免闪烁和重置滚动
+      if (activePopup.dataset.currentPost !== postId) {
+        activePopup.innerHTML = `
+                <div class="link-preview-header">
+                  <h5 class="link-preview-title">${post.title}</h5>
+                </div>
+                <div class="link-preview-body" id="preview-body-${level}">
+                  <div class="markdown-body">
+                    ${post.html}
+                  </div>
+                </div>
+                <div class="link-preview-footer" id="preview-footer-${level}">
+          </div>
+        `
+        activePopup.dataset.currentPost = postId
+      }
+
+      // 始终更新页脚
+      const footer = activePopup.querySelector(`#preview-footer-${level}`)
+      if (footer) {
+        footer.innerHTML = hash ? `Fragment: ${hash}` : `Level ${level} Preview`
+      }
+
+      // 滚动到指定位置
+      const container = activePopup.querySelector(`#preview-body-${level}`)
+      if (hash) {
+        const targetId = decodeURIComponent(hash.substring(1))
+        const targetEl = activePopup.querySelector(`[id="${targetId}"], [id="${targetId.toLowerCase()}"], [name="${targetId}"]`)
+        if (targetEl && container) {
+          setTimeout(() => {
+            const targetRect = targetEl.getBoundingClientRect()
+            const containerRect = container.getBoundingClientRect()
+            const relativeTop = targetRect.top - containerRect.top + container.scrollTop
+            const targetScrollTop = relativeTop - 10
+
+            // 如果距离太远（比如超过 500px），先瞬间跳到附近，再平滑滚动
+            const distance = Math.abs(targetScrollTop - container.scrollTop)
+            if (distance > 500) {
+              const startPos = targetScrollTop > container.scrollTop
+                ? targetScrollTop - 300
+                : targetScrollTop + 300
+              container.scrollTo({ top: startPos, behavior: 'auto' })
+            }
+
+            // 平滑滚动剩下的距离
+            container.scrollTo({ top: targetScrollTop, behavior: 'smooth' })
+
+            targetEl.classList.add('preview-highlight')
+          }, 50) // 缩短延迟
+        }
+      } else if (container) {
+        // 如果没有 hash，确保回到顶部
+        container.scrollTop = 0
+      }
+    }, 250)
+  }
+
+  function initPreviews() {
+    document.addEventListener('mouseover', (e) => {
+      const link = e.target.closest('.markdown-body a, .backlinks-section .posts-list a, .preview-link')
+      if (link && link.pathname.includes('/posts/')) {
+        // Find if this link belongs to any existing popup stack
+        const level = getLevel(link)
+        if (popupStack[level-1]) {
+          // If it's inside level N, then level N is the parent
+        }
+
+        // Mark link as hovered in the stack if applicable
+        const parentPopup = link.closest('.link-preview-popup')
+        if (parentPopup) {
+          // This link is inside a popup, we don't need to track isLinkHovered
+          // for the NEW popup here yet, but we MUST keep the parent open.
+        }
+
+        // Update isLinkHovered for existing popups in the stack
+        popupStack.forEach(p => {
+          if (p.link === link) p.isLinkHovered = true
+        })
+
+        clearTimeout(closeTimer)
+        showPreview(link)
+      }
+    })
+
+    document.addEventListener('mouseout', (e) => {
+      const link = e.target.closest('.markdown-body a, .backlinks-section .posts-list a, .preview-link')
+      if (link && link.pathname.includes('/posts/')) {
+        popupStack.forEach(p => {
+          if (p.link === link) p.isLinkHovered = false
+        })
+        checkAndHide()
+      }
+    })
+  }
+
+  document.addEventListener('astro:page-load', initPreviews)
+  initPreviews()
+})()
     </script>
   </body>
 </html>

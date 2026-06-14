@@ -1,20 +1,22 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { siteConfig } from '@/config/site.config';
+  const { giscus } = siteConfig;
 
-  // Placeholder for Giscus config - User can fill this later
-  const giscusConfig = {
-    repo: "huamurui/huamurui.github.io",
-    "repo-id": "R_kgDOHFCWEQ",
-    category: "General",
-    "category-id": "DIC_kwDOHFCWEc4CR0iJ",
-    mapping: "pathname",
-    strict: "0",
-    "reactions-enabled": "1",
-    "emit-metadata": "0",
-    "input-position": "bottom",
-    lang: "zh-CN",
-    loading: "lazy"
-  };
+  // Map camelCase to giscus data attributes
+  const giscusParams = giscus ? {
+    repo: giscus.repo,
+    "repo-id": giscus.repoId,
+    category: giscus.category,
+    "category-id": giscus.categoryId,
+    mapping: giscus.mapping,
+    strict: giscus.strict,
+    "reactions-enabled": giscus.reactionsEnabled,
+    "emit-metadata": giscus.emitMetadata,
+    "input-position": giscus.inputPosition,
+    lang: giscus.lang,
+    loading: giscus.loading
+  } : null;
 
   function getThemeUrl() {
     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
@@ -41,11 +43,12 @@
   }
 
   onMount(() => {
+    if (!giscusParams || !giscus?.enabled) return;
     const script = document.createElement('script');
     const theme = getThemeUrl();
     
     Object.entries({
-      ...giscusConfig,
+      ...giscusParams,
       theme,
       crossorigin: "anonymous",
       async: "true"
@@ -72,16 +75,17 @@
   });
 </script>
 
-<div class="comments-section">
-  <div id="giscus-container"></div>
-</div>
+{#if giscusParams && giscus?.enabled}
+  <div class="comments-section">
+    <div id="giscus-container"></div>
+  </div>
+{/if}
 
 <style>
   .comments-section {
-    margin-top: 4rem;
+    margin: 6rem auto 0;
     padding-top: 2rem;
     border-top: 1px solid var(--border-color);
     max-width: 800px;
-    margin: 0 auto;
   }
 </style>

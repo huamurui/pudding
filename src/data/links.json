@@ -1,0 +1,33 @@
+[
+  {
+    "name": "Friend Name",
+    "url": "https://example.com",
+    "avatar": "https://github.com/github.png",
+    "descr": "A friend's blog",
+    "color": "#8c4b99"
+  },
+  {
+    "name": "Cyber Friend",
+    "url": "https://example.com",
+    "avatar": "https://github.com/github.png",
+    "descr": "Cyber preset",
+    "color": "#00f6ff",
+    "preset": "cyber"
+  },
+  {
+    "name": "Sunset Friend",
+    "url": "https://example.com",
+    "avatar": "https://github.com/github.png",
+    "descr": "Sunset preset",
+    "color": "#ff6b6b",
+    "preset": "sunset"
+  },
+  {
+    "name": "Aurora Friend",
+    "url": "https://example.com",
+    "avatar": "https://github.com/github.png",
+    "descr": "Aurora preset",
+    "color": "#00d2ff",
+    "preset": "aurora"
+  }
+]

@@ -1,0 +1,427 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import { getCollection, render } from 'astro:content'
+
+// 获取 sasayai 集合
+const posts = await getCollection('sasayai')
+
+// 按时间倒序排序
+const sortedPosts = posts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+
+// 预先渲染所有内容
+const renderedPosts = await Promise.all(
+  sortedPosts.map(async(post) => {
+    const { Content } = await render(post)
+    return { post, Content }
+  })
+)
+
+// 瀑布流列数
+const col1 = []
+const col2 = []
+renderedPosts.forEach((item, index) => {
+  if (index % 2 === 0) col1.push(item)
+  else col2.push(item)
+})
+
+const title = 'Sasayai | 絮语';
+---
+
+<BaseLayout title={title}>
+  <div class="sasayai-container">
+    <header class="sasayai-header">
+      <h1 class="glow-text">Sasayai</h1>
+      <p class="subtitle">低语，或者那些无可归处的碎碎念。</p>
+    </header>
+
+    <!-- 发布区域 -->
+    <div class="publish-panel card">
+      <div class="token-banner" id="token-status">
+        <span>🔒 未设置 GitHub Token</span>
+        <button id="show-settings-btn" class="text-btn">去设置</button>
+      </div>
+
+      <div class="settings-area hidden" id="settings-area">
+        <input type="password" id="token-input" placeholder="输入你的 GitHub Fine-grained Token" class="minimal-input" />
+        <button id="save-token-btn" class="action-btn">保存</button>
+      </div>
+
+      <div class="input-area hidden" id="input-area">
+        <textarea id="thought-input" placeholder="在这块发光的板板上，写下你的低语..." class="minimal-input"></textarea>
+        <div class="input-footer">
+          <span id="char-count">0/500</span>
+          <button id="publish-btn" class="action-btn">发送</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 瀑布流列表区域 -->
+    <div class="masonry-grid">
+      <!-- 第一列 -->
+      <div class="masonry-col">
+        {col1.map(({ post, Content }) => (
+          <div class="thought-card card">
+            <div class="thought-header">
+              <span class="thought-date">
+                {post.data.date.toLocaleString('zh-CN', {
+                  month: '2-digit',
+                  day: '2-digit',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </span>
+              <span class="thought-id">#{post.data.id || 'N/A'}</span>
+            </div>
+            <div class="thought-content markdown-body">
+              <Content />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <!-- 第二列 -->
+      <div class="masonry-col">
+        {col2.map(({ post, Content }) => (
+          <div class="thought-card card">
+            <div class="thought-header">
+              <span class="thought-date">
+                {post.data.date.toLocaleString('zh-CN', {
+                  month: '2-digit',
+                  day: '2-digit',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </span>
+              <span class="thought-id">#{post.data.id || 'N/A'}</span>
+            </div>
+            <div class="thought-content markdown-body">
+              <Content />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .sasayai-container {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    font-family: var(--font-sans, system-ui, sans-serif);
+  }
+
+  .sasayai-header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .glow-text {
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--color-text, #333);
+    margin-bottom: 0.5rem;
+  }
+
+  .subtitle {
+    color: var(--color-text-muted, #777);
+    font-size: 0.95rem;
+    letter-spacing: 0.05em;
+  }
+
+  /* 极简卡片基础样式 */
+  .card {
+    background: var(--color-bg-card, rgba(255, 255, 255, 0.9));
+    border: 1px solid var(--color-border, #eee);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.2s ease;
+  }
+
+  :global(.dark) .card {
+    background: var(--color-bg-card, rgba(30, 30, 35, 0.9));
+    border: 1px solid var(--color-border, #333);
+  }
+
+  /* 发布面板 */
+  .publish-panel {
+    margin-bottom: 3rem;
+  }
+
+  .token-banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    color: var(--color-text-muted, #666);
+  }
+
+  .text-btn {
+    background: none;
+    border: none;
+    color: var(--color-primary, #a18cd1);
+    cursor: pointer;
+    font-weight: 600;
+    padding: 0.2rem 0.5rem;
+  }
+
+  .text-btn:hover {
+    text-decoration: underline;
+  }
+
+  .settings-area {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  .input-area {
+    margin-top: 1rem;
+  }
+
+  .minimal-input {
+    width: 100%;
+    padding: 0.8rem;
+    border-radius: 8px;
+    border: 1px solid var(--color-border, #ddd);
+    background: var(--color-bg, #fff);
+    font-family: inherit;
+    font-size: 0.95rem;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+  }
+
+  :global(.dark) .minimal-input {
+    background: #1a1a1a;
+    border-color: #444;
+    color: #fff;
+  }
+
+  .minimal-input:focus {
+    outline: none;
+    border-color: var(--color-primary, #a18cd1);
+  }
+
+  textarea.minimal-input {
+    min-height: 100px;
+    resize: vertical;
+  }
+
+  .input-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.8rem;
+    font-size: 0.8rem;
+    color: var(--color-text-muted, #777);
+  }
+
+  .action-btn {
+    background: var(--color-primary, #2c3e50);
+    border: none;
+    color: white;
+    padding: 0.5rem 1.2rem;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+
+  .action-btn:hover {
+    opacity: 0.9;
+  }
+
+  /* 瀑布流网格 */
+  .masonry-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  .masonry-col {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .thought-card:hover {
+    border-color: var(--color-primary, #a18cd1);
+  }
+
+  .thought-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--color-text-muted, #777);
+    margin-bottom: 0.6rem;
+  }
+
+  .thought-id {
+    font-family: var(--font-mono, monospace);
+    opacity: 0.5;
+  }
+
+  .thought-content {
+    line-height: 1.6;
+    color: var(--color-text, #333);
+    font-size: 0.95rem;
+  }
+
+  :global(.dark) .thought-content {
+    color: #ccc;
+  }
+
+  /* 确保 Markdown 内容样式正常 */
+  .thought-content :global(p) {
+    margin: 0.4rem 0;
+  }
+
+  .thought-content :global(ul) {
+    padding-left: 1.2rem;
+    margin: 0.4rem 0;
+  }
+
+  /* 响应式 */
+  @media (max-width: 600px) {
+    .masonry-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .hidden {
+    display: none !important;
+  }
+</style>
+
+<script>
+// 客户端脚本：处理 GitHub API (现在直接创建独立的 md 文件)
+const OWNER = 'your-github-username'
+const REPO = 'your-repo-name'
+
+const tokenInput = document.getElementById('token-input')
+const saveTokenBtn = document.getElementById('save-token-btn')
+const showSettingsBtn = document.getElementById('show-settings-btn')
+const tokenStatus = document.getElementById('token-status')
+const settingsArea = document.getElementById('settings-area')
+const inputArea = document.getElementById('input-area')
+const thoughtInput = document.getElementById('thought-input')
+const publishBtn = document.getElementById('publish-btn')
+const charCount = document.getElementById('char-count')
+
+// 初始化检查
+const token = localStorage.getItem('github_token')
+if (token) {
+  showInputArea()
+}
+
+// 交互逻辑
+showSettingsBtn?.addEventListener('click', () => {
+  settingsArea?.classList.toggle('hidden')
+})
+
+saveTokenBtn?.addEventListener('click', () => {
+  const val = tokenInput?.value.trim()
+  if (val) {
+    localStorage.setItem('github_token', val)
+    alert('Token 已保存在本地浏览器中')
+    showInputArea()
+  }
+})
+
+thoughtInput?.addEventListener('input', (e) => {
+  const len = e.target.value.length
+  if (charCount) charCount.textContent = `${len}/500`
+})
+
+publishBtn?.addEventListener('click', async() => {
+  const content = thoughtInput?.value.trim()
+  const token = localStorage.getItem('github_token')
+
+  if (!content) {
+    alert('写点什么吧...')
+    return
+  }
+  if (!token) {
+    alert('请先设置 Token')
+    return
+  }
+
+  publishBtn.disabled = true
+  publishBtn.textContent = '正在发送...'
+
+  try {
+    const jsonUrl = `https://api.github.com/repos/${OWNER}/${REPO}/contents/src/data/sasayai.json`
+
+    // 1. 获取当前 JSON 文件
+    const getRes = await fetch(jsonUrl, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+
+    if (!getRes.ok) {
+      throw new Error('无法获取源文件，请检查 Token 或网络')
+    }
+
+    const fileData = await getRes.json()
+    const sha = fileData.sha
+    // 解码 base64
+    const currentContent = decodeURIComponent(escape(window.atob(fileData.content)))
+    const jsonData = JSON.parse(currentContent)
+
+    // 2. 追加新内容
+    const timestamp = Date.now()
+    const newItem = {
+      id: `${timestamp}`,
+      date: new Date().toISOString(),
+      content: content
+    }
+    jsonData.push(newItem)
+
+    // 3. 编码并推回
+    const newJsonStr = JSON.stringify(jsonData, null, 2)
+    const base64Content = window.btoa(unescape(encodeURIComponent(newJsonStr)))
+
+    const putRes = await fetch(jsonUrl, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: 'Add whisper via web',
+        content: base64Content,
+        sha: sha
+      })
+    })
+
+    if (putRes.ok) {
+      alert('发送成功！GitHub 正在重新构建博客，请稍等几分钟后刷新页面。')
+      thoughtInput.value = ''
+      if (charCount) charCount.textContent = '0/500'
+    } else {
+      const errData = await putRes.json()
+      throw new Error(errData.message || '更新失败')
+    }
+  } catch (err) {
+    alert('出错啦: ' + err.message)
+    console.error(err)
+  } finally {
+    publishBtn.disabled = false
+    publishBtn.textContent = '发送'
+  }
+})
+
+function showInputArea() {
+  if (tokenStatus) tokenStatus.innerHTML = '<span>🔓 Token 已就位 (只存在你的浏览器里)</span> <button id="clear-token-btn" class="text-btn">清除</button>'
+  settingsArea?.classList.add('hidden')
+  inputArea?.classList.remove('hidden')
+
+  document.getElementById('clear-token-btn')?.addEventListener('click', () => {
+    localStorage.removeItem('github_token')
+    location.reload()
+  })
+}
+</script>

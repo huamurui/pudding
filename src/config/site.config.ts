@@ -34,6 +34,20 @@ export interface SiteConfig {
     };
   };
   locale: string;
+  giscus?: {
+    enabled: boolean;
+    repo: string;
+    repoId: string;
+    category: string;
+    categoryId: string;
+    mapping: string;
+    strict: string;
+    reactionsEnabled: string;
+    emitMetadata: string;
+    inputPosition: string;
+    lang: string;
+    loading: 'lazy' | 'eager';
+  };
 }
 
 export const siteConfig: SiteConfig = {
@@ -67,5 +81,19 @@ export const siteConfig: SiteConfig = {
       primary: "#ff9eb6",
     },
   },
-  locale: "en-US"
+  locale: "en-US",
+  giscus: {
+    enabled: false,
+    repo: "your-repo/your-repo",
+    repoId: "your-repo-id",
+    category: "General",
+    categoryId: "your-category-id",
+    mapping: "pathname",
+    strict: "0",
+    reactionsEnabled: "1",
+    emitMetadata: "0",
+    inputPosition: "bottom",
+    lang: "en-US",
+    loading: "lazy"
+  }
 };

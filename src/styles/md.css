@@ -185,14 +185,12 @@ article:not(.blog-post-container) a:hover:after {
    ========================================= */
 .markdown-body ol {
   list-style: none;
-  counter-reset: custom-counter;
   padding-left: 1.5rem;
   margin: 1.2rem 0;
 }
 
 .markdown-body ol>li {
   position: relative;
-  counter-increment: custom-counter;
   margin: 0.6rem 0;
   line-height: 1.7;
   padding-left: 0.5rem;
@@ -200,7 +198,7 @@ article:not(.blog-post-container) a:hover:after {
 
 /* 有序列表数字：粗体、主色调、带点 */
 .markdown-body ol>li::before {
-  content: counter(custom-counter) ".";
+  content: counter(list-item) ".";
   position: absolute;
   left: -1.5rem;
   top: 0;

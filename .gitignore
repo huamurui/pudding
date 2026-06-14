@@ -20,4 +20,3 @@ pnpm-debug.log*
 
 # generated types
 .astro/
-.cache/

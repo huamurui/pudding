@@ -33,6 +33,7 @@ export interface I18nConfig {
       home: string;
       timeline: string;
       about: string;
+      links: string;
     };
   };
   footer: {
@@ -89,7 +90,8 @@ export const i18nConfig: Record<string, I18nConfig> = {
       nav: {
         home: '首页',
         timeline: '时间线',
-        about: '关于'
+        about: '关于',
+        links: '友链'
       }
     },
     footer: {
@@ -145,7 +147,8 @@ export const i18nConfig: Record<string, I18nConfig> = {
       nav: {
         home: 'Home',
         timeline: 'Timeline',
-        about: 'About'
+        about: 'About',
+        links: 'Links'
       }
     },
     footer: {

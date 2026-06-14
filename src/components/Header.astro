@@ -20,7 +20,7 @@ const allPosts = await getCollection('posts')
 const searchablePosts = allPosts.map((post) => ({
   id: post.id,
   title: post.data.title,
-  url: buildUrl(['posts', post.id, '']),
+  url: buildUrl(['posts', post.id, ''])
   // 不再在这里传递 content，改用异步加载索引
 }));
 ---
@@ -49,7 +49,7 @@ const searchablePosts = allPosts.map((post) => ({
                         item.href.replace('/', '')
                     }}
                   >
-                    {item.label}
+                    {t(`header.nav.${item.labelKey}` as any)}
                   </a>
                 </li>
               ))

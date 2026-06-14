@@ -1,0 +1,107 @@
+.link-preview-popup {
+  position: absolute;
+  width: 550px;
+  max-width: calc(100vw - 30px);
+  max-height: 400px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -6px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  transform: translateY(10px) scale(0.98);
+  transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: auto;
+  backdrop-filter: blur(16px);
+  overflow: visible;
+  z-index: 1000;
+}
+
+.link-preview-popup.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.link-preview-header {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  background: rgba(var(--bg-primary-rgb), 0.5);
+}
+
+.link-preview-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--brand-primary);
+}
+
+.link-preview-body {
+  padding: 1rem;
+  overflow-y: auto;
+  font-size: 0.9rem;
+  position: relative;
+  flex: 1;
+}
+
+/* Fade out effect at the bottom */
+.link-preview-body::after {
+  content: '';
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: linear-gradient(to bottom, transparent, var(--bg-secondary));
+  pointer-events: none;
+}
+
+.link-preview-body .markdown-body {
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+@keyframes highlight-flash {
+  0% { background-color: var(--color-theme-mix-20); }
+  100% { background-color: transparent; }
+}
+
+.preview-highlight {
+  animation: highlight-flash 1.5s ease-out;
+  border-radius: 4px;
+}
+
+/* Limit image sizes inside preview */
+.link-preview-body :global(img) {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+
+.link-preview-footer {
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background: rgba(var(--bg-primary-rgb), 0.3);
+  border-top: 1px solid var(--border-color);
+}
+
+.link-preview-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  color: var(--text-muted);
+}
+
+.link-preview-footer::before {
+  content: '🔗';
+  font-size: 0.7rem;
+}
+
+/* Internal link specific style */
+.internal-link {
+  text-decoration-style: dashed;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}

@@ -6,37 +6,302 @@ const pageTitle = 'About';
 ---
 
 <BaseLayout pageTitle={pageTitle}>
-  <article class="blog-post-container">
-    <div class="blog-post-content markdown-body">
-      <header class="about-hero">
-        <h1 class="title">About Pudding</h1>
-        <p>A modern, simple Astro blog theme.</p>
-      </header>
-      <div class="github">
+  <article class="about-container">
+    <!-- Header -->
+    <header class="about-hero">
+      <div class="ambient-glow"></div>
+      <h1 class="title">Your Name <span class="sub-title">/ your-id</span></h1>
+      <p class="tagline">A short and catchy tagline.</p>
+      <p class="poetic-intro">
+        "A poetic intro or a quote you like."
+      </p>
+      <p class="poetic-intro2">
+        Some more text about yourself or your site. <br/>
+        You can write multiple lines here. <br/>
+        Enjoy building your site!
+      </p>
+    </header>
+
+    <!-- Main content - conversational style -->
+    <div class="about-body">
+
+      <section class="about-section">
         <p>
-          Check out <a
-            class="nav-link"
-            style="color: var(--primary-color);"
-            href="https://github.com/huamurui/pudding">GitHub repository</a
-          >
+          This is an example about page for the Pudding theme.
         </p>
-      </div>
+        <p>
+          You can write your personal introduction here. The layout provides multiple sections and styled components like lists and blockquotes to make your content look elegant.
+        </p>
+      </section>
+
+      <div class="divider">· · ·</div>
+
+      <section class="about-section">
+        <p>
+          Here is how you can use different text styles:
+        </p>
+        <p>
+          <span class="list-label">1.</span>
+          First item with a <a href="#" class="preview-link">preview link</a> style.
+        </p>
+        <p>
+          <span class="list-label">2.</span>
+          Second item.
+        </p>
+        <p class="aside-block">
+          This is an aside block. You can use it for notes, quotes, or additional context.
+        </p>
+      </section>
+
+      <div class="divider">· · ·</div>
+
+      <section class="about-section">
+        <h2>Technologies / Tools</h2>
+        <div class="tags-container">
+          <span class="tool-tag">Astro</span>
+          <span class="tool-tag">Vue.js</span>
+          <span class="tool-tag">TypeScript</span>
+        </div>
+      </section>
+
     </div>
+
+    <!-- Footer -->
+    <footer class="about-footer">
+      <p>
+        博客基于 <a href="https://github.com/huamurui/pudding" class="theme-link">Pudding</a> 主题构建。
+      </p>
+      <p class="copyright">© 2026 Your Name. Made with 🤍 and lots of daydreaming.</p>
+    </footer>
   </article>
+
   <style>
-    /* 文章容器 */
-    .blog-post-container {
-      display: flex;
-      gap: 3rem;
+    /* Container & Layout */
+    .about-container {
+      max-width: 720px;
       margin: 0 auto;
-      padding: 1rem;
+      padding: var(--spacing-xl) var(--spacing-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-lg);
+      position: relative;
     }
 
-    /* 主要内容区域 */
-    .blog-post-content {
-      flex: 1;
-      min-width: 0;
-      max-width: 800px;
+    /* Ambient Lighting Effect */
+    .ambient-glow {
+      position: absolute;
+      top: -80px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 350px;
+      height: 200px;
+      background: radial-gradient(circle, var(--color-theme-mix-20) 0%, transparent 70%);
+      filter: blur(40px);
+      z-index: -1;
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    /* Hero */
+    .about-hero {
+      text-align: center;
+      padding: var(--spacing-xl) 0 var(--spacing-sm);
+      position: relative;
+    }
+
+    .about-hero .title {
+      font-size: clamp(1.8rem, 4vw, 2.5rem);
+      font-weight: var(--font-weight-extrabold);
+      color: var(--text-primary);
+      margin: 0;
+      letter-spacing: -0.02em;
+    }
+
+    .about-hero .sub-title {
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-normal);
+      color: var(--text-muted);
+      font-family: var(--font-family-mono);
+    }
+
+    .tagline {
+      font-size: var(--font-size-sm);
+      font-family: var(--font-family-mono);
+      color: var(--text-muted);
+      margin: var(--spacing-xs) 0 0;
+      letter-spacing: 0.02em;
+    }
+
+    .poetic-intro {
+      font-size: var(--font-size-base);
+      font-style: italic;
+      color: var(--text-secondary);
+      max-width: 520px;
+      margin: var(--spacing-md) auto 0;
+      line-height: var(--line-height-relaxed);
+    }
+
+    .poetic-intro2 {
+      font-size: var(--font-size-sm);
+      font-style: italic;
+      color: var(--text-secondary);
+      max-width: 520px;
+      margin: var(--spacing-md) auto 0;
+      line-height: var(--line-height-relaxed);
+      text-align: start;
+    }
+
+    /* Body */
+    .about-body {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-md);
+    }
+
+    .about-section {
+      line-height: var(--line-height-relaxed);
+      color: var(--text-secondary);
+      font-size: var(--font-size-base);
+    }
+
+    .about-section p {
+      margin: 0 0 var(--spacing-sm);
+    }
+
+    .about-section p:last-child {
+      margin-bottom: 0;
+    }
+
+    .about-section h2 {
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-semibold);
+      color: var(--text-primary);
+      margin: 0 0 var(--spacing-sm);
+    }
+
+    .about-section strong {
+      color: var(--text-primary);
+      font-weight: var(--font-weight-semibold);
+    }
+
+    /* Inline aside — lighter, parenthetical */
+    .aside {
+      color: var(--text-muted);
+      font-size: 0.92em;
+    }
+
+    /* Block aside — styled like a diary excerpt */
+    .aside-block {
+      color: var(--text-muted);
+      font-size: var(--font-size-sm);
+      border-left: 2px solid var(--border-color);
+      padding-left: var(--spacing-md);
+      margin-top: var(--spacing-sm);
+      font-style: italic;
+      line-height: var(--line-height-relaxed);
+    }
+
+    /* Divider */
+    .divider {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: var(--font-size-sm);
+      letter-spacing: 0.5em;
+      padding: var(--spacing-xs) 0;
+      user-select: none;
+      opacity: 0.5;
+    }
+
+    /* List */
+    .about-list {
+      list-style: none;
+      padding: 0;
+      margin: var(--spacing-xs) 0 0;
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-xs);
+    }
+
+    .about-list li {
+      font-size: var(--font-size-sm);
+      color: var(--text-secondary);
+      padding: var(--spacing-xs) var(--spacing-sm);
+      border-radius: var(--radius-md);
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      transition: border-color var(--transition-normal);
+    }
+
+    .about-list li:hover {
+      border-color: var(--color-theme-mix-20);
+    }
+
+    .list-label {
+      font-family: var(--font-family-mono);
+      font-weight: var(--font-weight-semibold);
+      color: var(--theme-color);
+      font-size: var(--font-size-sm);
+    }
+
+    /* Tags */
+    .tags-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--spacing-sm);
+    }
+
+    .tool-tag {
+      font-size: var(--font-size-sm);
+      font-family: var(--font-family-mono);
+      color: var(--text-secondary);
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      padding: 0.35rem 0.7rem;
+      border-radius: var(--radius-lg);
+      transition:
+        transform var(--transition-slow),
+        border-color var(--transition-normal),
+        color var(--transition-normal);
+      cursor: default;
+      user-select: none;
+    }
+
+    .tool-tag:hover {
+      color: var(--theme-color);
+      border-color: var(--theme-color);
+      transform: translateY(-1px);
+    }
+
+    /* Footer */
+    .about-footer {
+      text-align: center;
+      padding: var(--spacing-lg) 0;
+      border-top: 1px solid var(--border-color);
+      font-size: var(--font-size-sm);
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-xs);
+    }
+
+    .about-footer p {
+      margin: 0;
+    }
+
+    .theme-link {
+      color: var(--theme-color);
+      text-decoration: none;
+      font-weight: var(--font-weight-semibold);
+      border-bottom: 1px solid transparent;
+      transition: border-color var(--transition-normal);
+    }
+
+    .theme-link:hover {
+      border-bottom-color: var(--theme-color);
+    }
+
+    .copyright {
+      font-size: var(--font-size-xs);
     }
   </style>
 </BaseLayout>

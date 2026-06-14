@@ -9,7 +9,8 @@ import { Image } from 'astro:assets'
 import { extractExcerptFromHtml, formatDate, sanitizeViewTransitionName, generateBreadcrumbItems, countWords } from '@/utils/helpers'
 import { generatePostStructuredData } from '@/utils/structured-data'
 import { ANIMATION_DURATION, EASING } from '@/utils/constants'
-import type { PostFrontmatter } from '@/types'
+import PostList from '@/components/PostList/PostList.svelte'
+import '@/components/PostList/PostList.css'
 import '/node_modules/katex/dist/katex.min.css'
 
 type StaticPath = {
@@ -42,8 +43,22 @@ const { Content, headings } = await render(post)
 const post_str = await container.renderToString(Content)
 const description = extractExcerptFromHtml(post_str)
 
-const breadcrumbItems = generateBreadcrumbItems(post.id);
+const breadcrumbItems = generateBreadcrumbItems(post.id)
 const structuredData = generatePostStructuredData(post, description, Astro.url.origin, breadcrumbItems)
+
+// Backlinks logic
+const allPosts = await getCollection('posts')
+let backlinkData = {}
+try {
+  // Use import.meta.glob or direct import for the JSON
+  // Relative to src/pages/posts/[...slug].astro, .cache is at ../../../.cache
+  const data = await import('../../../.cache/backlinks.json')
+  backlinkData = data.default || {}
+} catch (e) {
+  console.log('No backlinks found yet')
+}
+const currentBacklinks = backlinkData[post.id] || []
+const linkedPosts = allPosts.filter(p => currentBacklinks.includes(p.id))
 
 // page-specific title morph animation
 const anim = {
@@ -94,7 +109,7 @@ const customTransition = { forwards: anim, backwards: anim }
               width={1200}
               height={600}
               class="banner-image"
-              loading="eager" 
+              loading="eager"
               decoding="async"
             />
             {post.data.image.alt && (
@@ -109,6 +124,22 @@ const customTransition = { forwards: anim, backwards: anim }
       </div>
 
       <footer class="post-footer">
+        {
+          linkedPosts.length > 0 && (
+            <section class="backlinks-section">
+              <div class="timeline-post">
+                <div class="post-info year">
+                  <span class="post-date year">referred</span>
+                  <div class="timeline-connector year">
+                    <div class="post-marker year" />
+                  </div>
+                  <span class="inline-tag">{linkedPosts.length} 篇文章引用</span>
+                </div>
+              </div>
+              <PostList posts={linkedPosts} client:load />
+            </section>
+          )
+        }
       </footer>
     </div>
   </article>
@@ -119,48 +150,48 @@ const customTransition = { forwards: anim, backwards: anim }
   </div>
 
   <script>
-    (function() {
-      function initBlur() {
-        document.querySelectorAll('.blur-wrapper').forEach(btn => {
-          // 防止重复绑定
-          if (btn.dataset.spoilerInitialized === 'true') return
-          btn.dataset.spoilerInitialized = 'true'
+  (function() {
+    function initBlur() {
+      document.querySelectorAll('.blur-wrapper').forEach(btn => {
+        // 防止重复绑定
+        if (btn.dataset.spoilerInitialized === 'true') return
+        btn.dataset.spoilerInitialized = 'true'
 
-          btn.addEventListener('click', (e) => {
-            e.stopPropagation() // 阻止冒泡
-            const wrapper = btn.closest('.blur-wrapper')
-            if (!wrapper) return
-            const isHidden = wrapper.dataset.hidden === 'true'
-            wrapper.dataset.hidden = (!isHidden).toString()
-          })
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation() // 阻止冒泡
+          const wrapper = btn.closest('.blur-wrapper')
+          if (!wrapper) return
+          const isHidden = wrapper.dataset.hidden === 'true'
+          wrapper.dataset.hidden = (!isHidden).toString()
         })
-      }
-
-      // 初始加载时绑定
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initBlur)
-      } else {
-        initBlur()
-      }
-
-      // 在客户端路由切换后重新绑定（等待内容插入）
-      document.addEventListener('astro:page-load', () => setTimeout(initBlur, 50))
-    })()
-
-    // Medium Zoom Initialization
-    import mediumZoom from 'medium-zoom'
-    
-    function initZoom() {
-      const isDark = document.documentElement.classList.contains('dark')
-      const zoom = mediumZoom('.post-content img, .post-image img', {
-        margin: 24,
-        background: isDark ? '#121212' : '#ffffff',
       })
     }
 
-    document.addEventListener('astro:page-load', initZoom)
-    // Initial load
-    initZoom()
+    // 初始加载时绑定
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initBlur)
+    } else {
+      initBlur()
+    }
+
+    // 在客户端路由切换后重新绑定（等待内容插入）
+    document.addEventListener('astro:page-load', () => setTimeout(initBlur, 50))
+  })()
+
+  // Medium Zoom Initialization
+  import mediumZoom from 'medium-zoom'
+
+  function initZoom() {
+    const isDark = document.documentElement.classList.contains('dark')
+    const zoom = mediumZoom('.post-content img, .post-image img', {
+      margin: 24,
+      background: isDark ? '#121212' : '#ffffff'
+  })
+  }
+
+  document.addEventListener('astro:page-load', initZoom)
+  // Initial load
+  initZoom()
   </script>
 </BaseLayout>
 
@@ -266,11 +297,32 @@ const customTransition = { forwards: anim, backwards: anim }
     color: var(--text-secondary);
   }
 
-  /* 文章底部 */
+  /* 文章底部 & 反向链接 (Timeline Style) */
   .post-footer {
     margin-top: 3rem;
     padding-top: 2rem;
+    border-top: 1px solid var(--border-color);
   }
+
+  .backlinks-section {
+    margin-top: 2rem;
+  }
+
+  .backlinks-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 2rem;
+  }
+
+  .backlink-icon {
+    color: var(--theme-color);
+    opacity: 0.8;
+  }
+
 
   /* 响应式设计 */
   @media (max-width: 968px) {

@@ -1,0 +1,612 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import Comments from '@/components/Comments.svelte'
+import linksData from '@/data/links.json'
+import '@/styles/global.css'
+
+const pageTitle = 'Links';
+---
+
+<BaseLayout pageTitle={pageTitle}>
+  <article class="links-container">
+    <!-- Header / Hero Section -->
+    <header class="links-hero">
+      <div class="ambient-glow"></div>
+      <span class="badge">Friends</span>
+      <h1 class="title">友链 <span class="sub-title">/ Links</span></h1>
+      <p class="poetic-intro">
+        dododo
+      </p>
+    </header>
+
+    <!-- Friends Card Grid -->
+    <div class="friends-grid">
+      {
+        linksData.map((item) => (
+          <a
+            href={item.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            class:list={['friend-card', item.preset ? `preset-${item.preset}` : '']}
+            style={`--friend-color: ${item.color};`}
+          >
+            <div class="card-glow" />
+            <div class="card-holographic-shine" />
+            <div class="cyber-grid" />
+            <img src={item.avatar} alt={item.name} class="friend-avatar" loading="lazy" />
+            <div class="friend-info">
+              <div class="friend-header">
+                <span class="friend-name">{item.name}</span>
+                {item.tag && <span class="friend-tag">{item.tag}</span>}
+              </div>
+              <p class="friend-descr">{item.descr}</p>
+            </div>
+          </a>
+        ))
+      }
+    </div>
+
+    <!-- Link Exchange Contract Section -->
+    <section class="exchange-section">
+      <div class="exchange-header">
+        <span class="widget-icon">📜</span>
+        <h2>交换契约 / Link Exchange</h2>
+      </div>
+      <p class="exchange-desc">
+        如果你也想在这个角落里挂上你的徽章，欢迎在下方留言贴出你的名片。
+      </p>
+
+      <div class="contract-grid">
+        <div class="contract-item">
+          <span class="label">名称 (Name)</span>
+          <span class="val">Your Site Name</span>
+        </div>
+        <div class="contract-item">
+          <span class="label">地址 (URL)</span>
+          <span class="val">https://your-site.com</span>
+        </div>
+        <div class="contract-item">
+          <span class="label">头像 (Avatar)</span>
+          <span class="val">https://github.com/your-username.png</span>
+        </div>
+        <div class="contract-item">
+          <span class="label">简介 (Descr)</span>
+          <span class="val">Your site description.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Comments Section (Giscus comment board) -->
+    <Comments client:only="svelte" />
+  </article>
+
+  <style>
+    /* Container & Layout */
+    .links-container {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: var(--spacing-xl) var(--spacing-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-2xl);
+      position: relative;
+    }
+
+    /* Ambient Glow background */
+    .ambient-glow {
+      position: absolute;
+      top: -60px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 420px;
+      height: 220px;
+      background: radial-gradient(circle, var(--color-theme-mix-20) 0%, transparent 70%);
+      filter: blur(35px);
+      z-index: -1;
+      pointer-events: none;
+      opacity: 0.8;
+      transition: background 0.5s ease, opacity 0.5s ease;
+    }
+
+    /* Hero header */
+    .links-hero {
+      text-align: center;
+      padding: var(--spacing-md) 0;
+      position: relative;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: var(--font-size-xs);
+      font-family: var(--font-family-mono);
+      color: var(--theme-color);
+      background-color: var(--color-theme-mix-10);
+      padding: 0.3rem 0.8rem;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--border-color);
+      margin-bottom: var(--spacing-sm);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      animation: float 4s ease-in-out infinite;
+      transition: all 0.5s ease;
+    }
+
+    .links-hero .title {
+      font-size: clamp(2rem, 4.5vw, 2.6rem);
+      font-weight: var(--font-weight-extrabold);
+      color: var(--text-primary);
+      margin: 0;
+      letter-spacing: -0.02em;
+      transition: all 0.5s ease;
+    }
+
+    .links-hero .sub-title {
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-normal);
+      color: var(--text-muted);
+      font-family: var(--font-family-mono);
+      transition: all 0.5s ease;
+    }
+
+    .poetic-intro {
+      font-size: var(--font-size-base);
+      font-style: italic;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: var(--spacing-sm) auto 0;
+      line-height: var(--line-height-relaxed);
+      transition: all 0.5s ease;
+    }
+
+    /* Grid configuration - clean and extremely stable grid height */
+    .friends-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--spacing-md);
+    }
+
+    @media (min-width: 640px) {
+      .friends-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    /* ---------------------------------------------------- */
+    /* 1. BASE COMPACT CARD (Standard Uniform Row)         */
+    /* ---------------------------------------------------- */
+    .friend-card {
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-sm) var(--spacing-md);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+
+      /* Reset global article a styles from md.css */
+      text-decoration: none !important;
+      color: inherit !important;
+      font-weight: normal !important;
+
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      height: 76px; /* Strict uniform height prevents grid breaking and overflow */
+      box-sizing: border-box;
+      transition:
+        transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1),
+        border-color 0.3s ease,
+        box-shadow 0.3s ease,
+        background-color 0.3s ease,
+        color 0.3s ease,
+        opacity 0.3s ease;
+    }
+
+    /* Obliterate global a:after underline pollution from md.css */
+    .friend-card::after {
+      display: none !important;
+      content: none !important;
+    }
+
+
+    .card-glow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 120px;
+      height: 120px;
+      background: radial-gradient(circle, color-mix(in srgb, var(--friend-color) 12%, transparent) 0%, transparent 70%);
+      filter: blur(12px);
+      z-index: 0;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+
+    .card-holographic-shine {
+      position: absolute;
+      top: 0;
+      left: -150%;
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0) 10%,
+        rgba(255, 255, 255, 0.12) 30%,
+        rgba(255, 255, 255, 0.22) 50%,
+        rgba(255, 255, 255, 0.12) 70%,
+        rgba(255, 255, 255, 0) 90%,
+        transparent
+      );
+      transform: skewX(-25deg);
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .friend-card:hover {
+      transform: translateY(-3px) scale(1.01);
+      border-color: var(--friend-color);
+      box-shadow:
+        var(--shadow-md),
+        0 6px 18px color-mix(in srgb, var(--friend-color) 12%, transparent);
+    }
+
+    .friend-card:hover .card-glow {
+      opacity: 1;
+    }
+
+    .friend-card:hover .card-holographic-shine {
+      left: 150%;
+      transition: left 1s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    /* ---------------------------------------------------- */
+    /* 2. COMPACT PRESET: CYBER (Console Terminal Detail)   */
+    /* ---------------------------------------------------- */
+    .friend-card.preset-cyber {
+      font-family: var(--font-family-mono), monospace;
+      background-color: var(--bg-secondary);
+      border-style: dashed;
+      border-color: color-mix(in srgb, #30b080 40%, var(--border-color));
+    }
+
+    .friend-card.preset-cyber .friend-avatar {
+      border-radius: var(--radius-sm);
+      filter: grayscale(1) sepia(0.8) hue-rotate(80deg) saturate(2);
+    }
+
+    .friend-card.preset-cyber .friend-name::before {
+      content: '> ';
+      color: #30b080;
+      opacity: 0.8;
+    }
+
+    .friend-card.preset-cyber .friend-name::after {
+      content: '_';
+      animation: blink 1.2s step-end infinite;
+    }
+
+    .friend-card.preset-cyber:hover {
+      background-color: #0b0e14 !important;
+      border-style: solid;
+      border-color: #00f6ff !important;
+      color: #00f6ff !important;
+      box-shadow: 0 4px 14px rgba(0, 246, 255, 0.2) !important;
+    }
+
+    .friend-card.preset-cyber:hover .friend-avatar {
+      filter: grayscale(1) sepia(0.8) hue-rotate(140deg) saturate(2);
+      border-color: #00f6ff;
+    }
+
+    .friend-card.preset-cyber:hover .friend-descr {
+      color: rgba(0, 246, 255, 0.8) !important;
+    }
+
+    .friend-card.preset-cyber:hover .friend-tag {
+      background-color: rgba(0, 246, 255, 0.1) !important;
+      color: #00f6ff !important;
+      border-color: rgba(0, 246, 255, 0.3) !important;
+    }
+
+    /* ---------------------------------------------------- */
+    /* 3. COMPACT PRESET: SUNSET (Mini Polaroid Photo Detail)*/
+    /* ---------------------------------------------------- */
+    .friend-card.preset-sunset {
+      background-color: #fafaf7;
+      border-color: #e2e2d6;
+    }
+
+    .friend-card.preset-sunset .friend-avatar {
+      border-radius: 3px;
+      border: 2px solid #ffffff;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+      transform: rotate(-2deg); /* Tiny cozy slant */
+    }
+
+    .friend-card.preset-sunset .friend-name {
+      font-family: Georgia, serif;
+      font-style: italic;
+    }
+
+    .friend-card.preset-sunset:hover {
+      background: linear-gradient(135deg, #ff6b6b, #ff8e53) !important;
+      border-color: #ff6b6b !important;
+      color: #ffffff !important;
+      box-shadow: 0 6px 18px rgba(255, 107, 107, 0.25) !important;
+    }
+
+    .friend-card.preset-sunset:hover .friend-avatar {
+      border-color: #ffffff;
+      transform: rotate(0deg) scale(1.05);
+    }
+
+    .friend-card.preset-sunset:hover .friend-name,
+    .friend-card.preset-sunset:hover .friend-descr {
+      color: #ffffff !important;
+    }
+
+    .friend-card.preset-sunset:hover .friend-tag {
+      background-color: rgba(255, 255, 255, 0.2) !important;
+      color: #ffffff !important;
+      border-color: rgba(255, 255, 255, 0.4) !important;
+    }
+
+    /* ---------------------------------------------------- */
+    /* 4. COMPACT PRESET: AURORA (Frosted Glass Bubble)     */
+    /* ---------------------------------------------------- */
+    .friend-card.preset-aurora {
+      background-color: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(10px);
+      border-radius: var(--radius-xl);
+    }
+
+    .friend-card.preset-aurora:hover {
+      background: linear-gradient(135deg, #00d2ff, #3a7bd5) !important;
+      border-color: #00d2ff !important;
+      color: #ffffff !important;
+      box-shadow: 0 6px 18px rgba(0, 210, 255, 0.25) !important;
+    }
+
+    .friend-card.preset-aurora:hover .friend-avatar {
+      border-color: #ffffff;
+      transform: scale(1.06);
+    }
+
+    .friend-card.preset-aurora:hover .friend-name,
+    .friend-card.preset-aurora:hover .friend-descr {
+      color: #ffffff !important;
+    }
+
+    .friend-card.preset-aurora:hover .friend-tag {
+      background-color: rgba(255, 255, 255, 0.2) !important;
+      color: #ffffff !important;
+      border-color: rgba(255, 255, 255, 0.4) !important;
+    }
+
+    /* ---------------------------------------------------- */
+    /* 5. DEFAULT LAYOUT DETAILS                            */
+    /* ---------------------------------------------------- */
+    .friend-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-full);
+      border: 1.5px solid var(--border-color);
+      transition: transform var(--transition-normal), border-color 0.3s ease, filter 0.3s ease;
+      z-index: 1;
+      object-fit: cover;
+      flex-shrink: 0;
+      background-color: var(--bg-tertiary);
+    }
+
+    .friend-info {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      z-index: 1;
+    }
+
+    .friend-header {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+
+    .friend-name {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--text-primary);
+      transition: color 0.3s ease;
+    }
+
+    .friend-tag {
+      font-size: 10px;
+      font-family: var(--font-family-mono);
+      background-color: color-mix(in srgb, var(--friend-color) 8%, var(--bg-tertiary));
+      color: color-mix(in srgb, var(--friend-color) 85%, var(--text-secondary));
+      padding: 0.05rem 0.3rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid color-mix(in srgb, var(--friend-color) 15%, var(--border-color));
+      white-space: nowrap;
+      line-height: 1.2;
+      transition: all 0.3s ease;
+    }
+
+    .friend-descr {
+      font-size: var(--font-size-xs);
+      color: var(--text-muted);
+      margin: 0;
+      line-height: var(--line-height-normal);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: color 0.3s ease;
+    }
+
+    /* ---------------------------------------------------- */
+    /* 6. RESTRAINED ELEGANT AMBIENT MORPHING (:has)       */
+    /* ---------------------------------------------------- */
+
+    /* Gentle fading of non-hovered cards (very soft and clear) */
+    .friends-grid:has(.friend-card:hover) .friend-card:not(:hover) {
+      opacity: 0.6;
+    }
+
+    /* Soft Cyber Morphs - shifts ambient light and title color elegantly */
+    .links-container:has(.friend-card.preset-cyber:hover) .ambient-glow {
+      background: radial-gradient(circle, rgba(0, 246, 255, 0.2) 0%, transparent 70%) !important;
+    }
+    .links-container:has(.friend-card.preset-cyber:hover) .links-hero .title {
+      color: #00e5ff !important;
+    }
+    .links-container:has(.friend-card.preset-cyber:hover) .badge {
+      color: #00e5ff !important;
+      border-color: rgba(0, 246, 255, 0.4) !important;
+    }
+
+    /* Soft Sunset Morphs - shifts ambient light and title color elegantly */
+    .links-container:has(.friend-card.preset-sunset:hover) .ambient-glow {
+      background: radial-gradient(circle, rgba(255, 107, 107, 0.16) 0%, transparent 70%) !important;
+    }
+    .links-container:has(.friend-card.preset-sunset:hover) .links-hero .title {
+      color: #ff6b6b !important;
+    }
+    .links-container:has(.friend-card.preset-sunset:hover) .badge {
+      color: #ff6b6b !important;
+      border-color: rgba(255, 107, 107, 0.4) !important;
+    }
+
+    /* Soft Aurora Morphs - shifts ambient light and title color elegantly */
+    .links-container:has(.friend-card.preset-aurora:hover) .ambient-glow {
+      background: radial-gradient(circle, rgba(0, 210, 255, 0.16) 0%, transparent 70%) !important;
+    }
+    .links-container:has(.friend-card.preset-aurora:hover) .links-hero .title {
+      color: #00d2ff !important;
+    }
+    .links-container:has(.friend-card.preset-aurora:hover) .badge {
+      color: #00d2ff !important;
+      border-color: rgba(0, 210, 255, 0.4) !important;
+    }
+
+    /* ---------------------------------------------------- */
+    /* 7. OTHER SECTIONS                                    */
+    /* ---------------------------------------------------- */
+    .exchange-section {
+      background-color: var(--bg-secondary);
+      border: 1px dashed var(--border-color);
+      border-radius: var(--radius-xl);
+      padding: var(--spacing-lg);
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-md);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .exchange-header {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+
+    .widget-icon {
+      font-size: var(--font-size-2xl);
+    }
+
+    .exchange-section h2 {
+      font-size: var(--font-size-xl);
+      font-weight: var(--font-weight-bold);
+      color: var(--text-primary);
+      margin: 0;
+    }
+
+    .exchange-desc {
+      font-size: var(--font-size-sm);
+      color: var(--text-secondary);
+      margin: 0;
+      line-height: var(--line-height-relaxed);
+    }
+
+    .contract-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--spacing-xs);
+      background-color: var(--bg-tertiary);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-md);
+      border: 1px solid var(--border-color);
+    }
+
+    @media (min-width: 640px) {
+      .contract-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-sm);
+      }
+    }
+
+    .contract-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .contract-item .label {
+      font-size: 11px;
+      font-family: var(--font-family-mono);
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .contract-item .val {
+      font-size: var(--font-size-sm);
+      color: var(--text-primary);
+      font-weight: var(--font-weight-medium);
+      user-select: all;
+    }
+
+    .exchange-note {
+      display: flex;
+      gap: var(--spacing-sm);
+      background-color: var(--color-theme-mix-5);
+      border-left: 3px solid var(--theme-color);
+      padding: var(--spacing-sm) var(--spacing-md);
+      border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+      align-items: flex-start;
+    }
+
+    .note-icon {
+      font-size: var(--font-size-lg);
+      line-height: 1;
+    }
+
+    .exchange-note p {
+      font-size: var(--font-size-sm);
+      color: var(--text-secondary);
+      margin: 0;
+      line-height: var(--line-height-relaxed);
+      font-style: italic;
+    }
+
+    /* Terminal flashing cursor */
+    @keyframes blink {
+      from, to { color: transparent }
+      50% { color: inherit }
+    }
+
+    /* Floating keyframe animation for badges */
+    @keyframes float {
+      0% {
+        transform: translateY(0px);
+      }
+      50% {
+        transform: translateY(-4px);
+      }
+      100% {
+        transform: translateY(0px);
+      }
+    }
+  </style>
+</BaseLayout>

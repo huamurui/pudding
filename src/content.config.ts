@@ -25,4 +25,14 @@ const posts = defineCollection({
   schema: postsSchema
 })
 
-export const collections = { posts }
+const sasayaiSchema = z.object({
+  date: z.coerce.date(),
+  id: z.string().optional()
+})
+
+const sasayai = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './.cache/sasayai/' }),
+  schema: sasayaiSchema
+})
+
+export const collections = { posts, sasayai }

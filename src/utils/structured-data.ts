@@ -47,9 +47,9 @@ export function generatePostStructuredData(
       name: crumb.label,
       item: new URL(crumb.href, origin).toString()
     }))
-  } : null;
+  } : null
 
-  const graph = breadcrumbList ? [blogPosting, breadcrumbList] : [blogPosting];
+  const graph = breadcrumbList ? [blogPosting, breadcrumbList] : [blogPosting]
 
   return {
     '@context': 'https://schema.org',
