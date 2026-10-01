@@ -17,7 +17,7 @@ Captured from this repository's demo content. The same home page appears in ligh
 
 ![Article page in the dark theme](docs/screenshots/article-dark.jpg)
 
-<img src="docs/screenshots/mobile-light.jpg" alt="Mobile article page in the light theme" width="360">
+<img src="docs/screenshots/mobile-math-light.jpg" alt="Math &amp; KaTeX article on mobile in the light theme" width="360">
 
 </details>
 

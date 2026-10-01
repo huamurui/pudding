@@ -17,7 +17,7 @@ Pudding 是基于 Astro 7 和 Svelte 5 的静态 Markdown 博客主题，提供�
 
 ![暗色文章页](docs/screenshots/article-dark.jpg)
 
-<img src="docs/screenshots/mobile-light.jpg" alt="移动端亮色文章页" width="360">
+<img src="docs/screenshots/mobile-math-light.jpg" alt="英文数学示例文章移动端亮色页面" width="360">
 
 </details>
 
