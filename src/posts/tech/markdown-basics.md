@@ -29,10 +29,23 @@ Use multiple heading levels to verify styles:
 
 ## Links and images
 
-Here is a link to the project: https://github.com/huamurui
+Here is a link to the [theme repository](https://github.com/huamurui/pudding), kept inline as an ordinary link.
 
-And an example image (placeholder):
+Read the [feature showcase](./theme-showcase.md) and [code samples](./code-samples.md). These links resolve from the Markdown source directory and work when the site is hosted under `/pudding`.
 
-<!-- ![Placeholder image](/og-default.jpg) -->
+<!-- more -->
+
+## Excerpts
+
+The `<!-- more -->` marker above ends the rich home-page excerpt. Without a marker, the theme uses the first paragraph or list. A frontmatter description is used for metadata and RSS.
+
+## Tables and quotes
+
+| Feature | Example |
+| --- | --- |
+| Emphasis | **bold** and *italic* |
+| Inline code | `pnpm build` |
+
+> A regular blockquote needs no custom plugin. Admonition container syntax is not configured by this theme.
 
 End of basics.

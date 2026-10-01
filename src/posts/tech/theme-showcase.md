@@ -10,11 +10,11 @@ pinned: true
 
 ## 1. 强大的代码块 (Expressive Code)
 
-本主题内置了 `astro-expressive-code`，不仅支持精准的语法高亮，还支持添加标题、高亮特定行甚至折叠长代码块。
+本主题内置了 `astro-expressive-code`，支持语法高亮、代码块标题、复制按钮以及行和文本标记。
 
-### 1.1 带有标题和行号的高亮
+### 1.1 带有标题的行高亮
 
-```js {title="src/utils.js" showLineNumbers=true highlight="2-4"}
+```js title="src/utils.js" {2-4}
 export function debounce(fn, delay) {
   let timer;
   return function (...args) {
@@ -24,20 +24,18 @@ export function debounce(fn, delay) {
 }
 ```
 
-### 1.2 折叠长代码块
+### 1.2 文本标记
 
-对于一些不那么重要的冗长代码，你可以将其折叠：
+也可以标记代码中的特定文本：
 
-```rust {title="main.rs" collapsed=true}
+```rust title="main.rs" "println!"
 fn main() {
     println!("Hello, Pudding!");
-    // 这是一大段可以被折叠的代码
-    // ...
-    // ...
-    // ...
     println!("Goodbye!");
 }
 ```
+
+行号与折叠区块需要额外安装 Expressive Code 插件，模板默认没有启用。
 
 ## 2. 数学公式 (KaTeX)
 
@@ -57,13 +55,7 @@ $$
 
 你可以使用简单的语法：||这部分内容是被折叠的，点击查看详情||。
 
-或者使用块级语法：
-
-spoiler 点击查看更多详情：
-||| 
-在这个区块内，你可以放置多行文本。
-它会默认处于模糊状态，保护访客不被剧透。
-|||
+也可以使用黑色遮盖形式：|||这段纯文本默认被遮盖，点击或按 Enter、空格键可以揭示|||。两种形式都用于行内纯文本，不是 Markdown 容器语法。
 
 ## 4. 链接卡片预览 (Link Preview)
 
@@ -73,11 +65,11 @@ https://github.com/huamurui/pudding
 
 ## 5. 图片自适应与缩放 (Medium Zoom)
 
-文章中的图片默认会经过 Astro 的极致优化，并且内置了 `medium-zoom` 插件。你可以点击下方的占位图片进行缩放体验：
+文章中的图片支持延迟加载和 `medium-zoom` 点击缩放。远程 Markdown 图片作为普通图片输出；frontmatter 封面图使用 Astro 图片管线。点击下方图片体验缩放：
 
 ![Pudding 示例图片](https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=1200&q=80)
 
-> 注：为了更好的视觉体验，你可以给图片加上说明文字（figcaption 会自动提取并居中显示）。
+*图片说明：彩色渐变。正文图片的 alt 不会自动成为 figcaption，可以像这样另写说明段落。*
 
 ## 6. 其他基础排版优化
 
@@ -89,4 +81,10 @@ https://github.com/huamurui/pudding
 - **评论系统**：文章底部内置了基于 Giscus 的评论区配置，随时可开启。
 - **引用关系 (Backlinks)**：如果你的文章被其他文章引用了，底部会自动展示一条 “被引用的文章” 时间线！
 
-准备好了吗？立即开始你的创作之旅吧！
+## 7. 相对链接、预览与反向链接
+
+阅读 [代码样例](./code-samples.md)、[数学公式](./math-and-katex.md#math-examples) 与 [Markdown 扩展](./plugins-and-extensions.md)。这些链接相对于当前 Markdown 源文件，构建时会加入部署前缀并解析自定义 slug，悬停时可以预览已发布文章。
+
+反向链接由 `pnpm generate` 根据 Markdown 链接生成，`pnpm build` 会自动运行它。预览和首页摘要保留富文本格式，但不会执行文章脚本。
+
+准备好了吗？用这些主题样例开始自己的创作吧！

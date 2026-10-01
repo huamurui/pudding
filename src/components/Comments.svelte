@@ -1,7 +1,10 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { mountGiscus } from '@/scripts/giscus';
+  import { buildUrl } from '@/utils/helpers';
   import { siteConfig } from '@/config/site.config';
   const { giscus } = siteConfig;
+  let container: HTMLDivElement;
 
   // Map camelCase to giscus data attributes
   const giscusParams = giscus ? {
@@ -29,12 +32,12 @@
     
     // Production: Use the dedicated jelly theme files
     const themeFile = isDark ? 'giscus-dark.css' : 'giscus-light.css';
-    return `${window.location.origin}/${themeFile}`;
+    return new URL(buildUrl(themeFile), window.location.origin).href;
   }
 
   function updateGiscusTheme() {
     const theme = getThemeUrl();
-    const iframe = document.querySelector<HTMLIFrameElement>('iframe.giscus-frame');
+    const iframe = container?.querySelector<HTMLIFrameElement>('iframe.giscus-frame');
     if (!iframe) return;
     iframe.contentWindow?.postMessage(
       { giscus: { setConfig: { theme } } },
@@ -44,21 +47,7 @@
 
   onMount(() => {
     if (!giscusParams || !giscus?.enabled) return;
-    const script = document.createElement('script');
-    const theme = getThemeUrl();
-    
-    Object.entries({
-      ...giscusParams,
-      theme,
-      crossorigin: "anonymous",
-      async: "true"
-    }).forEach(([key, value]) => {
-      script.setAttribute(`data-${key}`, value);
-    });
-
-    script.src = "https://giscus.app/client.js";
-    const container = document.getElementById('giscus-container');
-    if (container) container.appendChild(script);
+    const disposeGiscus = mountGiscus(container, { ...giscusParams, theme: getThemeUrl() });
 
     // Listen for theme changes
     const observer = new MutationObserver((mutations) => {
@@ -69,15 +58,15 @@
       });
     });
 
-    observer.observe(document.documentElement, { attributes: true });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
-    return () => observer.disconnect();
+    return () => { observer.disconnect(); disposeGiscus(); };
   });
 </script>
 
 {#if giscusParams && giscus?.enabled}
   <div class="comments-section">
-    <div id="giscus-container"></div>
+    <div bind:this={container} id="giscus-container"></div>
   </div>
 {/if}
 

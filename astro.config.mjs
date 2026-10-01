@@ -1,9 +1,11 @@
 // @ts-check
-import { defineConfig } from "astro/config";
+import { defineConfig } from 'astro/config';
+import { unified } from '@astrojs/markdown-remark';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import remarkSpoiler from './src/plugin/remark-spoiler.js';
 import remarkLinkPreview from './src/plugin/remark-link-preview.js';
+import remarkPostLinks from './src/plugin/remark-post-links.js';
 import remarkImageOptimize from './src/plugin/remark-image-optimize.js';
 
 import svelte from '@astrojs/svelte';
@@ -14,6 +16,11 @@ import { siteConfig } from "./src/config/site.config.ts";
 export default defineConfig({
   site: siteConfig.site,
   base: siteConfig.base,
+  trailingSlash: 'always',
+  compressHTML: true,
+  build: {
+    format: 'directory'
+  },
   image: {
     domains: [
       'docs.astro.build',
@@ -49,8 +56,14 @@ export default defineConfig({
     }),
   ],
   markdown: {
-    remarkPlugins: [remarkMath, remarkSpoiler, remarkLinkPreview, remarkImageOptimize],
-    rehypePlugins: [rehypeKatex],
+    processor: unified({
+      remarkPlugins: [
+        remarkMath, remarkSpoiler,
+        [remarkPostLinks, { base: siteConfig.base }],
+        remarkLinkPreview, remarkImageOptimize,
+      ],
+      rehypePlugins: [rehypeKatex],
+    }),
   },
   vite: {
     resolve: {

@@ -1,4 +1,6 @@
 ---
+import { t } from '@/utils/i18n'
+
 interface Heading {
   depth: number;
   slug: string;
@@ -12,7 +14,7 @@ interface Props {
 const { headings = [] } = Astro.props as Props;
 ---
 
-<nav class="blog-toc main-toc" aria-label="文章目录">
+<nav class="blog-toc main-toc" aria-label={t('common.toc.label')}>
   <ul class="toc-list" id="toc-list">
     {
       headings.filter(item => item.depth < 5).map((heading) => (
@@ -32,17 +34,19 @@ const { headings = [] } = Astro.props as Props;
 </nav>
 
 <!-- 顶部滚动目录（仅小屏幕显示） -->
-<div class="scroll-toc-container">
+<div class="scroll-toc-container" inert>
   <button
     class="scroll-toc-toggle"
     id="scroll-toc-toggle"
     aria-expanded="false"
-    aria-label="快速目录"
+    aria-label={t('common.toc.quickLabel')}
+    aria-controls="scroll-toc"
+    type="button"
   >
-    <span class="toggle-text">当前章节</span>
+    <span class="toggle-text">{t('common.toc.label')}</span>
     <span class="toggle-icon">▼</span>
   </button>
-  <nav class="scroll-toc" aria-label="快速导航目录" id="scroll-toc">
+  <nav class="scroll-toc" aria-label={t('common.toc.quickLabel')} id="scroll-toc" inert>
     <ul class="scroll-toc-list">
       {
         headings.map((heading) => (
@@ -194,6 +198,7 @@ const { headings = [] } = Astro.props as Props;
   }
 
   .scroll-toc {
+    visibility: hidden;
     max-height: 0;
     overflow: hidden;
     transition: max-height 0.3s ease;
@@ -201,6 +206,7 @@ const { headings = [] } = Astro.props as Props;
   }
 
   .scroll-toc.expanded {
+    visibility: visible;
     max-height: 300px;
     overflow-y: auto;
     scrollbar-width: thin;
@@ -257,11 +263,20 @@ const { headings = [] } = Astro.props as Props;
 </style>
 
 <script>
+import { t } from '@/utils/i18n'
+
 (function() {
   let cleanupFn: (() => void) | null = null
 
   function setup() {
-    if (cleanupFn) { try { cleanupFn() } catch (e) {} }
+    cleanupFn?.()
+    cleanupFn = null
+    const controller = new AbortController()
+    const timers = new Set<ReturnType<typeof setTimeout>>()
+    function schedule(callback: () => void, delay: number) {
+      const timer = setTimeout(() => { timers.delete(timer); callback() }, delay)
+      timers.add(timer)
+    }
 
     // 1：DOM
     const DOM = {
@@ -271,12 +286,14 @@ const { headings = [] } = Astro.props as Props;
 
       scrollTocToggle: document.getElementById('scroll-toc-toggle'),
       scrollToc: document.getElementById('scroll-toc'),
-      scrollTocContainer: document.querySelector('.scroll-toc-container'),
+      scrollTocContainer: document.querySelector<HTMLElement>('.scroll-toc-container'),
       scrollTocLinks: document.querySelectorAll<HTMLAnchorElement>('.scroll-toc-link'),
       scrollTocList: document.querySelector('.scroll-toc-list'),
 
       toggleText: document.querySelector('.toggle-text')
     }
+
+    if (!DOM.mainTocLinks.length && !DOM.scrollTocLinks.length) return
 
     // 2. State
     const state = {
@@ -303,16 +320,16 @@ const { headings = [] } = Astro.props as Props;
     // 3. Events
     let observer:IntersectionObserver | null = null
     function bindEvents() {
-      DOM.scrollTocToggle?.addEventListener('click', handleScrollTocToggle)
+      DOM.scrollTocToggle?.addEventListener('click', handleScrollTocToggle, { signal: controller.signal })
 
-      window.addEventListener('scroll', handleWindowScroll)
+      window.addEventListener('scroll', handleWindowScroll, { passive: true, signal: controller.signal })
 
-      DOM.tocList?.addEventListener('scroll', updateIndicatorPosition)
+      DOM.tocList?.addEventListener('scroll', updateIndicatorPosition, { passive: true, signal: controller.signal })
 
-      window.addEventListener('resize', handleWindowResize)
+      window.addEventListener('resize', handleWindowResize, { signal: controller.signal })
 
-      DOM.mainTocLinks.forEach(link => link.addEventListener('click', (e) => handleTocLinkClick(e, link)))
-      DOM.scrollTocLinks.forEach(link => link.addEventListener('click', (e) => handleTocLinkClick(e, link)))
+      DOM.mainTocLinks.forEach(link => link.addEventListener('click', (e) => handleTocLinkClick(e, link), { signal: controller.signal }))
+      DOM.scrollTocLinks.forEach(link => link.addEventListener('click', (e) => handleTocLinkClick(e, link), { signal: controller.signal }))
 
       observer = new IntersectionObserver(handleHeadingIntersection, {
         threshold: 0.01
@@ -321,19 +338,10 @@ const { headings = [] } = Astro.props as Props;
     }
 
     function cleanup() {
-      DOM.scrollTocToggle?.removeEventListener('click', handleScrollTocToggle)
-      window.removeEventListener('scroll', handleWindowScroll)
-      DOM.tocList?.removeEventListener('scroll', updateIndicatorPosition)
-      window.removeEventListener('resize', handleWindowResize)
-
-      if (observer) {
-        try { observer.disconnect() } catch(e) {}
-        observer = null
-      }
-
-      // remove per-link listeners by cloning nodes
-      Array.from(DOM.mainTocLinks).forEach(link => { const clone = link.cloneNode(true); link.parentNode && link.parentNode.replaceChild(clone, link) })
-      Array.from(DOM.scrollTocLinks).forEach(link => { const clone = link.cloneNode(true); link.parentNode && link.parentNode.replaceChild(clone, link) })
+      controller.abort()
+      observer?.disconnect()
+      timers.forEach(timer => clearTimeout(timer))
+      timers.clear()
     }
 
     // 4. Functions
@@ -355,16 +363,18 @@ const { headings = [] } = Astro.props as Props;
           }
         })
         .filter(item => item.element)
+        .sort((a, b) => a.element!.compareDocumentPosition(b.element!) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1)
+        .map((item, index) => ({ ...item, index }))
 
       bindEvents()
+      handleWindowScroll()
 
       updateActiveHeading()
       updateIndicatorPosition()
 
-      const initialHash = window.location.hash.substring(1)
-      if (initialHash) {
-        setTimeout(() => scrollToHeading(initialHash), 100)
-      }
+      let initialHash = window.location.hash.substring(1)
+      try { initialHash = decodeURIComponent(initialHash) } catch { /* Preserve malformed literal IDs. */ }
+      if (initialHash) schedule(() => scrollToHeading(initialHash), 100)
 
       return cleanup
     }
@@ -374,6 +384,7 @@ const { headings = [] } = Astro.props as Props;
       const isExpanded = DOM.scrollTocToggle.getAttribute('aria-expanded') === 'true'
       DOM.scrollTocToggle.setAttribute('aria-expanded', (!isExpanded).toString())
       DOM.scrollToc.classList.toggle('expanded', !isExpanded)
+      DOM.scrollToc.inert = isExpanded
       // 展开时确保活跃项在可视区域
       if (!isExpanded) adjustScrollTocScroll()
     }
@@ -385,12 +396,18 @@ const { headings = [] } = Astro.props as Props;
 
       if (scrollTop > state.config.scrollThreshold && scrollTop > state.lastScrollTop) {
         DOM.scrollTocContainer.classList.add('visible')
+        DOM.scrollTocContainer.inert = false
       }
       else if (scrollTop <= state.config.scrollThreshold) {
         DOM.scrollTocContainer.classList.remove('visible')
+        DOM.scrollTocContainer.inert = true
+        DOM.scrollToc?.classList.remove('expanded')
+        if (DOM.scrollToc) DOM.scrollToc.inert = true
+        DOM.scrollTocToggle?.setAttribute('aria-expanded', 'false')
       }
 
       state.lastScrollTop = scrollTop <= 0 ? 0 : scrollTop
+      if (!state.isProgrammaticScroll) { updateActiveHeading(); updateIndicatorPosition() }
     }
 
 
@@ -406,6 +423,7 @@ const { headings = [] } = Astro.props as Props;
     }
 
     function handleTocLinkClick(e: MouseEvent, link: HTMLAnchorElement) {
+      if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
       e.preventDefault()
       const slug = link.getAttribute('data-slug')
       slug && scrollToHeading(slug)
@@ -420,16 +438,17 @@ const { headings = [] } = Astro.props as Props;
 
       const elementPosition = element.getBoundingClientRect().top
       const offsetPosition = elementPosition + window.pageYOffset - state.config.headerOffset
-      window.scrollTo({ top: offsetPosition, behavior: 'smooth' })
+      window.scrollTo({ top: offsetPosition, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' })
 
       if (window.location.hash !== `#${slug}`) {
-        window.history.replaceState(null, '', `#${slug}`)
+        window.history.replaceState(window.history.state, '', `#${encodeURIComponent(slug)}`)
       }
 
       DOM.scrollToc.classList.remove('expanded')
+      DOM.scrollToc.inert = true
       DOM.scrollTocToggle.setAttribute('aria-expanded', 'false')
 
-      setTimeout(() => {
+      schedule(() => {
         state.isProgrammaticScroll = false
         updateActiveHeading()
         adjustTocListScroll()
@@ -439,7 +458,7 @@ const { headings = [] } = Astro.props as Props;
 
     function updateActiveHeading() {
       const visible = Array.from(state.visibleHeadings).sort((a, b) => a - b)
-      let newActiveIndex = -1
+      let newActiveIndex: number
 
       state.headings.forEach(h => h.listItems.forEach(item => item.classList.remove('visible')))
       visible.forEach(index => state.headings[index].listItems.forEach(item => item.classList.add('visible')))
@@ -471,8 +490,8 @@ const { headings = [] } = Astro.props as Props;
       } else {
         const scrollPosition = window.scrollY
         const candidates = [...state.headings]
-          .filter(h => h.element!.offsetTop <= scrollPosition + state.config.scrollThreshold)
-          .sort((a, b) => b.element!.offsetTop - a.element!.offsetTop)
+          .filter(h => h.element!.getBoundingClientRect().top + scrollPosition <= scrollPosition + state.config.headerOffset)
+          .sort((a, b) => b.element!.getBoundingClientRect().top - a.element!.getBoundingClientRect().top)
         newActiveIndex = candidates.length > 0 ? candidates[0].index : (state.headings.length > 0 ? 0 : -1)
       }
 
@@ -485,10 +504,16 @@ const { headings = [] } = Astro.props as Props;
 
       if (newActiveIndex !== -1 && newActiveIndex !== state.activeIndex) {
         state.activeIndex = newActiveIndex
-        state.headings.forEach(h => h.listItems.forEach(item => item.classList.remove('active')))
+        state.headings.forEach(h => {
+          h.listItems.forEach(item => item.classList.remove('active'))
+          h.links.forEach(link => link.removeAttribute('aria-current'))
+        })
         state.headings[state.activeIndex].listItems.forEach(item => item.classList.add('active'))
+        state.headings[state.activeIndex].links.forEach(link => link.setAttribute('aria-current', 'location'))
         if (DOM.toggleText) {
-          DOM.toggleText.textContent = state.headings[state.activeIndex].element?.textContent || '当前章节'
+          const title = state.headings[state.activeIndex].element?.textContent || t('common.toc.label')
+          DOM.toggleText.textContent = t('common.toc.currentSection', { title })
+          DOM.scrollTocToggle?.setAttribute('aria-label', t('common.toc.quickNavLabel', { title }))
         }
         // updateIndicatorPosition();
         adjustTocListScroll()
@@ -572,9 +597,8 @@ const { headings = [] } = Astro.props as Props;
     setup()
   }
 
-  // reinitialize after client-side navigation
-  document.addEventListener('astro:page-load', () => { setTimeout(setup, 50) })
-  // after swap, trigger a light resize so indicator updates
-  document.addEventListener('astro:after-swap', () => { setTimeout(() => { try { window.dispatchEvent(new Event('resize')) } catch(e) {} }, 50) })
+  // Clean up before the document is replaced, including delayed scroll callbacks.
+  document.addEventListener('astro:before-swap', () => { cleanupFn?.(); cleanupFn = null })
+  document.addEventListener('astro:page-load', setup)
 })()
 </script>

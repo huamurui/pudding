@@ -1,8 +1,9 @@
-import { defineCollection, z } from 'astro:content'
+import { defineCollection } from 'astro:content'
+import { z } from 'astro/zod'
 import { glob } from 'astro/loaders'
 
 const postImageSchema = z.object({
-  url: z.string().url(),
+  url: z.url(),
   alt: z.string().optional()
 })
 
@@ -11,7 +12,8 @@ const postsSchema = z.object({
   title: z.string().min(1, '标题不能为空'),
   description: z.string().optional(),
   date: z.coerce.date(),
-  tags: z.array(z.string()).default([]),
+  tags: z.array(z.string().trim().min(1, '标签不能为空').transform(tag => tag.normalize()))
+    .default([]).transform(tags => [...new Set(tags)]),
   image: postImageSchema.optional(),
   author: z.string().optional(),
   updated: z.coerce.date().optional(),
@@ -25,14 +27,4 @@ const posts = defineCollection({
   schema: postsSchema
 })
 
-const sasayaiSchema = z.object({
-  date: z.coerce.date(),
-  id: z.string().optional()
-})
-
-const sasayai = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './.cache/sasayai/' }),
-  schema: sasayaiSchema
-})
-
-export const collections = { posts, sasayai }
+export const collections = { posts }

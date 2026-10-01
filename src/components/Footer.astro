@@ -1,6 +1,7 @@
 ---
 import { siteConfig } from '@/config/site.config'
 import { t } from '@/utils/i18n'
+import { buildUrl } from '@/utils/helpers'
 
 const currentYear = new Date().getFullYear();
 ---
@@ -12,7 +13,7 @@ const currentYear = new Date().getFullYear();
       {
         siteConfig.socialLinks.map((link) => (
           <a
-            href={link.href}
+            href={buildUrl(link.href)}
             class="nav-link footer-link"
             aria-label={t(link.nameKey)}
             target="_blank"

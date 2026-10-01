@@ -53,7 +53,7 @@ export interface SiteConfig {
 export const siteConfig: SiteConfig = {
   name: "Site Name",
   description: "Site Description",
-  url: "https://yoursite.com",
+  url: "https://huamurui.github.io/pudding/",
   site: "https://huamurui.github.io",
   base: "/pudding",
   keywords: ["astro", "blog", "theme", "pudding"],
@@ -71,7 +71,7 @@ export const siteConfig: SiteConfig = {
     { nameKey: "social.github", href: "https://github.com/your" },
     { nameKey: "social.email", href: "mailto:your@email.com" },
     { nameKey: "social.rss", href: "./rss.xml" },
-    { nameKey: "social.sitemap", href: "./sitemap-index.xml" },
+    { nameKey: "social.sitemap", href: "./sitemap.xml" },
   ],
   theme: {
     light: {

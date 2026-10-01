@@ -1,12 +1,21 @@
 <!-- PostCardList.svelte -->
-<script>
+<script lang="ts">
   import { sanitizeViewTransitionName, getTagUrl } from "@/utils/helpers";
   import { formatDate } from "@/utils/helpers";
   import { t } from "@/utils/i18n";
-  export let posts = [];
-  export let selectedTags = null;
+  interface CardPost {
+    id: string;
+    title: string;
+    url: string;
+    date: string | Date;
+    pinned?: boolean;
+    tags?: string[];
+    excerptHtml: string;
+  }
+  export let posts: CardPost[] | (() => CardPost[]) = [];
+  export let selectedTags: Set<string> | null = null;
 
-  const postsArr = (typeof posts === "function" ? posts() : posts || []).sort((a, b) => {
+  $: postsArr = [...(typeof posts === 'function' ? posts() : posts || [])].sort((a, b) => {
     if (a.pinned && !b.pinned) return -1;
     if (!a.pinned && b.pinned) return 1;
     return new Date(b.date).getTime() - new Date(a.date).getTime();
@@ -25,7 +34,7 @@
               class="post-title"
               style={`view-transition-name: ${sanitizeViewTransitionName(post.id)}`}
             >
-              {#if post.pinned}<span class="pinned-badge">置顶</span>{/if}{post.title}
+              {#if post.pinned}<span class="pinned-badge">{t('common.posts.pinned')}</span>{/if}{post.title}
             </h2>
             <time
               class="post-date"
@@ -35,10 +44,12 @@
             </time>
           </a>
 
+          <!-- The index page sanitizes rendered Markdown at build time via utils/excerpt.ts. -->
+          <!-- eslint-disable-next-line svelte/no-at-html-tags -->
           <div class="post-excerpt">{@html post.excerptHtml}</div>
 
           <div class="post-tags">
-            {#each post.tags || [] as tag}
+            {#each post.tags || [] as tag (tag)}
               <a
                 href={getTagUrl(tag)}
                 class="post-tag"

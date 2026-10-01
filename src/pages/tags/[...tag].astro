@@ -1,9 +1,11 @@
 ---
-import { type CollectionEntry, getCollection } from 'astro:content'
+import { type CollectionEntry } from 'astro:content'
+import { getPublishedPosts } from '@/utils/content'
 import BaseLayout from '@/layouts/BaseLayout.astro'
 import PostList from '@/components/PostList/PostList.svelte'
 import '@/components/PostList/PostList.css'
 import { t } from '@/utils/i18n'
+import { getTagRoutePath } from '@/utils/helpers'
 type StaticPath = {
   params: {
     tag: string;
@@ -15,7 +17,7 @@ type StaticPath = {
 };
 
 export async function getStaticPaths(): Promise<StaticPath[]> {
-  const posts = await getCollection('posts')
+  const posts = await getPublishedPosts()
   const tags = new Map<string, CollectionEntry<'posts'>[]>()
 
   for (const post of posts) {
@@ -29,8 +31,8 @@ export async function getStaticPaths(): Promise<StaticPath[]> {
 
   return Array.from(tags.entries()).map(
     ([tag, posts]): StaticPath => ({
-      params: { tag },
-      props: { tag, posts }
+      params: { tag: getTagRoutePath(tag) },
+      props: { tag, posts: posts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime()) }
     })
   )
 }

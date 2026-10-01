@@ -1,9 +1,11 @@
 ---
-import { getCollection, type CollectionEntry } from 'astro:content'
+import { type CollectionEntry } from 'astro:content'
 import { siteConfig } from '@/config/site.config'
 import type { PostEntry } from '@/types'
 import Tag from './Tag.astro'
 import { t } from '@/utils/i18n'
+import { getPublishedPosts } from '@/utils/content'
+import { formatDate } from '@/utils/helpers'
 
 interface Props {
   intro?: string; // 一句话简介（可选）
@@ -12,7 +14,12 @@ interface Props {
 
 const { intro = siteConfig.description, post = null } = Astro.props as Props
 
-const allBlogPosts: CollectionEntry<'posts'>[] = await getCollection('posts')
+const allBlogPosts: CollectionEntry<'posts'>[] = await getPublishedPosts()
+
+const latestUpdate = allBlogPosts.reduce<Date | null>((latest, entry) => {
+  const updated = entry.data.updated || entry.data.date
+  return !latest || updated > latest ? updated : latest
+}, null)
 
 const tagCountMap: Map<string, number> = new Map()
 
@@ -51,7 +58,7 @@ allBlogPosts.map((post) => {
     <div class="stat-item">📝 {allBlogPosts.length} {t('sidebar.stats.posts')}</div>
     <div class="stat-item">🏷️ {Array.from(tagCountMap).length} {t('sidebar.stats.tags')}</div>
     <div class="stat-item">
-      {new Date().toISOString().split('T')[0]}
+      {latestUpdate ? formatDate(latestUpdate) : '—'}
       {t('sidebar.stats.updated')}
     </div>
   </div>

@@ -1,13 +1,14 @@
 ---
 title: "Math & KaTeX — Example"
-date: 2025-06-03
+date: "2025-06-03T09:00:00+08:00"
+updated: "2025-06-04T10:30:00+08:00"
 tags: ["tech","math","katex","example"]
 description: "Tests inline and block math rendering (KaTeX) and remark-math compatibility."
 ---
 
 # Math Examples
 
-Inline math example: Euler's identity $e^{i\pi} + 1 = 0$ should render inline.
+Inline math example: Euler's identity $e^{i\pi} + 1 = 0$ should render inline. This sample uses quoted datetime frontmatter with an explicit timezone; date-only values such as `2025-06-03` are also supported.
 
 Block math example:
 

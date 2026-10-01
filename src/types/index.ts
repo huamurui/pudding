@@ -21,6 +21,7 @@ export interface PostFrontmatter {
   updated?: Date;
   url?: string;
   pinned?: boolean;
+  draft?: boolean;
 }
 
 /** 文章数据 */

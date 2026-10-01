@@ -1,5 +1,8 @@
-import { getCollection, render } from 'astro:content'
+import { render } from 'astro:content'
 import { experimental_AstroContainer } from 'astro/container'
+import { getPublishedPosts, groupPostsByDirectory } from '@/utils/content'
+import { formatDate } from '@/utils/helpers'
+import { sanitizePostPreviewHtml } from '@/utils/excerpt'
 
 function escapeHtml(text: string) {
   return text
@@ -11,41 +14,24 @@ function escapeHtml(text: string) {
 }
 
 export async function getStaticPaths() {
-  const posts = await getCollection('posts')
+  const posts = await getPublishedPosts()
 
-  const paths = posts.map(post => ({
-    params: { id: post.id }
-  }))
-
-  const categories = new Set<string>()
-  for (const post of posts) {
-    const pathParts = post.id.split('/')
-    if (pathParts.length > 1) {
-      categories.add(pathParts[0])
-    }
-  }
-
-  for (const category of categories) {
-    paths.push({
-      params: { id: category }
-    })
-  }
-
-  return paths
+  return [...posts.map(post => post.id), ...groupPostsByDirectory(posts).keys()]
+    .map(id => ({ params: { id } }))
 }
 
 export async function GET({ params }: { params: { id: string } }) {
-  const posts = await getCollection('posts')
-  const cleanId = params.id.replace(/\.html$/, '')
+  const posts = await getPublishedPosts()
+  const cleanId = params.id
 
   const post = posts.find(p => p.id === cleanId)
   if (post) {
     try {
       const container = await experimental_AstroContainer.create()
       const { Content } = await render(post)
-      const html = await container.renderToString(Content)
+      const html = sanitizePostPreviewHtml(await container.renderToString(Content))
 
-      const wrappedHtml = `<div id="preview-wrapper" data-title="${escapeHtml(post.data.title)}" data-date="${post.data.date}">${html}</div>`
+      const wrappedHtml = `<div id="preview-wrapper" data-title="${escapeHtml(post.data.title)}" data-date="${post.data.date.toISOString()}">${html}</div>`
 
       return new Response(wrappedHtml, {
         headers: {
@@ -69,7 +55,7 @@ export async function GET({ params }: { params: { id: string } }) {
     for (const p of sorted) {
       html += `<li>
         <div style="font-weight: 600; font-size: 1.05em; color: var(--text-primary); margin-bottom: 2px;">${escapeHtml(p.data.title)}</div>
-        <div style="font-size: 0.85em; color: var(--text-muted);">${new Date(p.data.date).toLocaleDateString()}</div>
+        <div style="font-size: 0.85em; color: var(--text-muted);">${formatDate(p.data.date)}</div>
       </li>`
     }
     html += '</ul></div>'

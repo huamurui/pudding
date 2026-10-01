@@ -3,13 +3,16 @@ import ToC from '@/components/ToC.astro'
 import Breadcrumb from '@/components/Breadcrumb.svelte'
 import ReadingProgress from '@/components/ReadingProgress.svelte'
 import Comments from '@/components/Comments.svelte'
-import { getCollection, render, type CollectionEntry } from 'astro:content'
+import { render, type CollectionEntry } from 'astro:content'
 import BaseLayout from '@/layouts/BaseLayout.astro'
 import { Image } from 'astro:assets'
-import { extractExcerptFromHtml, formatDate, sanitizeViewTransitionName, generateBreadcrumbItems, countWords } from '@/utils/helpers'
+import { extractExcerptFromMarkdown, formatDate, sanitizeViewTransitionName, generateBreadcrumbItems, countWords } from '@/utils/helpers'
 import { generatePostStructuredData } from '@/utils/structured-data'
 import { ANIMATION_DURATION, EASING } from '@/utils/constants'
 import PostList from '@/components/PostList/PostList.svelte'
+import CategoryPage from './[category].astro'
+import { getPublishedPosts, groupPostsByDirectory } from '@/utils/content'
+import type { PostFrontmatter } from '@/types'
 import '@/components/PostList/PostList.css'
 import '/node_modules/katex/dist/katex.min.css'
 
@@ -18,46 +21,53 @@ type StaticPath = {
     slug: string;
   };
   props: {
-    post: CollectionEntry<'posts'>;
+    post?: CollectionEntry<'posts'>;
+    category?: string;
+    posts?: CollectionEntry<'posts'>[];
   };
 };
 
 export async function getStaticPaths(): Promise<StaticPath[]> {
-  const posts = await getCollection('posts')
-  return posts.map((post) => ({
+  const posts = await getPublishedPosts()
+  const paths: StaticPath[] = posts.map((post) => ({
     params: { slug: post.id },
     props: { post }
   }))
+  for (const [category, categoryPosts] of groupPostsByDirectory(posts)) {
+    if (!category.includes('/')) continue
+    paths.push({ params: { slug: category }, props: { category, posts: categoryPosts } })
+  }
+  return paths
 }
-
-import { experimental_AstroContainer } from 'astro/container'
-const container = await experimental_AstroContainer.create()
 
 interface Props {
-  post: CollectionEntry<'posts'>;
+  post?: CollectionEntry<'posts'>;
+  category?: string;
+  posts?: CollectionEntry<'posts'>[];
 }
 
-const { post } = Astro.props as Props
-const { Content, headings } = await render(post)
+const { post, category, posts = [] } = Astro.props as Props
+const { Content, headings } = post ? await render(post) : { Content: undefined, headings: [] }
 
-const post_str = await container.renderToString(Content)
-const description = extractExcerptFromHtml(post_str)
+const description = post?.data.description || extractExcerptFromMarkdown(post?.body || '')
 
-const breadcrumbItems = generateBreadcrumbItems(post.id)
-const structuredData = generatePostStructuredData(post, description, Astro.url.origin, breadcrumbItems)
+const breadcrumbItems = generateBreadcrumbItems(post?.id || category || '')
+const structuredData = post
+  ? generatePostStructuredData(post, description, Astro.site?.origin || Astro.url.origin, breadcrumbItems)
+  : null
 
 // Backlinks logic
-const allPosts = await getCollection('posts')
-let backlinkData = {}
+const allPosts = await getPublishedPosts()
+let backlinkData: Record<string, string[]> = {}
 try {
   // Use import.meta.glob or direct import for the JSON
   // Relative to src/pages/posts/[...slug].astro, .cache is at ../../../.cache
   const data = await import('../../../.cache/backlinks.json')
   backlinkData = data.default || {}
-} catch (e) {
+} catch {
   console.log('No backlinks found yet')
 }
-const currentBacklinks = backlinkData[post.id] || []
+const currentBacklinks = post ? backlinkData[post.id] || [] : []
 const linkedPosts = allPosts.filter(p => currentBacklinks.includes(p.id))
 
 // page-specific title morph animation
@@ -68,7 +78,7 @@ const anim = {
 const customTransition = { forwards: anim, backwards: anim }
 ---
 
-<BaseLayout postFrontmatter={{ ...post.data, description } as PostFrontmatter} post={post} structuredData={structuredData}>
+{post && Content ? <BaseLayout postFrontmatter={{ ...post.data, description } as PostFrontmatter} post={post} structuredData={structuredData}>
   <ReadingProgress client:load />
   <article class="blog-post-container">
     <div class="blog-post-content">
@@ -150,48 +160,47 @@ const customTransition = { forwards: anim, backwards: anim }
   </div>
 
   <script>
-  (function() {
-    function initBlur() {
-      document.querySelectorAll('.blur-wrapper').forEach(btn => {
-        // 防止重复绑定
-        if (btn.dataset.spoilerInitialized === 'true') return
-        btn.dataset.spoilerInitialized = 'true'
-
-        btn.addEventListener('click', (e) => {
-          e.stopPropagation() // 阻止冒泡
-          const wrapper = btn.closest('.blur-wrapper')
-          if (!wrapper) return
-          const isHidden = wrapper.dataset.hidden === 'true'
-          wrapper.dataset.hidden = (!isHidden).toString()
-        })
-      })
-    }
-
-    // 初始加载时绑定
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initBlur)
-    } else {
-      initBlur()
-    }
-
-    // 在客户端路由切换后重新绑定（等待内容插入）
-    document.addEventListener('astro:page-load', () => setTimeout(initBlur, 50))
-  })()
-
-  // Medium Zoom Initialization
   import mediumZoom from 'medium-zoom'
 
-  function initZoom() {
-    const isDark = document.documentElement.classList.contains('dark')
-    const zoom = mediumZoom('.post-content img, .post-image img', {
-      margin: 24,
-      background: isDark ? '#121212' : '#ffffff'
-  })
+  function toggleSpoiler(wrapper: HTMLElement) {
+    const expanded = wrapper.dataset.hidden === 'true'
+    wrapper.dataset.hidden = String(!expanded)
+    wrapper.setAttribute('aria-expanded', String(expanded))
   }
 
+  document.addEventListener('click', event => {
+    const wrapper = event.target instanceof Element ? event.target.closest<HTMLElement>('.post-content .blur-wrapper') : null
+    if (wrapper) toggleSpoiler(wrapper)
+  })
+  document.addEventListener('keydown', event => {
+    const wrapper = event.target instanceof Element ? event.target.closest<HTMLElement>('.post-content .blur-wrapper') : null
+    if (wrapper && (event.key === 'Enter' || event.key === ' ')) {
+      event.preventDefault()
+      toggleSpoiler(wrapper)
+    }
+  })
+
+  const zoom = mediumZoom({ margin: 24 })
+  function updateZoomTheme() {
+    zoom.update({ background: document.documentElement.getAttribute('data-theme') === 'dark' ? '#121212' : '#ffffff' })
+  }
+  let zoomRevision = 0
+  function initZoom() {
+    zoomRevision++
+    zoom.detach()
+    zoom.attach('.post-content img, .post-image img')
+    updateZoomTheme()
+  }
+  const observer = new MutationObserver(updateZoomTheme)
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
   document.addEventListener('astro:page-load', initZoom)
+  document.addEventListener('astro:before-swap', () => {
+    const revision = ++zoomRevision
+    void zoom.close().then(() => { if (revision === zoomRevision) zoom.detach() })
+  })
+  initZoom()
   </script>
-</BaseLayout>
+</BaseLayout> : <CategoryPage category={category!} posts={posts} />}
 
 <style>
   /* 文章容器 */

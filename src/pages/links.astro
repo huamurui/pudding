@@ -4,6 +4,17 @@ import Comments from '@/components/Comments.svelte'
 import linksData from '@/data/links.json'
 import '@/styles/global.css'
 
+interface FriendLink {
+  name: string;
+  url: string;
+  avatar: string;
+  descr: string;
+  color: string;
+  preset?: string;
+  tag?: string;
+}
+
+const friendLinks: FriendLink[] = linksData
 const pageTitle = 'Links';
 ---
 
@@ -22,7 +33,7 @@ const pageTitle = 'Links';
     <!-- Friends Card Grid -->
     <div class="friends-grid">
       {
-        linksData.map((item) => (
+        friendLinks.map((item) => (
           <a
             href={item.url}
             target="_blank"

@@ -1,137 +1,123 @@
 <script lang="ts">
-  import { onMount } from "svelte";
-  type Theme = "light" | "dark";
-  let theme: Theme = "light";
-  const getInitialTheme = (): Theme => {
-    if (typeof window === "undefined") return "light";
+  import { onMount } from 'svelte';
+  import { t } from '@/utils/i18n';
+  type Theme = 'light' | 'dark';
+  let theme: Theme = 'light';
+  let transitionSequence = 0;
+  let activeTransition: ViewTransition | null = null;
 
-    const savedTheme = localStorage.getItem("theme");
-    if (savedTheme && ["light", "dark"].includes(savedTheme)) {
-      return savedTheme as Theme;
+  function savedTheme(): Theme | null {
+    try {
+      const saved = localStorage.getItem('theme');
+      return saved === 'light' || saved === 'dark' ? saved : null;
+    } catch {
+      return null;
     }
-    return window.matchMedia("(prefers-color-scheme: dark)").matches
-      ? "dark"
-      : "light";
-  };
+  }
 
-  const executeThemeChange = (newTheme: Theme): void => {
+  function initialTheme(): Theme {
+    return savedTheme() || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  }
+
+  function executeThemeChange(newTheme: Theme) {
+    theme = newTheme;
     const html = document.documentElement;
-    if (html.getAttribute("data-theme") === newTheme && html.classList.contains(newTheme)) return;
-
-    html.classList.remove("light", "dark");
+    html.classList.remove('light', 'dark');
     html.classList.add(newTheme);
-    html.setAttribute("data-theme", newTheme);
-    localStorage.setItem("theme", newTheme);
-  };
+    html.setAttribute('data-theme', newTheme);
+  }
 
-  const applyTheme = (newTheme: Theme, e?: MouseEvent): void => {
-    // @ts-ignore: View Transitions API
-    const isAppearanceTransition = document.startViewTransition && !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    if (!isAppearanceTransition || !e) {
+  function applyTheme(newTheme: Theme, event?: MouseEvent) {
+    const sequence = ++transitionSequence;
+    activeTransition?.skipTransition();
+    const html = document.documentElement;
+    html.classList.remove('theme-transitioning');
+    if (!document.startViewTransition || !event || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      activeTransition = null;
       executeThemeChange(newTheme);
       return;
     }
-
-    document.documentElement.classList.add("theme-transitioning");
-
-    const x = e.clientX;
-    const y = e.clientY;
-    const endRadius = Math.hypot(
-      Math.max(x, innerWidth - x),
-      Math.max(y, innerHeight - y)
-    );
-
-    // @ts-ignore
-    const transition = document.startViewTransition(() => {
-      executeThemeChange(newTheme);
-    });
-
-    transition.ready.then(() => {
-      const clipPath = [
-        `circle(0px at ${x}px ${y}px)`,
-        `circle(${endRadius}px at ${x}px ${y}px)`,
-      ];
-      document.documentElement.animate(
-        {
-          clipPath: newTheme === "dark" ? [...clipPath].reverse() : clipPath,
-        },
-        {
+    html.classList.add('theme-transitioning');
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    const x = event.detail === 0 ? rect.left + rect.width / 2 : event.clientX;
+    const y = event.detail === 0 ? rect.top + rect.height / 2 : event.clientY;
+    const radius = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
+    try {
+      const transition = document.startViewTransition(() => { if (sequence === transitionSequence) executeThemeChange(newTheme); });
+      activeTransition = transition;
+      void transition.ready.then(() => {
+        if (sequence !== transitionSequence) return;
+        const clipPath = [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`];
+        html.animate({ clipPath: newTheme === 'dark' ? [...clipPath].reverse() : clipPath }, {
           duration: 500,
-          easing: "ease-in-out",
-          pseudoElement: newTheme === "dark" ? "::view-transition-old(root)" : "::view-transition-new(root)",
-          fill: "both",
+          easing: 'ease-in-out',
+          pseudoElement: newTheme === 'dark' ? '::view-transition-old(root)' : '::view-transition-new(root)',
+          fill: 'both'
+        });
+      }).catch(() => { /* A skipped transition still applies the theme. */ });
+      void transition.finished.catch(() => {}).finally(() => {
+        if (sequence === transitionSequence) {
+          html.classList.remove('theme-transitioning');
+          activeTransition = null;
         }
-      );
-    });
-
-    transition.finished.then(() => {
-      document.documentElement.classList.remove("theme-transitioning");
-    });
-  };
+      });
+    } catch {
+      html.classList.remove('theme-transitioning');
+      executeThemeChange(newTheme);
+    }
+  }
 
   onMount(() => {
-    const initialTheme = getInitialTheme();
-    theme = initialTheme;
-    // The theme is already applied by the inline script in Head.astro.
-    // Only call applyTheme if the DOM state is inconsistent.
-    if (document.documentElement.getAttribute("data-theme") !== initialTheme) {
-      applyTheme(initialTheme);
-    }
-
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    const handleSystemThemeChange = (e: MediaQueryListEvent): void => {
-      if (!localStorage.getItem("theme")) {
-        const newTheme = e.matches ? "dark" : "light";
-        theme = newTheme;
-        applyTheme(newTheme);
-      }
+    const current = document.documentElement.getAttribute('data-theme');
+    executeThemeChange(current === 'dark' || current === 'light' ? current : initialTheme());
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleSystemThemeChange = (event: MediaQueryListEvent) => {
+      if (!savedTheme()) applyTheme(event.matches ? 'dark' : 'light');
     };
-
-    mediaQuery.addEventListener("change", handleSystemThemeChange);
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === 'theme' || event.key === null) applyTheme(initialTheme());
+    };
+    mediaQuery.addEventListener('change', handleSystemThemeChange);
+    window.addEventListener('storage', handleStorageChange);
     return () => {
-      mediaQuery.removeEventListener("change", handleSystemThemeChange);
+      ++transitionSequence;
+      activeTransition?.skipTransition();
+      document.documentElement.classList.remove('theme-transitioning');
+      mediaQuery.removeEventListener('change', handleSystemThemeChange);
+      window.removeEventListener('storage', handleStorageChange);
     };
   });
 
-  const toggleTheme = (e: MouseEvent): void => {
-    const newTheme = theme === "light" ? "dark" : "light";
+  function toggleTheme(event: MouseEvent) {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
     theme = newTheme;
-    applyTheme(newTheme, e);
-  };
-
-  const switchToTheme = (targetTheme: Theme, e: MouseEvent): void => {
-    if (theme !== targetTheme) {
-      theme = targetTheme;
-      applyTheme(targetTheme, e);
-    }
-  };
+    try { localStorage.setItem('theme', newTheme); } catch { /* Theme switching works without storage. */ }
+    applyTheme(newTheme, event);
+  }
 </script>
 
 <button
   type="button"
   class="theme-toggle-container"
   on:click={toggleTheme}
-  aria-label={`当前为${theme === "dark" ? "暗色" : "亮色"}模式，点击切换为${theme === "dark" ? "亮色" : "暗色"}模式`}
+  aria-label={t('common.theme.label', { current: t(`common.theme.${theme}`), target: t(`common.theme.${theme === 'dark' ? 'light' : 'dark'}`) })}
   aria-pressed={theme === "dark"}
 >
   <span class="theme-options">
     <span
       class="nav-link light"
-      aria-hidden={theme !== "light"}
-      on:click|stopPropagation={(e) => switchToTheme("light", e)}
+      aria-hidden="true"
     >
-      Light
+      {t('common.theme.light')}
     </span>
 
     <span aria-hidden="true">/</span>
 
     <span
       class="nav-link dark"
-      aria-hidden={theme !== "dark"}
-      on:click|stopPropagation={(e) => switchToTheme("dark", e)}
+      aria-hidden="true"
     >
-      Dark
+      {t('common.theme.dark')}
     </span>
     <span class="indicator theme-toggle-indicator" aria-hidden="true"></span>
   </span>
@@ -164,7 +150,7 @@
 
 
   .theme-toggle-container:focus-visible {
-    outline: 2px solid rgba(var(--theme-color), 0.8);
+    outline: 2px solid var(--theme-color);
     outline-offset: 2px;
     border-radius: 4px;
   }

@@ -1,6 +1,8 @@
 <script lang="ts">
-  import { siteConfig } from '@/config/site.config';
-  import { onMount, onDestroy, tick } from 'svelte';
+  import { onMount } from 'svelte';
+  import { buildUrl, getPostUrl } from '@/utils/helpers';
+  import { t } from '@/utils/i18n';
+  import { breadcrumbDirectoryPath } from '@/scripts/breadcrumb';
 
   interface BreadcrumbItem {
     label: string;
@@ -17,175 +19,114 @@
   export let clientBuildUrl: ((paths: string[] | string) => string) | null = null;
 
   let directoryStructure: Record<string, DirectoryItem> = {};
-  let pathMap = new Map<string, string>();
-  let activeDropdownLabel: string | null = null;
+  let activeDropdownIndex: number | null = null;
   let isDirectoryLoaded = false;
-  let childrenCache = new Map<string, BreadcrumbItem[]>(); // 标签 -> 子项缓存
+  let directoryError = false;
+  let breadcrumb: HTMLElement;
+  let activeButton: HTMLButtonElement | null = null;
 
-  const safeBuildUrl = (paths: string[] | string): string => {
-    if (clientBuildUrl) {
-      return clientBuildUrl(paths);
-    }
+  const safeBuildUrl = (paths: string[] | string): string => (clientBuildUrl || buildUrl)(paths);
 
-    if (typeof paths === 'string') {
-      return `${siteConfig.base}/${paths.replace(/^\/|\/$/g, '')}`;
-    }
-    return `${siteConfig.base}/${paths.filter(Boolean).join('/')}`;
-  };
-
-  const generatePathMap = () => {
-    const newPathMap = new Map<string, string>();
-    items.forEach((item, index) => {
-      const path = items
-        .slice(1, index + 1)
-        .map(i => i.label.toLowerCase().replace(/\s+/g, '-'))
-        .join('/');
-      newPathMap.set(item.label, path);
-    });
-    pathMap = newPathMap;
-  };
-
-  const computeChildrenFromPath = (path: string): BreadcrumbItem[] => {
+  function computeChildren(
+    item: BreadcrumbItem,
+    structure: Record<string, DirectoryItem>,
+    makeUrl: (paths: string[] | string) => string
+  ): BreadcrumbItem[] {
+    const path = breadcrumbDirectoryPath(item.href, makeUrl('posts'));
     const pathParts = path.split('/').filter(Boolean);
-    let current: Record<string, DirectoryItem> | undefined = directoryStructure;
-
+    let current: Record<string, DirectoryItem> | undefined = structure;
     for (const part of pathParts) {
-      if (!current || !current[part] || current[part].type !== 'directory') {
-        return [];
-      }
+      if (current?.[part]?.type !== 'directory') return [];
       current = current[part].children;
     }
+    return Object.entries(current || {}).map(([key, value]) => ({
+      label: value.label,
+      href: makeUrl === buildUrl
+        ? getPostUrl([...pathParts, key].join('/'))
+        : makeUrl(['posts', ...pathParts, key])
+    }));
+  }
 
-    if (!current || Object.keys(current).length === 0) {
-      return [];
-    }
+  $: childrenCache = new Map(items.map(item => [item.href, computeChildren(item, directoryStructure, clientBuildUrl || buildUrl)]));
 
-    return Object.entries(current).map(([key, value]) => {
-      const fullPath = [...pathParts, key].join('/');
-      const hrefPaths = value.type === 'directory' 
-        ? ['posts', fullPath, ''] 
-        : ['posts', fullPath];
-      
-      return {
-        label: value.label,
-        href: safeBuildUrl(hrefPaths),
-      };
-    });
-  };
+  function toggleDropdown(index: number, event: MouseEvent) {
+    activeDropdownIndex = activeDropdownIndex === index ? null : index;
+    activeButton = event.currentTarget as HTMLButtonElement;
+  }
 
-  const computeChildrenCache = () => {
-    if (!isDirectoryLoaded || pathMap.size === 0 || Object.keys(directoryStructure).length === 0) {
-      return;
-    }
-
-    const newCache = new Map<string, BreadcrumbItem[]>();
-    pathMap.forEach((path, label) => {
-      newCache.set(label, computeChildrenFromPath(path));
-    });
-    childrenCache = newCache;
-  };
-
-  const toggleDropdown = (label: string, e: Event) => {
-    e.preventDefault();
-    e.stopPropagation();
-    activeDropdownLabel = activeDropdownLabel === label ? null : label;
-  };
-
-  const closeAllDropdowns = (e: Event) => {
-    const target = e.target as HTMLElement;
-    if (
-      !target.closest('.breadcrumb-dropdown') &&
-      !target.closest('.breadcrumb-dropdown-btn')
-    ) {
-      activeDropdownLabel = null;
-    }
-  };
-
-  const loadDirectoryStructure = async () => {
-    try {
-      const response = await fetch(siteConfig.base+'/data/dir-data.json');
-      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-      const structure = await response.json();
-      directoryStructure = structure;
-      isDirectoryLoaded = true;
-      await tick();
-    } catch (error) {
-      console.error('加载目录结构失败：', error);
-      directoryStructure = {};
-      isDirectoryLoaded = false;
-    }
-  };
-
-  onMount(async () => {
-    generatePathMap();
-    await loadDirectoryStructure();
-    document.addEventListener('click', closeAllDropdowns);
+  onMount(() => {
+    const controller = new AbortController();
+    const closeOutside = (event: MouseEvent) => {
+      if (event.target instanceof Node && !breadcrumb.contains(event.target)) activeDropdownIndex = null;
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && activeDropdownIndex !== null) {
+        activeDropdownIndex = null;
+        activeButton?.focus();
+      }
+    };
+    document.addEventListener('click', closeOutside);
+    document.addEventListener('keydown', closeOnEscape);
+    void (async () => {
+      try {
+        const response = await fetch(safeBuildUrl('data/dir-data.json'), { signal: controller.signal });
+        if (!response.ok) throw new Error(`Directory HTTP ${response.status}`);
+        const structure = await response.json();
+        if (controller.signal.aborted) return;
+        directoryStructure = structure;
+        isDirectoryLoaded = true;
+      } catch (error) {
+        if (!controller.signal.aborted) {
+          directoryError = true;
+          console.error('加载目录结构失败：', error);
+        }
+      }
+    })();
+    return () => {
+      controller.abort();
+      document.removeEventListener('click', closeOutside);
+      document.removeEventListener('keydown', closeOnEscape);
+    };
   });
-
-  // onDestroy(() => {
-  //   document.removeEventListener('click', closeAllDropdowns);
-  // });
-
-  $: if (isDirectoryLoaded && pathMap.size > 0) {
-    computeChildrenCache();
-  }
-
-  $: if (items.length > 0) {
-    generatePathMap();
-  }
 </script>
 
-<nav class="breadcrumb" aria-label="Breadcrumb" >
+<nav bind:this={breadcrumb} class="breadcrumb" aria-label={t('common.breadcrumb.label')}>
   <ol class="breadcrumb-list">
-    {#each items as item, index}
+    {#each items as item, index (item.href)}
       <li class="breadcrumb-item">
         {#if index < items.length - 1}
           <div class="breadcrumb-item-container">
-            <a href={item.href} class="breadcrumb-link" title={item.label}>
-              {item.label}
-            </a>
+            <a href={item.href} class="breadcrumb-link" title={item.label}>{item.label}</a>
             <button
               class="breadcrumb-dropdown-btn"
               type="button"
-              aria-label={`查看 ${item.label} 下的子目录`}
-              aria-expanded={activeDropdownLabel === item.label}
-              aria-haspopup="true"
-              on:click={(e) => toggleDropdown(item.label, e)}
+              aria-label={t('common.breadcrumb.children', { label: item.label })}
+              aria-expanded={activeDropdownIndex === index}
+              aria-controls={`breadcrumb-dropdown-${index}`}
+              on:click={(event) => toggleDropdown(index, event)}
             >
-              <span class="breadcrumb-separator">
+              <span class="breadcrumb-separator" aria-hidden="true">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
               </span>
-              <div class="breadcrumb-dropdown">
-                <ul class="breadcrumb-dropdown-menu">
-                  {#if !isDirectoryLoaded}
-                    <li>
-                      <span class="no-items">Loading...</span>
-                    </li>
-                  {:else}
-                    {#if childrenCache.has(item.label) && (childrenCache.get(item.label) || []).length > 0}
-                      {#each childrenCache.get(item.label) as child}
-                        <li>
-                          <a
-                            href={child.href}
-                            title={child.label}
-                            on:click|stopPropagation
-                          >
-                            {child.label}
-                          </a>
-                        </li>
-                      {/each}
-                    {:else}
-                      <li>
-                        <span class="no-items">No items</span>
-                      </li>
-                    {/if}
-                  {/if}
-                </ul>
-              </div>
             </button>
+            <div class="breadcrumb-dropdown" id={`breadcrumb-dropdown-${index}`} hidden={activeDropdownIndex !== index}>
+              <ul class="breadcrumb-dropdown-menu">
+                {#if directoryError}
+                  <li><span class="no-items">{t('common.breadcrumb.loadError')}</span></li>
+                {:else if !isDirectoryLoaded}
+                  <li><span class="no-items">{t('common.breadcrumb.loading')}</span></li>
+                {:else if (childrenCache.get(item.href) || []).length > 0}
+                  {#each childrenCache.get(item.href) || [] as child (child.href)}
+                    <li><a href={child.href} title={child.label} on:click={() => activeDropdownIndex = null}>{child.label}</a></li>
+                  {/each}
+                {:else}
+                  <li><span class="no-items">{t('common.breadcrumb.empty')}</span></li>
+                {/if}
+              </ul>
+            </div>
           </div>
         {:else}
-          <span class="breadcrumb-current">{item.label}</span>
+          <span class="breadcrumb-current" aria-current="page">{item.label}</span>
         {/if}
       </li>
     {/each}
@@ -291,7 +232,7 @@
     padding: 0.4rem;
   }
 
-  .breadcrumb-dropdown-btn[aria-expanded="true"] .breadcrumb-dropdown {
+  .breadcrumb-dropdown:not([hidden]) {
     opacity: 1;
     visibility: visible;
     transform: translateX(-50%) translateY(0) scale(1);

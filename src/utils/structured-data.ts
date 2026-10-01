@@ -1,7 +1,11 @@
 import { siteConfig } from '@/config/site.config'
 import type { PostEntry, StructuredData } from '@/types'
-import { getPostUrl } from './helpers'
+import { buildUrl, getPostUrl } from './helpers'
 
+/** Encode JSON-LD as script text without allowing HTML tokenizer transitions. */
+export function serializeStructuredData(data: StructuredData): string {
+  return JSON.stringify(data).replace(/</g, '\\u003c')
+}
 
 export function generatePostStructuredData(
   post: PostEntry,
@@ -19,7 +23,7 @@ export function generatePostStructuredData(
     },
     headline: post.data.title,
     description: post.data.description || description,
-    image: post.data.image?.url ? new URL(post.data.image.url, origin).toString() : '',
+    ...(post.data.image?.url ? { image: new URL(post.data.image.url, origin).toString() } : {}),
     author: {
       '@type': 'Person',
       name: post.data.author || siteConfig.author.name
@@ -31,7 +35,7 @@ export function generatePostStructuredData(
       name: siteConfig.name,
       logo: {
         '@type': 'ImageObject',
-        url: `${origin}/favicon.svg`
+        url: new URL(buildUrl('favicon.svg'), origin).toString()
       }
     },
     url: postUrl,
@@ -61,7 +65,7 @@ export function generateWebsiteStructuredData(origin: string): StructuredData {
   const siteNavigationElements = siteConfig.navItems.map(item => ({
     '@type': 'SiteNavigationElement',
     name: item.label,
-    url: new URL(item.href, origin).toString()
+    url: new URL(buildUrl(item.href), origin).toString()
   }))
 
   return {
@@ -69,7 +73,7 @@ export function generateWebsiteStructuredData(origin: string): StructuredData {
     '@graph': [
       {
         '@type': 'WebSite',
-        url: origin,
+        url: new URL(buildUrl(''), origin).toString(),
         name: siteConfig.name,
         description: siteConfig.description,
         publisher: {
@@ -77,7 +81,7 @@ export function generateWebsiteStructuredData(origin: string): StructuredData {
           name: siteConfig.name,
           logo: {
             '@type': 'ImageObject',
-            url: `${origin}/favicon.svg`
+            url: new URL(buildUrl('favicon.svg'), origin).toString()
           }
         }
       },
@@ -104,7 +108,7 @@ export function generatePostListStructuredData(
   const siteNavigationElements = siteConfig.navItems.map(item => ({
     '@type': 'SiteNavigationElement',
     name: item.label,
-    url: new URL(item.href, origin).toString()
+    url: new URL(buildUrl(item.href), origin).toString()
   }))
 
   return {
@@ -112,7 +116,7 @@ export function generatePostListStructuredData(
     '@graph': [
       {
         '@type': 'WebSite',
-        url: origin,
+        url: new URL(buildUrl(''), origin).toString(),
         name: siteConfig.name,
         description: siteConfig.description,
         publisher: {
@@ -120,14 +124,14 @@ export function generatePostListStructuredData(
           name: siteConfig.name,
           logo: {
             '@type': 'ImageObject',
-            url: `${origin}/favicon.svg`
+            url: new URL(buildUrl('favicon.svg'), origin).toString()
           }
         }
       },
       {
         '@type': 'CollectionPage',
         name: 'Recent posts',
-        url: origin,
+        url: new URL(buildUrl(''), origin).toString(),
         description: siteConfig.description,
         mainEntity: itemList,
         publisher: {
@@ -135,7 +139,7 @@ export function generatePostListStructuredData(
           name: siteConfig.name,
           logo: {
             '@type': 'ImageObject',
-            url: `${origin}/favicon.svg`
+            url: new URL(buildUrl('favicon.svg'), origin).toString()
           }
         }
       },

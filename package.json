@@ -3,48 +3,58 @@
   "type": "module",
   "version": "0.0.1",
   "private": true,
+  "packageManager": "pnpm@12.8.1",
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
+    "generate": "node --experimental-strip-types scripts/build-backlinks.mjs",
+    "dev": "pnpm generate && astro dev",
+    "build": "pnpm generate && astro build",
     "preview": "astro preview",
-    "build:infos": "node scripts/generate-sasayai.mjs && node scripts/build-backlinks.mjs && astro build",
+    "build:infos": "pnpm build",
     "astro": "astro",
+    "check": "pnpm generate && astro check && svelte-check --tsconfig ./tsconfig.json",
+    "test": "node --experimental-strip-types --test tests/*.test.mjs",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "@astrojs/rss": "^4.0.14",
-    "@astrojs/sitemap": "^3.6.1",
-    "@astrojs/svelte": "^7.2.5",
-    "astro": "^5.16.8",
-    "astro-expressive-code": "^0.41.6",
-    "fuse.js": "^7.1.0",
-    "katex": "^0.16.27",
+    "@astrojs/markdown-remark": "^7.3.1",
+    "@astrojs/rss": "^4.0.19",
+    "@astrojs/svelte": "^9.0.1",
+    "astro": "^7.3.5",
+    "astro-expressive-code": "^0.44.2",
+    "fuse.js": "^7.5.0",
+    "github-slugger": "2.0.0",
+    "katex": "^0.16.47",
     "medium-zoom": "^1.1.0",
     "nprogress": "^0.2.0",
-    "overlayscrollbars": "^2.13.0",
+    "overlayscrollbars": "^2.16.0",
     "rehype-katex": "^7.0.1",
     "remark-math": "^6.0.0",
-    "sharp": "^0.34.5",
-    "svelte": "^5.46.1"
+    "sanitize-html": "2.18.0",
+    "sharp": "^0.35.5",
+    "svelte": "^5.57.1"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.2",
+    "@astrojs/check": "^0.9.10",
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^22.20.4",
     "@types/nprogress": "^0.2.3",
-    "@typescript-eslint/parser": "^8.53.1",
-    "eslint": "^9.39.2",
-    "eslint-plugin-astro": "^1.5.0",
-    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "@types/sanitize-html": "2.16.2",
+    "@typescript-eslint/parser": "^8.71.0",
+    "eslint": "^10.11.0",
+    "eslint-plugin-astro": "^3.2.1",
+    "eslint-plugin-jsx-a11y-x": "^0.2.0",
+    "eslint-plugin-svelte": "^3.23.0",
     "glob": "^13.0.6",
+    "globals": "^17.13.0",
     "remark": "^15.0.1",
     "remark-parse": "^11.0.0",
-    "typescript-eslint": "^8.52.0",
-    "unist-util-visit": "^5.0.0"
+    "svelte-check": "^4.7.6",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.71.0",
+    "unist-util-visit": "^5.1.0"
   },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild",
-      "sharp"
-    ]
+  "engines": {
+    "node": ">=22.12.0"
   }
 }

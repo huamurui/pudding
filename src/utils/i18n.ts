@@ -6,12 +6,12 @@ export type { SupportedLocale }
 export { getLocale }
 
 export function t(path: string, params?: Record<string, string | number>, locale?: SupportedLocale): string {
-  const currentLocale = locale || siteConfig.locale as SupportedLocale
+  const currentLocale = getLocale(locale ?? siteConfig.locale)
   return tBase(currentLocale, path, params)
 }
 
 export function useI18n(locale?: SupportedLocale): { locale: SupportedLocale; t: (path: string, params?: Record<string, string | number>) => string; config: typeof i18nConfig[SupportedLocale] } {
-  const currentLocale = locale || siteConfig.locale as SupportedLocale
+  const currentLocale = getLocale(locale ?? siteConfig.locale)
   const config = i18nConfig[currentLocale]
 
   return {

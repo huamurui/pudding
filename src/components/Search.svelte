@@ -1,290 +1,213 @@
 <script lang="ts">
-  import Fuse from "fuse.js";
-  import { onMount } from "svelte";
-  import { t } from "@/utils/i18n";
+  import Fuse, { type FuseResult, type IFuseOptions } from 'fuse.js';
+  import { onMount, tick } from 'svelte';
+  import { t } from '@/utils/i18n';
+  import { buildUrl } from '@/utils/helpers';
+  import { generateExcerpt, highlightSegments, type SearchPost, type SearchWorkerMessage, type SearchWorkerResponse } from '@/scripts/search';
 
-  interface Post {
-    id: string;
-    title: string;
-    excerpt?: string;
-    url: string;
-    content: string;
-    description?: string;
-    tags?: string[];
-  }
+  export let searchablePosts: readonly SearchPost[] = [];
 
-  type SearchablePosts = readonly Post[];
-  export let searchablePosts: SearchablePosts = [];
-
-  let searchQuery = "";
+  let searchQuery = '';
   let isSearchOpen = false;
-  let searchResults: any[] = [];
-  let fuse: any;
+  let searchResults: FuseResult<SearchPost>[] = [];
+  let fuse: Fuse<SearchPost> | null = null;
   let searchWorker: Worker | null = null;
   let isWorkerReady = false;
   let isIndexLoading = false;
   let isIndexLoaded = false;
-  const fuseOptions: any = {
+  let indexError = false;
+  let mounted = false;
+  let requestId = 0;
+  let searchContainer: HTMLDivElement;
+  let searchInput: HTMLInputElement;
+  let searchToggle: HTMLButtonElement;
+  const indexController = new AbortController();
+  const fuseOptions: IFuseOptions<SearchPost> = {
     includeScore: true,
-    includeMatches: true,
     threshold: 0.4,
     ignoreLocation: true,
     minMatchCharLength: 2,
     keys: [
-      { name: "title", weight: 3 },
-      { name: "description", weight: 2 },
-      { name: "content", weight: 1 },
-      { name: "tags", weight: 1 },
-    ],
+      { name: 'title', weight: 3 },
+      { name: 'description', weight: 2 },
+      { name: 'content', weight: 1 },
+      { name: 'tags', weight: 1 }
+    ]
   };
 
-  const loadFullIndex = async () => {
-    if (isIndexLoaded || isIndexLoading) return;
-    isIndexLoading = true;
-    try {
-      // 仅动态导入索引数据
-      const res = await fetch('/search-index.json');
-      const data = await res.json();
-      
-      searchablePosts = data;
-      fuse = new Fuse(searchablePosts as any[], fuseOptions);
-      isIndexLoaded = true;
-    } catch (e) {
-      console.error('Failed to load search index:', e);
-    } finally {
-      isIndexLoading = false;
-    }
-  };
+  function fallbackSearch() {
+    searchResults = searchQuery ? fuse?.search(searchQuery, { limit: 5 }) || [] : [];
+  }
 
-  onMount(() => {
-    document.addEventListener("click", handleClickOutside);
-    
-    try {
-      // 初始化 Web Worker (使用 Vite 支持的方式，并指定为模块类型)
-      searchWorker = new Worker(new URL('../workers/search-worker.ts', import.meta.url), { type: 'module' });
-      
-      searchWorker.onmessage = (e) => {
-        const { type, payload } = e.data;
-        
-        switch (type) {
-          case 'INITIALIZED':
-            isWorkerReady = true;
-            break;
-          case 'SEARCH_RESULTS':
-            searchResults = payload.slice(0, 5);
-            break;
-          case 'ERROR':
-            console.error('Search Worker Error:', payload);
-            // 降级到主线程搜索
-            if (fuse && searchQuery) {
-              searchResults = fuse.search(searchQuery).slice(0, 5);
-            }
-            break;
-        }
-      };
-      
-      searchWorker.onerror = (error) => {
-        console.error('Search Worker Error:', error);
-        isWorkerReady = false;
-      };
-    } catch (error) {
-      console.error('Failed to create search worker:', error);
-      isWorkerReady = false;
-    }
-    
-    // 初始化 Fuse 实例（主线程备用）
-    fuse = new Fuse(searchablePosts as Post[], fuseOptions);
-    
-    // 发送初始化消息到 Worker
-    if (searchWorker) {
-      // 创建可序列化的 options 副本，移除不可序列化的属性
-      const serializableOptions = {
-        includeScore: true,
-        includeMatches: true,
-        threshold: 0.4,
-        ignoreLocation: true,
-        minMatchCharLength: 2,
-        keys: [
-          { name: "title", weight: 3 },
-          { name: "description", weight: 2 },
-          { name: "content", weight: 1 },
-          { name: "tags", weight: 1 },
-        ],
-      };
-      
-      // 创建可序列化的文章数据副本，只包含必要属性
-      const serializablePosts = searchablePosts.map(post => ({
-        id: post.id,
-        title: post.title,
-        content: post.content,
-        description: post.description || '',
-        tags: post.tags || [],
-        url: post.url
-      }));
-      
-      // todo . 现在未使用 worker
-      // searchWorker.postMessage({
-      //   type: 'INIT',
-      //   payload: {
-      //     posts: serializablePosts,
-      //     options: serializableOptions
-      //   }
-      // });
-    }
-    
-    return () => {
-      document.removeEventListener("click", handleClickOutside);
-      if (searchWorker) {
-        searchWorker.terminate();
-        searchWorker = null;
-      }
-    };
-  });
+  function disableWorker() {
+    searchWorker?.terminate();
+    searchWorker = null;
+    isWorkerReady = false;
+    fallbackSearch();
+  }
 
-  // 高亮显示匹配的文本
-  const highlightMatch = (text: string, query: string): string => {
-    if (!query) return text;
-    
-    const regex = new RegExp(`(${query})`, "gi");
-    return text.replace(regex, "<mark>$1</mark>");
-  };
-
-  // 生成显示摘要，包含匹配的内容
-  const generateExcerpt = (post: Post, query: string): string => {
-    if (!query) return post.description || post.content.slice(0, 150) + "...";
-    
-    const content = post.content.toLowerCase();
-    const queryLower = query.toLowerCase();
-    const matchIndex = content.indexOf(queryLower);
-    
-    if (matchIndex === -1) return post.description || post.content.slice(0, 150) + "...";
-    
-    const start = Math.max(0, matchIndex - 50);
-    const end = Math.min(content.length, matchIndex + query.length + 50);
-    let excerpt = post.content.slice(start, end);
-    
-    if (start > 0) excerpt = "..." + excerpt;
-    if (end < post.content.length) excerpt = excerpt + "...";
-    
-    return highlightMatch(excerpt, query);
-  };
-
-  const handleClickOutside = (e: MouseEvent) => {
-    const searchContainer = document.querySelector(".search-container");
-    if (searchContainer && !searchContainer.contains(e.target as Node)) {
-      isSearchOpen = false;
-      searchQuery = "";
-      searchResults = [];
-    }
-  };
-
-  const handleSearchInput = (e: Event) => {
-    const inputValue = (e.target as HTMLInputElement).value.trim();
-    searchQuery = inputValue;
-
-    if (!inputValue) {
+  function search() {
+    requestId++;
+    if (!searchQuery) {
       searchResults = [];
       return;
     }
-    
-    // 使用 Web Worker 搜索，如果可用
     if (isWorkerReady && searchWorker) {
-      searchWorker.postMessage({
-        type: 'SEARCH',
-        payload: {
-          query: inputValue
+      const message: SearchWorkerMessage = { type: 'SEARCH', payload: { query: searchQuery, requestId } };
+      try {
+        searchWorker.postMessage(message);
+      } catch {
+        disableWorker();
+      }
+    } else {
+      fallbackSearch();
+    }
+  }
+
+  function initializeWorker(posts: SearchPost[]) {
+    try {
+      searchWorker = new Worker(new URL('../workers/search-worker.ts', import.meta.url), { type: 'module' });
+      searchWorker.onmessage = (event: MessageEvent<SearchWorkerResponse>) => {
+        if (event.data.type === 'INITIALIZED') {
+          isWorkerReady = true;
+          search();
+        } else if (event.data.type === 'SEARCH_RESULTS') {
+          if (event.data.requestId === requestId && isSearchOpen) searchResults = event.data.payload;
+        } else {
+          disableWorker();
         }
-      });
-    } else {
-      // 降级到主线程搜索
-      const results = fuse.search(inputValue);
-      searchResults = results.slice(0, 5);
+      };
+      searchWorker.onerror = disableWorker;
+      const message: SearchWorkerMessage = { type: 'INIT', payload: { posts, options: fuseOptions } };
+      searchWorker.postMessage(message);
+    } catch {
+      disableWorker();
     }
-  };
+  }
 
-  const toggleSearch = () => {
-    isSearchOpen = !isSearchOpen;
+  async function loadFullIndex() {
+    if (isIndexLoaded || isIndexLoading) return;
+    isIndexLoading = true;
+    indexError = false;
+    try {
+      const response = await fetch(buildUrl('search-index.json'), { signal: indexController.signal });
+      if (!response.ok) throw new Error(`Search index HTTP ${response.status}`);
+      const posts: SearchPost[] = await response.json();
+      if (!Array.isArray(posts)) throw new Error('Invalid search index');
+      if (!mounted) return;
+      fuse = new Fuse(posts, fuseOptions);
+      isIndexLoaded = true;
+      search();
+      initializeWorker(posts);
+    } catch (error) {
+      if (mounted && !indexController.signal.aborted) {
+        indexError = true;
+        console.error('Failed to load search index:', error);
+      }
+    } finally {
+      isIndexLoading = false;
+    }
+  }
+
+  function closeSearch(restoreFocus = false) {
+    isSearchOpen = false;
+    searchQuery = '';
+    searchResults = [];
+    requestId++;
+    if (restoreFocus) searchToggle?.focus();
+  }
+
+  function handleClickOutside(event: MouseEvent) {
+    if (event.target instanceof Node && !searchContainer.contains(event.target)) closeSearch();
+  }
+
+  function handleSearchInput(event: Event) {
+    searchQuery = (event.target as HTMLInputElement).value.trim();
+    search();
+  }
+
+  async function toggleSearch() {
     if (isSearchOpen) {
-      loadFullIndex(); // 点击时开始加载索引
-      setTimeout(() => {
-        const searchInput =
-          document.querySelector<HTMLInputElement>(".search-input");
-        searchInput?.focus();
-      }, 100);
-    } else {
-      searchQuery = "";
-      searchResults = [];
+      closeSearch();
+      return;
     }
-  };
+    isSearchOpen = true;
+    void loadFullIndex();
+    await tick();
+    if (isSearchOpen) searchInput?.focus();
+  }
 
-  const handleSearchKeydown = (e: KeyboardEvent) => {
-    if (e.key === "Escape") {
-      isSearchOpen = false;
-      searchQuery = "";
-      searchResults = [];
-    }
-
-    if (e.key === "Enter" && searchResults.length > 0) {
-      e.preventDefault();
+  function handleSearchKeydown(event: KeyboardEvent) {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closeSearch(true);
+    } else if (event.key === 'Enter' && !event.isComposing && searchResults.length > 0) {
+      event.preventDefault();
       window.location.href = searchResults[0].item.url;
     }
-  };
+  }
+
+  onMount(() => {
+    mounted = true;
+    fuse = new Fuse([...searchablePosts], fuseOptions);
+    document.addEventListener('click', handleClickOutside);
+    return () => {
+      mounted = false;
+      indexController.abort();
+      document.removeEventListener('click', handleClickOutside);
+      searchWorker?.terminate();
+      searchWorker = null;
+    };
+  });
 </script>
 
-<div class="search-container" role="search" aria-label="文章搜索区域">
+<div bind:this={searchContainer} class="search-container" role="search" aria-label={t('common.search.region')}>
   <button
+    bind:this={searchToggle}
     class="search-toggle"
     type="button"
-    aria-label={isSearchOpen ? "收起搜索框" : "打开搜索框"}
+    aria-label={t(isSearchOpen ? 'common.search.ariaLabel.close' : 'common.search.ariaLabel.open')}
+    aria-expanded={isSearchOpen}
+    aria-controls="search-dropdown"
     on:click={toggleSearch}
   >
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="2"
-    >
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
       <circle cx="11" cy="11" r="8"></circle>
       <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
     </svg>
   </button>
 
   {#if isSearchOpen}
-    <div class="search-dropdown">
+    <div class="search-dropdown" id="search-dropdown">
       <input
+        bind:this={searchInput}
         class="search-input"
-        type="text"
-        placeholder={isIndexLoading ? "正在加载索引..." : "搜索文章..."}
+        type="search"
+        placeholder={t(isIndexLoading ? 'common.search.loading' : 'common.search.placeholder')}
         value={searchQuery}
-        disabled={isIndexLoading}
         on:input={handleSearchInput}
         on:keydown={handleSearchKeydown}
-        aria-label="输入关键词搜索文章"
-        aria-autocomplete="list"
+        aria-label={t('common.search.ariaLabel.input')}
         aria-controls="search-results-list"
+        aria-busy={isIndexLoading}
       />
-
-      {#if searchResults.length > 0}
-        <ul class="search-results" id="search-results-list">
-          {#each searchResults as result}
-            <li class="search-result-item">
-              <a
-              href={result.item.url}
-              on:click={() => {
-                isSearchOpen = false;
-                searchQuery = "";
-              }}
-              aria-label={t('common.search.ariaLabel.viewArticle', { title: result.item.title })}
-            >
-              <h4 class="result-title">{@html highlightMatch(result.item.title, searchQuery)}</h4>
-              <p class="result-excerpt">{@html generateExcerpt(result.item, searchQuery)}</p>
+      <p class="search-status" role="status">
+        {#if indexError}{t('common.search.loadError')}
+        {:else if isIndexLoading}{t('common.search.loading')}
+        {:else if searchQuery && searchResults.length === 0}{t('common.search.noResults')}
+        {:else if searchQuery}{t('common.search.resultCount', { count: searchResults.length })}
+        {/if}
+      </p>
+      <ul class="search-results" id="search-results-list">
+        {#each searchResults as result (result.item.id)}
+          <li class="search-result-item">
+            <a href={result.item.url} on:click={() => closeSearch()} aria-label={t('common.search.ariaLabel.viewArticle', { title: result.item.title })}>
+              <h4 class="result-title">{#each highlightSegments(result.item.title, searchQuery) as part, index (index)}{#if part.matched}<mark>{part.text}</mark>{:else}{part.text}{/if}{/each}</h4>
+              <p class="result-excerpt">{#each highlightSegments(generateExcerpt(result.item, searchQuery), searchQuery) as part, index (index)}{#if part.matched}<mark>{part.text}</mark>{:else}{part.text}{/if}{/each}</p>
             </a>
-            </li>
-          {/each}
-        </ul>
-      {/if}
+          </li>
+        {/each}
+      </ul>
     </div>
   {/if}
 </div>

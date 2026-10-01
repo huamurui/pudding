@@ -1,10 +1,9 @@
 ---
 import ThemeToggle from './ThemeToggle.svelte'
 import { siteConfig } from '@/config/site.config'
-import { isPostPage, buildUrl } from '@/utils/helpers'
-import { SCROLL_THRESHOLD } from '@/utils/constants'
+import { isPostPage, buildUrl, getPostUrl } from '@/utils/helpers'
 import Search from './Search.svelte'
-import { getCollection } from 'astro:content'
+import { getPublishedPosts } from '@/utils/content'
 import { t } from '@/utils/i18n'
 
 interface Props {
@@ -14,13 +13,15 @@ interface Props {
 const { pageTitle } = Astro.props as Props
 
 const navItems = siteConfig.navItems
+const normalizePath = (pathname: string) => pathname.replace(/\/+$/, '') || '/'
+const isNavActive = (href: string) => normalizePath(Astro.url.pathname) === normalizePath(new URL(buildUrl(href), Astro.url).pathname)
 
 const isPostsPage = isPostPage(Astro.url.pathname)
-const allPosts = await getCollection('posts')
+const allPosts = await getPublishedPosts()
 const searchablePosts = allPosts.map((post) => ({
   id: post.id,
   title: post.data.title,
-  url: buildUrl(['posts', post.id, ''])
+  url: getPostUrl(post.id)
   // 不再在这里传递 content，改用异步加载索引
 }));
 ---
@@ -43,10 +44,9 @@ const searchablePosts = allPosts.map((post) => ({
                   <a
                     href={buildUrl(item.href)}
                     class="nav-link"
+                    aria-current={isNavActive(item.href) ? 'page' : undefined}
                     class:list={{
-                      'is-active':
-                        Astro.url.pathname.replace('/', '') ===
-                        item.href.replace('/', '')
+                      'is-active': isNavActive(item.href)
                     }}
                   >
                     {t(`header.nav.${item.labelKey}` as any)}
@@ -92,23 +92,43 @@ const searchablePosts = allPosts.map((post) => ({
   // 滚动状态变量（保持在外部以保存状态）
   let lastScrollTop = 0
   let currentDirection = 'down'
-  let directionChange = false
   let scrollDistance = 0
   const threshold = 50
   let showingNav = true // 当前是否显示导航（而非标题）
 
-  document.addEventListener('click', (e) => {
-    const toggle =
-        e.target instanceof Element ? e.target.closest('#menu-toggle') : null
-    if (!toggle) return
+  function setMenuOpen(open: boolean) {
+    const toggle = document.getElementById('menu-toggle')
+    toggle?.setAttribute('aria-expanded', String(open))
     const nav = document.getElementById('nav')
-    const header = document.getElementById('header')
-    const scrollContainer = document.getElementById('scroll-container')
-    const isExpanded = toggle.getAttribute('aria-expanded') === 'true'
-    toggle.setAttribute('aria-expanded', (!isExpanded).toString())
-    nav?.classList.toggle('nav-open')
-    scrollContainer?.classList.toggle('nav-open')
-    header?.classList.toggle('menu-open')
+    nav?.classList.toggle('nav-open', open)
+    if (nav) nav.inert = window.innerWidth <= 768 && !open
+    document.getElementById('scroll-container')?.classList.toggle('nav-open', open)
+    document.getElementById('header')?.classList.toggle('menu-open', open)
+  }
+
+  document.addEventListener('click', event => {
+    if (!(event.target instanceof Element)) return
+    const toggle = event.target.closest('#menu-toggle')
+    if (toggle) {
+      setMenuOpen(toggle.getAttribute('aria-expanded') !== 'true')
+    } else if (!event.target.closest('#header') || event.target.closest('#nav a')) {
+      setMenuOpen(false)
+    }
+  })
+  document.addEventListener('keydown', event => {
+    const toggle = document.getElementById('menu-toggle')
+    if (event.key === 'Escape' && toggle?.getAttribute('aria-expanded') === 'true') {
+      setMenuOpen(false)
+      toggle.focus()
+    }
+  })
+  window.addEventListener('resize', () => setMenuOpen(false))
+  document.addEventListener('focusin', event => {
+    if (window.innerWidth > 768 && event.target instanceof Element && event.target.closest('#nav')) {
+      showingNav = true
+      const container = document.getElementById('scroll-container')
+      if (container) container.style.transform = 'translateY(0)'
+    }
   })
 
   // 滚动处理函数：每次运行时重新查询相关 DOM 元素以应对 SPA 替换
@@ -129,13 +149,10 @@ const searchablePosts = allPosts.map((post) => ({
 
     if (newDirection !== currentDirection) {
       currentDirection = newDirection
-      directionChange = true
       scrollDistance = 0
     }
 
-    if (directionChange) {
-      scrollDistance += Math.abs(scrollTop - lastScrollTop)
-    }
+    scrollDistance += Math.abs(scrollTop - lastScrollTop)
 
     if (scrollDistance >= threshold) {
       if (currentDirection === 'down' && showingNav) {
@@ -145,7 +162,7 @@ const searchablePosts = allPosts.map((post) => ({
         showingNav = true
         scrollContainer.style.transform = 'translateY(0)'
       }
-      directionChange = false
+      scrollDistance = 0
     }
 
     lastScrollTop = scrollTop <= 0 ? 0 : scrollTop
@@ -161,9 +178,9 @@ const searchablePosts = allPosts.map((post) => ({
   document.addEventListener('astro:page-load', () => {
     lastScrollTop = 0
     currentDirection = 'down'
-    directionChange = false
     scrollDistance = 0
     showingNav = true
+    setMenuOpen(false)
     const scrollContainer = document.getElementById('scroll-container')
     if (scrollContainer) scrollContainer.style.transform = 'translateY(0)'
     setTimeout(handleScroll, 50)
@@ -171,6 +188,7 @@ const searchablePosts = allPosts.map((post) => ({
   })
 
   ensureScrollListener()
+  setMenuOpen(false)
   handleScroll()
 })()
 </script>

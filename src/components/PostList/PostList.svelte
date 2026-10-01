@@ -1,7 +1,7 @@
 <!-- PostList.svelte -->
 <script lang="ts">
   import { t } from "@/utils/i18n";
-  import { getPostUrl, getTagUrl } from "@/utils/helpers";
+  import { getPostUrl, getTagUrl, sanitizeViewTransitionName } from "@/utils/helpers";
 
   interface Post {
     id: string;
@@ -13,10 +13,7 @@
   }
 
   export let posts: Post[];
-  const postsArr = posts;
-  const getSafeId = (id: string) => {
-    return String(id).replace(/[^a-zA-Z0-9_-]/g, "-");
-  };
+  $: postsArr = posts;
 </script>
 
 {#if postsArr.length === 0}
@@ -24,10 +21,10 @@
 {:else}
   <ul class="posts-list">
     {#each postsArr as post (post.id)}
-      <article class="timeline-post">
+      <li class="timeline-post"><article>
         <div class="post-content">
           <div class="post-info">
-            <time class="post-date">
+            <time class="post-date" datetime={new Date(post.data.date).toISOString()}>
               {new Date(post.data.date)
                 .toISOString()
                 .split("T")[0]
@@ -43,22 +40,22 @@
             <a href={getPostUrl(post.id)} class="post-link">
               <h5
                 class="post-title"
-                style={`view-transition-name: post-${getSafeId(post.id)}`}
+                style={`view-transition-name: ${sanitizeViewTransitionName(post.id)}`}
               >
                 {post.data.title}
               </h5>
             </a>
 
             <div class="post-tags">
-              {#each post.data.tags || [] as t}
-                <a href={getTagUrl(t)} class="inline-tag">
-                  #{t}
+              {#each post.data.tags || [] as tag (tag)}
+                <a href={getTagUrl(tag)} class="inline-tag">
+                  #{tag}
                 </a>
               {/each}
             </div>
           </div>
         </div>
-      </article>
+      </article></li>
     {/each}
   </ul>
 {/if}

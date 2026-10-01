@@ -1,5 +1,11 @@
 packages:
   - '.'
+# Keep native pnpm's store consistent in local, sandboxed and CI runs.
+storeDir: node_modules/.pnpm-store
 allowBuilds:
   esbuild: true
   sharp: true
+minimumReleaseAgeExclude:
+  - globals@17.13.0
+  - launder@1.7.2
+  - sanitize-html@2.18.0

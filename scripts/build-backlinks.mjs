@@ -1,85 +1,59 @@
-import fs from 'fs'
-import path from 'path'
-import { fileURLToPath } from 'url'
-import { globSync } from 'glob'
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { remark } from 'remark'
 import { visit } from 'unist-util-visit'
+import { loadPostEntries, resolveLocalPostId } from './post-paths.mjs'
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
+const root = fileURLToPath(new URL('../', import.meta.url))
 
-// 路径配置
-const POSTS_DIR = path.resolve(__dirname, '../src/posts')
-const CACHE_DIR = path.resolve(__dirname, '../.cache')
-const OUTPUT_FILE = path.join(CACHE_DIR, 'backlinks.json')
+export function buildBacklinks({
+  postsDir = path.join(root, 'src/posts'),
+  outputFile = path.join(root, '.cache/backlinks.json'),
+  base = ''
+} = {}) {
+  const entries = loadPostEntries(postsDir).filter(entry => !entry.draft)
+  const postIdMap = new Map(entries.map(({ filePath, id }) => [filePath, id]))
+  const backlinks = new Map()
 
-// 确保缓存目录存在
-if (!fs.existsSync(CACHE_DIR)) {
-  fs.mkdirSync(CACHE_DIR, { recursive: true })
-}
-
-async function buildBacklinks() {
-  console.log('🚀 Starting backlink scan...')
-
-  const files = globSync('**/*.{md,mdx}', { cwd: POSTS_DIR })
-  const backlinks = {} // TargetID -> Array of SourceIDs
-
-  for (const file of files) {
-    const filePath = path.join(POSTS_DIR, file)
-    const content = fs.readFileSync(filePath, 'utf-8')
-
-    // 获取当前文件的 ID (例如: diary/notes)
-    const sourceId = file.replace(/\.(md|mdx)$/, '')
-
-    // 使用 remark 解析 Markdown
+  for (const { filePath, id: sourceId, content } of entries) {
     const tree = remark.parse(content)
-
-    visit(tree, 'link', (node) => {
-      const url = node.url
-
-      // 忽略外部链接
-      if (url.startsWith('http') || url.startsWith('mailto')) return
-
-      try {
-        // 解析链接指向的物理路径
-        let targetPath
-        if (url.startsWith('/')) {
-          // 绝对路径，相对于 posts 目录
-          targetPath = path.resolve(POSTS_DIR, url.replace(/^\//, ''))
-        } else {
-          // 相对路径，相对于当前文件所在目录
-          targetPath = path.resolve(path.dirname(filePath), url)
-        }
-
-        // 去掉 hash 和扩展名进行匹配
-        const cleanTargetPath = targetPath.split('#')[0].replace(/\.(md|mdx)$/, '')
-
-        // 检查这个路径是否在我们的 posts 目录下
-        if (cleanTargetPath.startsWith(POSTS_DIR)) {
-          const targetId = path.relative(POSTS_DIR, cleanTargetPath)
-
-          // 自己引用自己通常不计入反向链接
-          if (targetId === sourceId) return
-
-          if (!backlinks[targetId]) {
-            backlinks[targetId] = []
-          }
-
-          // 避免重复记录
-          if (!backlinks[targetId].includes(sourceId)) {
-            backlinks[targetId].push(sourceId)
-            console.log(`🔗 Found: [${sourceId}] -> [${targetId}]`)
-          }
-        }
-      } catch (e) {
-        // 解析失败通常说明链接写法有问题，或者是普通的非文章资源
-      }
+    const definitions = new Map()
+    visit(tree, 'definition', node => {
+      if (!definitions.has(node.identifier)) definitions.set(node.identifier, node.url)
+    })
+    visit(tree, node => {
+      const url = node.type === 'link' ? node.url
+        : node.type === 'linkReference' ? definitions.get(node.identifier) : null
+      if (!url) return
+      const targetId = resolveLocalPostId(url, filePath, postIdMap, { postsDir, base })
+      if (!targetId || targetId === sourceId) return
+      if (!backlinks.has(targetId)) backlinks.set(targetId, new Set())
+      backlinks.get(targetId).add(sourceId)
     })
   }
 
-  // 写入 JSON 文件
-  fs.writeFileSync(OUTPUT_FILE, JSON.stringify(backlinks, null, 2))
-  console.log(`✅ Scan complete! Data saved to ${OUTPUT_FILE}`)
+  const data = Object.fromEntries([...backlinks].sort(([a], [b]) => a.localeCompare(b))
+    .map(([id, sources]) => [id, [...sources].sort()]))
+  fs.mkdirSync(path.dirname(outputFile), { recursive: true })
+  // A same-directory rename prevents consumers from reading an incomplete JSON file.
+  const temporary = `${outputFile}.${process.pid}.tmp`
+  try {
+    fs.writeFileSync(temporary, `${JSON.stringify(data, null, 2)}\n`)
+    fs.renameSync(temporary, outputFile)
+  } finally {
+    fs.rmSync(temporary, { force: true })
+  }
+  return data
 }
 
-buildBacklinks().catch(console.error)
+if (process.argv[1] && fs.realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  try {
+    const { siteConfig } = await import(new URL('../src/config/site.config.ts', import.meta.url))
+    const data = buildBacklinks({ base: siteConfig.base })
+    console.log(`Generated backlinks for ${Object.keys(data).length} articles`)
+  } catch (error) {
+    console.error(`Failed to generate backlinks: ${error.message}`)
+    process.exitCode = 1
+  }
+}
