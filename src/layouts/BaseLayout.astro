@@ -14,7 +14,7 @@ import Header from '@/components/Header.astro'
 import Footer from '@/components/Footer.astro'
 import FAB from '@/components/FAB.svelte'
 import Sidebar from '@/components/Sidebar.astro'
-import { resolveCanonicalUrl } from '@/scripts/canonical'
+import { canonicalPageUrl, resolveCanonicalUrl } from '@/scripts/canonical'
 
 // 判断是否为文章页面
 const isPostsPage = isPostPage(Astro.url.pathname)
@@ -33,7 +33,7 @@ let {
   pageTitle = siteConfig.name,
   postFrontmatter = null,
   ogImage = '',
-  canonicalUrl = Astro.url.href,
+  canonicalUrl = canonicalPageUrl(Astro.url),
   post = null,
   structuredData = null,
   description = siteConfig.description
@@ -83,6 +83,7 @@ const isHome = isHomePage(Astro.url.pathname);
 
       .main-content {
         flex: 1;
+        min-width: 0;
         max-width: 800px;
         margin: 0 auto;
         width: 100%;

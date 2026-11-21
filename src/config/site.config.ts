@@ -41,12 +41,14 @@ export interface SiteConfig {
     category: string;
     categoryId: string;
     mapping: string;
+    term?: string;
     strict: string;
     reactionsEnabled: string;
     emitMetadata: string;
     inputPosition: string;
     lang: string;
     loading: 'lazy' | 'eager';
+    theme?: { light: string; dark: string };
   };
 }
 

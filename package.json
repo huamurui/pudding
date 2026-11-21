@@ -3,7 +3,6 @@
   "type": "module",
   "version": "0.0.1",
   "private": true,
-  "packageManager": "pnpm@12.8.1",
   "scripts": {
     "generate": "node --experimental-strip-types scripts/build-backlinks.mjs",
     "dev": "pnpm generate && astro dev",

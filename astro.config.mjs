@@ -16,7 +16,7 @@ import { siteConfig } from "./src/config/site.config.ts";
 export default defineConfig({
   site: siteConfig.site,
   base: siteConfig.base,
-  trailingSlash: 'always',
+  trailingSlash: 'ignore',
   compressHTML: true,
   build: {
     format: 'directory'

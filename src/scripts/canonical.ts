@@ -8,3 +8,10 @@ export function resolveCanonicalUrl(candidate: string, base: string | URL, fallb
     return fallback
   }
 }
+
+/** Use the directory URL for pages, regardless of how a visitor reached them. */
+export function canonicalPageUrl(currentUrl: string | URL): string {
+  const url = new URL(currentUrl)
+  if (!url.pathname.endsWith('/') && !/\/[^/]+\.[^/]+$/.test(url.pathname)) url.pathname += '/'
+  return url.href
+}

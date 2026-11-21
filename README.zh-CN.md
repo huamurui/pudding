@@ -23,13 +23,13 @@ Pudding 是基于 Astro 7 和 Svelte 5 的静态 Markdown 博客主题，提供�
 
 ## 快速开始
 
-使用 **Node.js 22.12.0 或更新版本**和 **pnpm 12.8.1**。仓库中的 `.nvmrc` 选择 Node 22，`packageManager` 固定 pnpm 版本。
+使用 **Node.js 22.12.0 或更新版本**和 **pnpm 10**（至少 10.26）。仓库中的 `.nvmrc` 选择 Node 22。
 
 ```sh
 git clone https://github.com/huamurui/pudding.git
 cd pudding
 # 使用 nvm 时可运行：nvm install && nvm use
-npm install --global pnpm@12.8.1
+npm install --global pnpm@10 # 如果尚未安装 pnpm 10
 pnpm install --frozen-lockfile
 pnpm dev
 ```
@@ -214,7 +214,9 @@ Markdown 图片支持延迟加载和点击缩放。远程 Markdown 图片作为�
 
 评论默认关闭。选择一个公开 GitHub 仓库，开启 Discussions 并安装 giscus app，然后在 [giscus.app](https://giscus.app/zh-CN) 生成仓库与分类 ID。将值填入 `siteConfig.giscus`，再设置 `enabled: true`。
 
-`strict`、`reactionsEnabled` 和 `emitMetadata` 保留生成的字符串值。`lang` 指定评论语言。`mapping: 'pathname'` 按完整部署路径关联讨论，包括部署前缀，因此修改 slug 或 `base` 可能改变讨论映射。评论组件进入可视区域后加载，并跟随站点亮暗主题。
+`strict`、`reactionsEnabled` 和 `emitMetadata` 保留生成的字符串值。`lang` 指定评论语言。`mapping: 'pathname'` 按完整部署路径关联讨论，包括部署前缀，因此修改 slug 或 `base` 可能改变讨论映射。`loading: 'lazy'` 会在读者接近评论区时加载，改为 `'eager'` 可立即加载。加载失败时，读者可以重试或直接打开仓库的 GitHub Discussions。
+
+评论跟随站点的亮暗主题。如需使用附带的 Pudding 配色，设置 `theme: { light: 'giscus-light.css', dark: 'giscus-dark.css' }`。自定义样式表需通过 HTTPS 提供，并允许来自 `https://giscus.app` 的跨域请求。本地 HTTP 预览会使用 giscus 内置主题。
 
 ## 部署到 GitHub Pages
 
@@ -223,7 +225,7 @@ Markdown 图片支持延迟加载和点击缩放。远程 Markdown 图片作为�
 3. 在 **Settings → Pages → Build and deployment** 中，将来源设置为 **GitHub Actions**。
 4. 推送到 `main`，或从 `main` 手动运行仓库内的工作流。
 
-`.github/workflows/` 中的工作流对发往 `main` 的 PR 和推送运行 lint、类型检查、测试与生产构建。部署只在非 PR 的 `main` 上执行。质量检查从 `packageManager` 读取 pnpm，从 `.nvmrc` 读取 Node；Astro 构建使用 Node 22。采用其他默认分支时，同时修改触发分支与部署条件。自定义域名配置见 [GitHub 官方指南](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site)。
+`.github/workflows/` 中的工作流对发往 `main` 的 PR 和推送运行 lint、类型检查、测试与生产构建。部署只在非 PR 的 `main` 上执行。工作流使用 pnpm 10，并从 `.nvmrc` 读取 Node 版本。采用其他默认分支时，同时修改触发分支与部署条件。自定义域名配置见 [GitHub 官方指南](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site)。
 
 其他静态托管服务可以发布 `pnpm build` 生成的 `dist/`。构建采用目录形式路由并保留末尾斜线。RSS、站点地图和 robots 规则分别位于 `/rss.xml`、`/sitemap.xml`、`/robots.txt`，均带有配置中的部署前缀。
 

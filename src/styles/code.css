@@ -9,7 +9,7 @@ pre.astro-code.code-collapsed { max-height: 360px; overflow: auto; }
 pre.astro-code.code-collapsed::after { content: ""; pointer-events: none; position: absolute; left: 0; right: 0; bottom: 0; height: 3rem; background:  rgba(255,255,255,0, var(--bg-primary)); border-radius: 0 0 8px 8px; }
 
 /* when expanded remove fade */
-pre.astro-code.code-expanded { max-height: none; overflow: visible; }
+pre.astro-code.code-expanded { max-height: none; overflow-x: auto; }
 pre.astro-code code { display: block; }
 
 /* small adjustments for smaller screens */

@@ -138,6 +138,7 @@
     margin-bottom: 2rem;
     padding: 0.4rem 0;
     width: fit-content;
+    max-width: 100%;
   }
 
   .breadcrumb-list {
@@ -154,6 +155,7 @@
     display: flex;
     align-items: center;
     font-size: 0.9rem;
+    min-width: 0;
   }
 
   .breadcrumb-item-container {
@@ -181,6 +183,7 @@
     color: var(--text-primary);
     font-weight: 700;
     padding: 0.3rem 0.6rem;
+    overflow-wrap: anywhere;
   }
 
   .breadcrumb-separator {

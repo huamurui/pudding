@@ -166,7 +166,7 @@ import 'nprogress/nprogress.css';
   />
 
   <!-- 预连接外部资源 (仅在需要时) -->
-  {needGiscus && (
+  {needGiscus && siteConfig.giscus?.enabled && (
     <>
       <link rel="preconnect" href="https://giscus.app" crossorigin />
       <link rel="dns-prefetch" href="https://giscus.app" />

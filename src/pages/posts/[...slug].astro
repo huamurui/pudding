@@ -156,7 +156,7 @@ const customTransition = { forwards: anim, backwards: anim }
 
   {headings && headings.length > 0 && <ToC slot="aside" headings={headings} />}
   <div slot="bottom" class="comments-wrapper">
-    <Comments client:visible />
+    <Comments client:load />
   </div>
 
   <script>
@@ -231,6 +231,7 @@ const customTransition = { forwards: anim, backwards: anim }
     line-height: 1.2;
     color: var(--text-primary);
     margin-bottom: 1rem;
+    overflow-wrap: anywhere;
   }
 
   .post-description {

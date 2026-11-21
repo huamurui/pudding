@@ -4,7 +4,29 @@
   font-size: 1.05rem;
   color: var(--text-primary);
   max-width: 100%;
-  overflow-wrap: break-word;
+  overflow-wrap: anywhere;
+}
+
+/* 宽内容在文章栏内滚动，不撑宽整个页面。 */
+.markdown-body table,
+.markdown-body .katex-display,
+.markdown-body pre {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.markdown-body iframe,
+.markdown-body canvas,
+.markdown-body svg,
+.markdown-body video {
+  max-width: 100%;
+}
+
+@media (max-width: 968px) {
+  .blog-post-container :is(h1, h2, h3, h4, h5, h6)::after {
+    content: none;
+  }
 }
 
 /* 标题样式 */

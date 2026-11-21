@@ -15,21 +15,23 @@ const { headings = [] } = Astro.props as Props;
 ---
 
 <nav class="blog-toc main-toc" aria-label={t('common.toc.label')}>
-  <ul class="toc-list" id="toc-list">
-    {
-      headings.filter(item => item.depth < 5).map((heading) => (
-        <li class={`toc-item toc-item-depth-${heading.depth -1}`}>
-          <a
-            href={`#${heading.slug}`}
-            class="toc-link"
-            data-slug={heading.slug}
-          >
-            {heading.text}
-          </a>
-        </li>
-      ))
-    }
-  </ul>
+  <div class="toc-scroll" id="toc-scroll">
+    <ul class="toc-list" id="toc-list">
+      {
+        headings.map((heading) => (
+          <li class={`toc-item toc-item-depth-${heading.depth -1}`}>
+            <a
+              href={`#${heading.slug}`}
+              class="toc-link"
+              data-slug={heading.slug}
+            >
+              {heading.text}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
   <div class="toc-indicator" id="toc-indicator"></div>
 </nav>
 
@@ -75,16 +77,17 @@ const { headings = [] } = Astro.props as Props;
     overflow: hidden;
   }
 
+  .toc-scroll {
+    max-height: calc(100vh - 8rem);
+    overflow-y: auto;
+  }
+
   .toc-list {
     padding: 0.3rem;
     list-style: none;
     border-left: 1px solid var(--border-color);
     margin: 0 0 0 1px;
     position: relative;
-    max-height: calc(100vh - 8rem);
-    overflow-y: auto;
-    scroll-behavior: smooth;
-    scrollbar-width: thin;
   }
 
   .toc-item {
@@ -100,11 +103,22 @@ const { headings = [] } = Astro.props as Props;
 
   .toc-item-depth-3 {
     margin-left: 1.5rem;
-    font-size: 0.7em;
-    line-height: 1;
+    font-size: 0.85em;
+    line-height: 1.4;
+  }
+
+  .toc-item-depth-4 {
+    margin-left: 2rem;
+    font-size: 0.85em;
+  }
+
+  .toc-item-depth-5 {
+    margin-left: 2.5rem;
+    font-size: 0.85em;
   }
 
   .toc-link {
+    overflow-wrap: anywhere;
     color: var(--text-secondary);
     text-decoration: none;
     display: block;
@@ -230,13 +244,20 @@ const { headings = [] } = Astro.props as Props;
 
   .scroll-toc-item-depth-3 {
     margin-left: 1.2rem;
-    font-size: 0.7em;
+    font-size: 0.85em;
   }
 
   .scroll-toc-item-depth-4 {
-    display: none;
+    margin-left: 1.6rem;
+    font-size: 0.85em;
+  }
+
+  .scroll-toc-item-depth-5 {
+    margin-left: 2rem;
+    font-size: 0.85em;
   }
   .scroll-toc-link {
+    overflow-wrap: anywhere;
     color: var(--text-secondary);
     text-decoration: none;
     display: block;
@@ -260,10 +281,25 @@ const { headings = [] } = Astro.props as Props;
       display: none;
     }
   }
+  @media (prefers-reduced-motion: reduce) {
+    .toc-item,
+    .toc-link,
+    .toc-indicator,
+    .scroll-toc-container,
+    .scroll-toc-toggle,
+    .toggle-icon,
+    .scroll-toc,
+    .scroll-toc-link {
+      transition: none;
+    }
+    .scroll-toc { scroll-behavior: auto; }
+  }
 </style>
 
 <script>
 import { t } from '@/utils/i18n'
+import { ClickScrollPlugin, OverlayScrollbars } from 'overlayscrollbars'
+import { closeTocDisclosure, focusTocTarget, tocScrollbarSettings } from '@/scripts/toc'
 
 (function() {
   let cleanupFn: (() => void) | null = null
@@ -283,6 +319,7 @@ import { t } from '@/utils/i18n'
       indicator: document.getElementById('toc-indicator'),
       mainTocLinks: document.querySelectorAll<HTMLAnchorElement>('.toc-link'),
       tocList: document.getElementById('toc-list'),
+      tocScroll: document.getElementById('toc-scroll'),
 
       scrollTocToggle: document.getElementById('scroll-toc-toggle'),
       scrollToc: document.getElementById('scroll-toc'),
@@ -294,6 +331,28 @@ import { t } from '@/utils/i18n'
     }
 
     if (!DOM.mainTocLinks.length && !DOM.scrollTocLinks.length) return
+
+    let tocScrollbars: OverlayScrollbars | undefined
+    let tocViewport = DOM.tocScroll
+    const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const scrollBehavior = (): ScrollBehavior => motionPreference.matches ? 'instant' : 'smooth'
+    const updateScrollbarOptions = () => tocScrollbars?.options({
+      scrollbars: tocScrollbarSettings(document.documentElement, motionPreference.matches)
+    })
+    if (DOM.tocScroll) {
+      try {
+        OverlayScrollbars.plugin(ClickScrollPlugin)
+        tocScrollbars = OverlayScrollbars(DOM.tocScroll, {
+          scrollbars: { ...tocScrollbarSettings(document.documentElement, motionPreference.matches), autoHide: 'leave' }
+        })
+        if (!tocScrollbars.state().destroyed) tocViewport = tocScrollbars.elements().viewport
+      } catch {
+        tocScrollbars?.destroy()
+        tocScrollbars = undefined
+      }
+    }
+    const themeObserver = new MutationObserver(updateScrollbarOptions)
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
 
     // 2. State
     const state = {
@@ -324,9 +383,12 @@ import { t } from '@/utils/i18n'
 
       window.addEventListener('scroll', handleWindowScroll, { passive: true, signal: controller.signal })
 
-      DOM.tocList?.addEventListener('scroll', updateIndicatorPosition, { passive: true, signal: controller.signal })
+      tocViewport?.addEventListener('scroll', updateIndicatorPosition, { passive: true, signal: controller.signal })
 
       window.addEventListener('resize', handleWindowResize, { signal: controller.signal })
+      motionPreference.addEventListener('change', updateScrollbarOptions, { signal: controller.signal })
+      document.addEventListener('keydown', handleDisclosureKeydown, { signal: controller.signal })
+      document.addEventListener('click', handleDisclosureOutsideClick, { signal: controller.signal })
 
       DOM.mainTocLinks.forEach(link => link.addEventListener('click', (e) => handleTocLinkClick(e, link), { signal: controller.signal }))
       DOM.scrollTocLinks.forEach(link => link.addEventListener('click', (e) => handleTocLinkClick(e, link), { signal: controller.signal }))
@@ -340,6 +402,8 @@ import { t } from '@/utils/i18n'
     function cleanup() {
       controller.abort()
       observer?.disconnect()
+      themeObserver.disconnect()
+      tocScrollbars?.destroy()
       timers.forEach(timer => clearTimeout(timer))
       timers.clear()
     }
@@ -389,6 +453,18 @@ import { t } from '@/utils/i18n'
       if (!isExpanded) adjustScrollTocScroll()
     }
 
+    function handleDisclosureKeydown(event: KeyboardEvent) {
+      if (event.key !== 'Escape' || event.defaultPrevented || DOM.scrollTocToggle?.getAttribute('aria-expanded') !== 'true') return
+      event.preventDefault()
+      closeTocDisclosure(DOM.scrollTocToggle, DOM.scrollToc, true)
+    }
+
+    function handleDisclosureOutsideClick(event: MouseEvent) {
+      if (event.target instanceof Node && !DOM.scrollTocContainer?.contains(event.target)) {
+        closeTocDisclosure(DOM.scrollTocToggle, DOM.scrollToc)
+      }
+    }
+
 
     function handleWindowScroll() {
       if (!DOM.scrollTocContainer) return
@@ -399,11 +475,13 @@ import { t } from '@/utils/i18n'
         DOM.scrollTocContainer.inert = false
       }
       else if (scrollTop <= state.config.scrollThreshold) {
+        if (DOM.scrollTocContainer.contains(document.activeElement)) {
+          const activeHeading = state.headings[state.activeIndex]?.element
+          if (activeHeading) focusTocTarget(activeHeading)
+        }
         DOM.scrollTocContainer.classList.remove('visible')
         DOM.scrollTocContainer.inert = true
-        DOM.scrollToc?.classList.remove('expanded')
-        if (DOM.scrollToc) DOM.scrollToc.inert = true
-        DOM.scrollTocToggle?.setAttribute('aria-expanded', 'false')
+        closeTocDisclosure(DOM.scrollTocToggle, DOM.scrollToc)
       }
 
       state.lastScrollTop = scrollTop <= 0 ? 0 : scrollTop
@@ -426,11 +504,11 @@ import { t } from '@/utils/i18n'
       if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
       e.preventDefault()
       const slug = link.getAttribute('data-slug')
-      slug && scrollToHeading(slug)
+      slug && scrollToHeading(slug, true)
     }
 
 
-    function scrollToHeading(slug: string) {
+    function scrollToHeading(slug: string, moveFocus = false) {
       const element = document.getElementById(slug)
       if (!element || !DOM.scrollToc || !DOM.scrollTocToggle) return
 
@@ -438,15 +516,14 @@ import { t } from '@/utils/i18n'
 
       const elementPosition = element.getBoundingClientRect().top
       const offsetPosition = elementPosition + window.pageYOffset - state.config.headerOffset
-      window.scrollTo({ top: offsetPosition, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' })
+      window.scrollTo({ top: offsetPosition, behavior: scrollBehavior() })
 
       if (window.location.hash !== `#${slug}`) {
         window.history.replaceState(window.history.state, '', `#${encodeURIComponent(slug)}`)
       }
 
-      DOM.scrollToc.classList.remove('expanded')
-      DOM.scrollToc.inert = true
-      DOM.scrollTocToggle.setAttribute('aria-expanded', 'false')
+      if (moveFocus) focusTocTarget(element)
+      closeTocDisclosure(DOM.scrollTocToggle, DOM.scrollToc)
 
       schedule(() => {
         state.isProgrammaticScroll = false
@@ -522,7 +599,7 @@ import { t } from '@/utils/i18n'
     }
 
     function updateIndicatorPosition() {
-      if (!DOM.indicator || !DOM.tocList || window.innerWidth <= 968 || state.activeIndex === -1) return
+      if (!DOM.indicator || !DOM.tocList || !tocViewport || window.innerWidth <= 968 || state.activeIndex === -1) return
 
       // 找到 visible或active 类的第一个元素
       const visibleItems = DOM.tocList.querySelectorAll('.toc-item.visible, .toc-item.active')
@@ -535,29 +612,29 @@ import { t } from '@/utils/i18n'
       const firstOffsetTop = firstVisibleItem.offsetTop
       const lastOffsetTop = lastVisibleItem.offsetTop
       const lastItemHeight = lastVisibleItem.clientHeight
-      const tocListScrollTop = DOM.tocList.scrollTop
+      const tocListScrollTop = tocViewport.scrollTop
       DOM.indicator.style.top = `${firstOffsetTop - tocListScrollTop}px`
       DOM.indicator.style.height = `${(lastOffsetTop + lastItemHeight) - firstOffsetTop}px`
       DOM.indicator.style.opacity = '1'
     }
 
     function adjustTocListScroll() {
-      if (!DOM.tocList || window.innerWidth <= 968) return
+      if (!DOM.tocList || !tocViewport || window.innerWidth <= 968) return
 
       const activeTocItem = DOM.tocList.querySelector('.toc-item.active')
       if (!activeTocItem) return
 
-      const tocListClientHeight = DOM.tocList.clientHeight
+      const tocListClientHeight = tocViewport.clientHeight
       const activeItemOffsetTop = (activeTocItem as HTMLElement).offsetTop
       const activeItemHeight = (activeTocItem as HTMLElement).clientHeight
-      const tocListScrollHeight = DOM.tocList.scrollHeight
+      const tocListScrollHeight = tocViewport.scrollHeight
 
       if (tocListScrollHeight <= tocListClientHeight) return
 
       const targetScrollTop = activeItemOffsetTop - (tocListClientHeight - activeItemHeight) * state.config.scrollRatio
-      DOM.tocList.scrollTo({
+      tocViewport.scrollTo({
         top: Math.max(0, targetScrollTop), // 避免负数值（滚到顶部）
-        behavior: 'smooth'
+        behavior: scrollBehavior()
       })
     }
 
@@ -577,7 +654,7 @@ import { t } from '@/utils/i18n'
       const targetScrollTop = activeItemOffsetTop - (scrollTocClientHeight - activeItemHeight) * state.config.scrollRatio
       DOM.scrollToc.scrollTo({
         top: Math.max(0, targetScrollTop),
-        behavior: 'smooth'
+        behavior: scrollBehavior()
       })
     }
 

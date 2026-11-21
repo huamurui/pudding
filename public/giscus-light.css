@@ -1,20 +1,31 @@
-/* Giscus Jelly Theme - Light Mode */
 @import url('https://giscus.app/themes/light.css');
 
 main {
-  --color-accent-fg: #5e7eff;
-  --color-accent-emphasis: #5e7eff;
-  --color-btn-primary-bg: #5e7eff;
-  --color-btn-primary-hover-bg: #4d6eef;
+  color-scheme: light;
+  --pudding-accent: #4058c8;
+  --pudding-accent-hover: #3247ae;
+  --color-fg-default: #272e42;
+  --color-fg-muted: #565e71;
+  --color-fg-subtle: #646c7c;
+  --color-canvas-default: #fff;
+  --color-canvas-overlay: #fff;
+  --color-canvas-inset: #f5f6fb;
+  --color-canvas-subtle: #f5f6fb;
+  --color-border-default: #dce0ee;
+  --color-border-muted: #e9ebf3;
+  --color-accent-fg: var(--pudding-accent);
+  --color-accent-emphasis: var(--pudding-accent);
+  --color-accent-muted: #5e7eff66;
+  --color-accent-subtle: #5e7eff1a;
+  --color-btn-primary-text: #fff;
+  --color-btn-primary-bg: var(--pudding-accent);
   --color-btn-primary-border: transparent;
-  --radius-buttons: 10px;
-  --radius-inputs: 10px;
-}
-
-.giscus-active-discussion {
-  border-radius: 16px;
-}
-
-.reply-box {
-  border-radius: 12px !important;
+  --color-btn-primary-hover-bg: var(--pudding-accent-hover);
+  --color-btn-primary-hover-border: transparent;
+  --color-btn-primary-selected-bg: var(--pudding-accent-hover);
+  --color-btn-primary-selected-shadow: none;
+  --color-btn-primary-disabled-text: #565e71;
+  --color-btn-primary-disabled-bg: #e2e7fb;
+  --color-btn-primary-disabled-border: transparent;
+  --color-social-reaction-bg-reacted-hover: var(--color-accent-subtle);
 }

@@ -23,13 +23,13 @@ Captured from this repository's demo content. The same home page appears in ligh
 
 ## Get started
 
-Use **Node.js 22.12.0 or newer** and **pnpm 12.8.1**. The repository's `.nvmrc` selects Node 22, and `packageManager` pins pnpm.
+Use **Node.js 22.12.0 or newer** and **pnpm 10** (10.26 or newer). The repository’s `.nvmrc` selects Node 22.
 
 ```sh
 git clone https://github.com/huamurui/pudding.git
 cd pudding
 # If you use nvm: nvm install && nvm use
-npm install --global pnpm@12.8.1
+npm install --global pnpm@10 # if pnpm 10 is not already installed
 pnpm install --frozen-lockfile
 pnpm dev
 ```
@@ -214,7 +214,9 @@ This uses Astro's native script lifecycle; no custom rerun attribute is needed. 
 
 Comments are disabled by default. Choose a public GitHub repository, enable Discussions, install the giscus app, and generate repository/category IDs at [giscus.app](https://giscus.app/). Copy the values into `siteConfig.giscus`, then set `enabled: true`.
 
-Keep generated string values for `strict`, `reactionsEnabled`, and `emitMetadata`. `lang` sets the comment language. `mapping: 'pathname'` associates comments with the full deployed path, including the base; changing a slug or deployment base can change its discussion mapping. The comment component loads when visible and follows the site's light/dark theme.
+Keep generated string values for `strict`, `reactionsEnabled`, and `emitMetadata`. `lang` sets the comment language. `mapping: 'pathname'` associates comments with the full deployed path, including the base; changing a slug or deployment base can change its discussion mapping. With `loading: 'lazy'`, comments start loading as the reader approaches the comment section. Set `loading: 'eager'` to start immediately. If loading fails, readers can retry or open the repository's GitHub Discussions.
+
+Comments follow the site's light and dark modes. To use the bundled Pudding colors, set `theme: { light: 'giscus-light.css', dark: 'giscus-dark.css' }`. Custom stylesheets need to be served over HTTPS and allow cross-origin requests from `https://giscus.app`. Local HTTP previews use giscus's built-in themes.
 
 ## Deploy to GitHub Pages
 
@@ -223,7 +225,7 @@ Keep generated string values for `strict`, `reactionsEnabled`, and `emitMetadata
 3. In **Settings → Pages → Build and deployment**, choose **GitHub Actions** as the source.
 4. Push to `main`, or run the included workflow manually from `main`.
 
-The workflow in `.github/workflows/` runs lint, type checks, tests, and a production build on pull requests and pushes to `main`. Deployment runs only on `main` outside pull requests. Quality checks read pnpm from `packageManager` and Node from `.nvmrc`; the Astro build uses Node 22. For another default branch, update both the triggers and deployment condition. See [GitHub's guide](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site) for custom domains.
+The workflow in `.github/workflows/` runs lint, type checks, tests, and a production build on pull requests and pushes to `main`. Deployment runs only on `main` outside pull requests. The workflow uses pnpm 10 and reads the Node version from `.nvmrc`. For another default branch, update both the triggers and deployment condition. See [GitHub's guide](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site) for custom domains.
 
 Other static hosts can publish `dist/` after `pnpm build`. The output uses directory-style routes with trailing slashes. RSS is at `/rss.xml`, the sitemap at `/sitemap.xml`, and robots rules at `/robots.txt`, all under the configured base.
 
