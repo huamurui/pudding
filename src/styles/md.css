@@ -16,6 +16,13 @@
   overflow-x: auto;
 }
 
+/* 将 KaTeX 的块间距留在滚动容器内，让积分上下限和分式完整显示。 */
+.markdown-body .katex-display {
+  margin-block: 0;
+  padding-block: 1em;
+  overflow-y: hidden;
+}
+
 .markdown-body iframe,
 .markdown-body canvas,
 .markdown-body svg,
