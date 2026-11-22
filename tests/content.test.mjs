@@ -4,9 +4,10 @@ import path from 'node:path'
 import { tmpdir } from 'node:os'
 import test from 'node:test'
 import ts from 'typescript'
+import katex from 'katex'
 import { remark } from 'remark'
 import remarkSpoiler from '../src/plugin/remark-spoiler.js'
-import remarkLinkPreview, { fetchTextLimited } from '../src/plugin/remark-link-preview.js'
+import remarkLinkPreview, { fetchTextLimited, renderLinkCard } from '../src/plugin/remark-link-preview.js'
 import remarkImageOptimize from '../src/plugin/remark-image-optimize.js'
 import remarkPostLinks from '../src/plugin/remark-post-links.js'
 import { siteConfig } from '../src/config/site.config.ts'
@@ -221,6 +222,23 @@ test('rich excerpts retain formatting while removing executable article content'
   assert.doesNotMatch(preview, /script|onclick|alert/)
 })
 
+test('previews and excerpts preserve native math and resolve references against the article', async() => {
+  const { exports: excerpt } = await sourceModule('src/utils/excerpt.ts', {
+    'sanitize-html': import.meta.resolve('sanitize-html'),
+    './helpers': helpersModule.url
+  })
+  const article = new URL('https://example.com/blog/posts/tech/math/')
+  const formula = katex.renderToString(String.raw`\frac{\sqrt{\pi}}{2}`)
+  const html = `<p>${formula}<a href="#proof">Proof</a><img src="../figure.png"><a href="https://other.test/">Other</a></p>`
+  for (const fragment of [excerpt.sanitizePostPreviewHtml(html, article), excerpt.createSafeExcerpt(html, article)]) {
+    assert.match(fragment, /<mfrac><msqrt>/)
+    assert.doesNotMatch(fragment, /katex-html|katex-mathml|<svg|<path/)
+    assert.match(fragment, /href="\/blog\/posts\/tech\/math\/#proof"/)
+    assert.match(fragment, /src="\/blog\/posts\/tech\/figure\.png"/)
+    assert.match(fragment, /href="https:\/\/other\.test\/"/)
+  }
+})
+
 test('Markdown article links follow source files and custom slugs while draft labels remain unlinked', async t => {
   const postsDir = await mkdtemp(path.join(tmpdir(), 'pudding-links-'))
   t.after(() => rm(postsDir, { recursive: true, force: true }))
@@ -274,14 +292,48 @@ test('preview fetch timeout remains active while reading the body', async t => {
   await assert.rejects(fetchTextLimited('https://example.com/stalled', 20), /aborted/)
 })
 
-test('oversized streamed previews cancel their response body', async t => {
+test('large pages with streamed metadata produce cards without reading the body', async t => {
   const originalFetch = globalThis.fetch
   t.after(() => { globalThis.fetch = originalFetch })
   let cancelled = false
+  const prefix = Buffer.from('<head><title>中文标题</title></HEAD>')
   globalThis.fetch = async () => new Response(new ReadableStream({
-    start(controller) { controller.enqueue(new Uint8Array(32)) },
+    start(controller) {
+      for (let i = 0; i < prefix.byteLength; i++) controller.enqueue(prefix.subarray(i, i + 1))
+      // Reading any body chunk after closing the head should be unnecessary.
+    },
+    pull() { throw new Error('read past the head') },
+    cancel() { cancelled = true }
+  }, { highWaterMark: 0 }), { headers: { 'Content-Type': 'text/html', 'Content-Length': '1000000' } })
+  const tree = markdownTree('https://example.com/large')
+  await remarkLinkPreview({ cache: false })(tree)
+  assert.match(pluginHtml(tree), />中文标题<\/h4>/)
+  assert.equal(cancelled, true)
+})
+
+test('the metadata budget retains the bounded prefix and cancels an unfinished head', async t => {
+  const originalFetch = globalThis.fetch
+  t.after(() => { globalThis.fetch = originalFetch })
+  const prefix = '<head><title>Small title</title>'
+  let cancelled = false
+  globalThis.fetch = async () => new Response(new ReadableStream({
+    start(controller) { controller.enqueue(Buffer.from(prefix + 'unlimited data')) },
     cancel() { cancelled = true }
   }), { headers: { 'Content-Type': 'text/html' } })
-  await assert.rejects(fetchTextLimited('https://example.com/large', 100, 16), /too large/)
+  const { text } = await fetchTextLimited('https://example.com/large-head', 1000, prefix.length)
+  assert.equal(text, prefix)
   assert.equal(cancelled, true)
+})
+
+test('bare URL fallbacks stay clickable and shared cards only link to HTTP(S)', async t => {
+  const originalFetch = globalThis.fetch
+  t.after(() => { globalThis.fetch = originalFetch })
+  const href = 'https://example.com/file'
+  globalThis.fetch = async () => new Response('sample', { headers: { 'Content-Type': 'image/png' } })
+  const tree = markdownTree(href)
+  await remarkLinkPreview({ cache: false })(tree)
+  const link = tree.children[0].children[0]
+  assert.deepEqual([link.type, link.url, link.children[0].value], ['link', href, href])
+  assert.equal(renderLinkCard('javascript:alert(1)', { title: 'example' }), '')
+  assert.match(renderLinkCard(href, { title: 'x<img>', description: '<br>' }), /x&lt;img&gt;/)
 })

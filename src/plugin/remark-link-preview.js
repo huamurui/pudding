@@ -88,24 +88,25 @@ export async function fetchTextLimited(url, timeout = TIMEOUT, maxBytes = MAX_BY
       await response.body?.cancel()
       throw new Error('not html')
     }
-    if (Number(response.headers.get('content-length')) > maxBytes) {
-      await response.body?.cancel()
-      throw new Error('too large')
-    }
-
-    const chunks = []
+    const decoder = new TextDecoder()
+    const headEnd = /<\/head(?=[\s>])|<body(?=[\s>])/ig
+    let text = ''
     let received = 0
     if (response.body) {
       reader = response.body.getReader()
-      while (true) {
+      while (received < maxBytes) {
         const { done, value } = await reader.read()
         if (done) break
-        received += value.byteLength
-        if (received > maxBytes) throw new Error('too large')
-        chunks.push(Buffer.from(value))
+        // The metadata is near the start even when the page itself is very large.
+        const chunk = value.subarray(0, maxBytes - received)
+        received += chunk.byteLength
+        headEnd.lastIndex = Math.max(0, text.length - '</head'.length)
+        text += decoder.decode(chunk, { stream: true })
+        const end = headEnd.exec(text)
+        if (end) return { text: text.slice(0, end.index), url: response.url || url }
       }
     }
-    return { text: Buffer.concat(chunks).toString('utf-8'), url: response.url || url }
+    return { text: text + decoder.decode(), url: response.url || url }
   } finally {
     if (reader) {
       try { await reader.cancel() } catch { /* An aborted stream may already be closed. */ }
@@ -115,18 +116,20 @@ export async function fetchTextLimited(url, timeout = TIMEOUT, maxBytes = MAX_BY
   }
 }
 
-function generateHtml(url, meta) {
-  const title = escapeHtml(meta.title || url)
+export function renderLinkCard(url, meta = {}) {
+  const href = httpUrl(url)
+  if (!href) return ''
+  const title = escapeHtml(meta.title || href)
   const description = meta.description ? escapeHtml(meta.description) : ''
   // Old caches also need URL validation; metadata is supplied by remote websites.
-  const image = meta.image ? httpUrl(meta.image, url) : null
-  const site = escapeHtml(meta.site || new URL(url).hostname)
+  const image = meta.image ? httpUrl(meta.image, href) : null
+  const site = escapeHtml(meta.site || new URL(href).hostname)
   const imageHtml = image
     ? `<div class="link-card__img-wrapper"><img class="link-card__img" src="${escapeHtml(image)}" alt="${title}" loading="lazy" decoding="async"></div>`
     : ''
 
   return `<figure class="link-card">
-  <a class="link-card__link" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">
+  <a class="link-card__link" href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer">
     ${imageHtml}
     <div class="link-card__body">
       <h4 class="link-card__title">${title}</h4>
@@ -148,21 +151,22 @@ export default function remarkLinkPreview({ cache: useCache = true } = {}) {
       const source = child.type === 'link' ? child.url : child.type === 'text' ? child.value.trim() : ''
       const url = /^https?:\/\/\S+$/i.test(source || '') ? httpUrl(source) : null
       if (!url) return
+      if (child.type === 'text') node.children = [{ type: 'link', url, children: [{ type: 'text', value: source }] }]
       queue.push((async() => {
         try {
           let meta = cache[url]
-          if (!meta) {
+          if (!meta?.title && !meta?.description && !meta?.image) {
             if (!pending.has(url)) {
               pending.set(url, fetchTextLimited(url)
                 .then(result => extractMetaFromHtml(result.text, result.url))
                 .finally(() => pending.delete(url)))
             }
             meta = await pending.get(url)
+            if (!meta.title && !meta.description && !meta.image) return
             updates[url] = meta
           }
-          if (!meta.title && !meta.description && !meta.image) return
           const index = parent.children.indexOf(node)
-          if (index >= 0) parent.children[index] = { type: 'html', value: generateHtml(url, meta) }
+          if (index >= 0) parent.children[index] = { type: 'html', value: renderLinkCard(url, meta) }
         } catch {
           // Keep the original link if the remote page is unavailable or unsuitable.
         }

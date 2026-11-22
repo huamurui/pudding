@@ -19,6 +19,7 @@ function mountedSearch(t) {
   const mounts = []
   const context = {
     AbortController,
+    EventTarget,
     URL,
     console,
     document: new EventTarget(),
@@ -36,10 +37,15 @@ function mountedSearch(t) {
   }
   vm.createContext(context)
   vm.runInContext(`${searchScript}
+    searchContainer = new EventTarget();
+    searchInput = {};
+    searchToggle = { focus() { document.activeElement = this; } };
     globalThis.searchHarness = {
       start() { isSearchOpen = true; initializeWorker([]); },
       input(value) { handleSearchInput({ target: { value } }); },
-      enter() { handleSearchKeydown({ key: 'Enter', isComposing: false, preventDefault() {} }); },
+      enter() { handleSearchKeydown({ key: 'Enter', target: searchInput, preventDefault() {} }); },
+      keyFromResult(event) { return searchContainer.dispatchEvent(event); },
+      dismissed() { return !isSearchOpen && document.activeElement === searchToggle; },
       pending() { return isSearchPending; },
       resultCount() { return searchResults.length; }
     }`, context)
@@ -91,6 +97,17 @@ test('clearing the query also clears pending state and ignores its late result',
   search.enter()
   assert.equal(search.resultCount(), 0)
   assert.equal(location.href, '')
+})
+
+test('result links retain native Enter activation and Escape restores focus to the search toggle', t => {
+  const { search, location, request, respond } = mountedSearch(t)
+  search.input('alpha')
+  respond(request(), '/posts/first/')
+  const key = name => Object.assign(new Event('keydown', { cancelable: true }), { key: name })
+  assert.equal(search.keyFromResult(key('Enter')), true)
+  assert.equal(location.href, '')
+  assert.equal(search.keyFromResult(key('Escape')), false)
+  assert.equal(search.dismissed(), true)
 })
 
 test('a worker error finishes pending search using the current main-thread query', t => {

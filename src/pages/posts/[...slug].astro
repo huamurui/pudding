@@ -162,24 +162,6 @@ const customTransition = { forwards: anim, backwards: anim }
   <script>
   import mediumZoom from 'medium-zoom'
 
-  function toggleSpoiler(wrapper: HTMLElement) {
-    const expanded = wrapper.dataset.hidden === 'true'
-    wrapper.dataset.hidden = String(!expanded)
-    wrapper.setAttribute('aria-expanded', String(expanded))
-  }
-
-  document.addEventListener('click', event => {
-    const wrapper = event.target instanceof Element ? event.target.closest<HTMLElement>('.post-content .blur-wrapper') : null
-    if (wrapper) toggleSpoiler(wrapper)
-  })
-  document.addEventListener('keydown', event => {
-    const wrapper = event.target instanceof Element ? event.target.closest<HTMLElement>('.post-content .blur-wrapper') : null
-    if (wrapper && (event.key === 'Enter' || event.key === ' ')) {
-      event.preventDefault()
-      toggleSpoiler(wrapper)
-    }
-  })
-
   const zoom = mediumZoom({ margin: 24 })
   function updateZoomTheme() {
     zoom.update({ background: document.documentElement.getAttribute('data-theme') === 'dark' ? '#121212' : '#ffffff' })
@@ -188,7 +170,7 @@ const customTransition = { forwards: anim, backwards: anim }
   function initZoom() {
     zoomRevision++
     zoom.detach()
-    zoom.attach('.post-content img, .post-image img')
+    zoom.attach(':is(.post-content, .post-image) img:not(a[href] img)')
     updateZoomTheme()
   }
   const observer = new MutationObserver(updateZoomTheme)
@@ -274,20 +256,19 @@ const customTransition = { forwards: anim, backwards: anim }
   }
 
   /* Post content images optimization */
-  .post-content :global(img) {
+  .post-content :global(img:not(.link-card__img)) {
     max-width: 100%;
     height: auto;
     border-radius: 8px;
     margin: 1.5rem auto;
     display: block;
-    cursor: zoom-in;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     background-color: var(--color-bg-tertiary);
     /* transition: transform 0.3s ease, box-shadow 0.3s ease; */ /* Removed to avoid conflict with medium-zoom */
     transition: box-shadow 0.3s ease;
   }
 
-  .post-content :global(img:hover) {
+  .post-content :global(img:not(.link-card__img):hover) {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   }
 

@@ -10,7 +10,8 @@ interface Props {
   ogImage?: string;
   canonicalUrl?: string;
   structuredData?: StructuredData | null;
-  needGiscus?: boolean;
+  isArticle?: boolean;
+  noindex?: boolean;
 }
 
 const {
@@ -19,7 +20,8 @@ const {
   ogImage = '',
   canonicalUrl = Astro.url.href,
   structuredData = null,
-  needGiscus = false
+  isArticle = false,
+  noindex = false
 } = Astro.props as Props
 const structuredDataJson = structuredData
   ? serializeStructuredData(structuredData)
@@ -64,23 +66,24 @@ import 'nprogress/nprogress.css';
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="generator" content={Astro.generator} />
   <link rel="sitemap" href={buildUrl('sitemap.xml')} />
+  <link rel="alternate" type="application/rss+xml" title={siteConfig.name} href={buildUrl('rss.xml')} />
 
   <title>{pageTitle}</title>
   <meta name="description" content={description} />
   <meta name="keywords" content={siteConfig.keywords.join(', ')} />
 
-  <link rel="canonical" href={canonicalUrl} />
+  {!noindex && <link rel="canonical" href={canonicalUrl} />}
 
-  <meta name="robots" content="index, follow" />
+  <meta name="robots" content={noindex ? 'noindex, follow' : 'index, follow'} />
   <meta
     name="googlebot"
-    content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"
+    content={noindex ? 'noindex, follow' : 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1'}
   />
 
   <meta property="og:title" content={pageTitle} />
   <meta property="og:description" content={description} />
-  <meta property="og:type" content={needGiscus ? 'article' : 'website'} />
-  <meta property="og:url" content={canonicalUrl} />
+  <meta property="og:type" content={isArticle ? 'article' : 'website'} />
+  {!noindex && <meta property="og:url" content={canonicalUrl} />}
   {ogImage && <meta property="og:image" content={ogImage} />}
   <meta property="og:site_name" content={siteConfig.name} />
   <meta property="og:locale" content={siteConfig.locale} />
@@ -141,7 +144,7 @@ import 'nprogress/nprogress.css';
   />
 
   <!-- 为文章页预载代码字体 -->
-  {needGiscus && (
+  {isArticle && (
     <link
       rel="preload"
       href={buildUrl('fonts/JetBrainsMono/fonts/variable/JetBrainsMono[wght].ttf')}
@@ -166,7 +169,7 @@ import 'nprogress/nprogress.css';
   />
 
   <!-- 预连接外部资源 (仅在需要时) -->
-  {needGiscus && siteConfig.giscus?.enabled && (
+  {isArticle && siteConfig.giscus?.enabled && (
     <>
       <link rel="preconnect" href="https://giscus.app" crossorigin />
       <link rel="dns-prefetch" href="https://giscus.app" />

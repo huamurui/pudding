@@ -112,14 +112,11 @@
 
 }
 
-.link-card__img-wrapper img {
-    margin: 0 !important;
-}
-
-.link-card__img {
+.link-card__img-wrapper .link-card__img {
     position: absolute;
-    top: 0;
-    left: 0;
+    inset: 0;
+    margin: 0;
+    border-radius: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -128,7 +125,7 @@
 
 @media (max-width: 640px) {
     .link-card a.link-card__link {
-        flex-direction: column-reverse;
+        flex-direction: column;
         /* 手机端：图片在上，文字在下 */
     }
 
@@ -138,10 +135,6 @@
         height: 160px;
         border-left: none;
         border-bottom: 1px solid var(--border-color);
-    }
-
-    .link-card__img {
-        position: relative;
     }
 
     .link-card__body {

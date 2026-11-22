@@ -77,31 +77,21 @@ button {
   text-shadow: none;
 }
 
-h1::after,
-h2::after,
-h3::after,
-h4::after,
-h5::after,
-h6::after {
-  content: '✦';
-  color: var(--primary-color);
-  position: absolute;
-  opacity: 0;
-  /* 初始状态在远处，很小，且倒转 180 度 */
-  transform: translateX(30px) rotate(180deg) scale(0.5);
-  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-  font-weight: inherit;
-}
+@media (min-width: 969px) and (hover: hover) {
+  :is(h1, h2, h3, h4, h5, h6)::after {
+    content: '✦';
+    color: var(--primary-color);
+    position: absolute;
+    opacity: 0;
+    transform: translateX(30px) rotate(180deg) scale(0.5);
+    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    font-weight: inherit;
+  }
 
-h1:hover::after,
-h2:hover::after,
-h3:hover::after,
-h4:hover::after,
-h5:hover::after,
-h6:hover::after {
-  opacity: 1;
-  /* 悬停时旋转正过来，变大，并靠近标题 */
-  transform: translateX(10px) rotate(0deg) scale(1.1);
+  :is(h1, h2, h3, h4, h5, h6):hover::after {
+    opacity: 1;
+    transform: translateX(10px) rotate(0deg) scale(1.1);
+  }
 }
 
 .search-results mark {

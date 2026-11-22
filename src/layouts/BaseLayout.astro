@@ -27,6 +27,7 @@ interface Props {
   post?: PostEntry | null;
   structuredData?: StructuredData | null;
   description?: string;
+  noindex?: boolean;
 }
 
 let {
@@ -36,7 +37,8 @@ let {
   canonicalUrl = canonicalPageUrl(Astro.url),
   post = null,
   structuredData = null,
-  description = siteConfig.description
+  description = siteConfig.description,
+  noindex = false
 } = Astro.props as Props
 
 if (postFrontmatter?.description) {
@@ -66,7 +68,8 @@ const isHome = isHomePage(Astro.url.pathname);
     ogImage={ogImage}
     canonicalUrl={canonicalUrl}
     structuredData={structuredData}
-    needGiscus={isPostsPage}
+    isArticle={Boolean(post)}
+    noindex={noindex}
   />
 
   <body>
@@ -171,6 +174,41 @@ const isHome = isHomePage(Astro.url.pathname);
       import { initLinkPreviews } from '@/scripts/link-preview'
 
       initLinkPreviews()
+
+      function removeFailedThumbnail(image: HTMLImageElement) {
+        if (image.complete && image.naturalWidth === 0) {
+          image.closest('.link-card__img-wrapper')?.remove()
+        }
+      }
+
+      function checkCardThumbnails() {
+        document.querySelectorAll<HTMLImageElement>('.link-card__img-wrapper img').forEach(removeFailedThumbnail)
+      }
+
+      // Capture also covers cards inserted after load by a post preview.
+      document.addEventListener('error', event => {
+        if (event.target instanceof HTMLImageElement) removeFailedThumbnail(event.target)
+      }, true)
+      document.addEventListener('astro:page-load', checkCardThumbnails)
+      checkCardThumbnails()
+
+      function toggleSpoiler(event: MouseEvent | KeyboardEvent) {
+        const spoiler = event.target instanceof Element
+          ? event.target.closest<HTMLElement>('.blur-wrapper[data-hidden]')
+          : null
+        if (!spoiler) return
+        if (event instanceof KeyboardEvent) {
+          if (event.key !== 'Enter' && event.key !== ' ') return
+          event.preventDefault()
+          if (event.repeat) return
+        }
+        const reveal = spoiler.dataset.hidden === 'true'
+        spoiler.dataset.hidden = String(!reveal)
+        spoiler.setAttribute('aria-expanded', String(reveal))
+      }
+
+      document.addEventListener('click', toggleSpoiler)
+      document.addEventListener('keydown', toggleSpoiler)
     </script>
   </body>
 </html>

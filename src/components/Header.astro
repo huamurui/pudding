@@ -110,21 +110,28 @@ const searchablePosts = allPosts.map((post) => ({
     if (!(event.target instanceof Element)) return
     const toggle = event.target.closest('#menu-toggle')
     if (toggle) {
-      setMenuOpen(toggle.getAttribute('aria-expanded') !== 'true')
-    } else if (!event.target.closest('#header') || event.target.closest('#nav a')) {
+      const open = toggle.getAttribute('aria-expanded') !== 'true'
+      setMenuOpen(open)
+      // The navigation precedes its mobile toggle in the document's tab order.
+      if (open && event.detail === 0) document.querySelector<HTMLElement>('#nav a')?.focus()
+    } else if (!event.target.closest('#nav') || event.target.closest('#nav a')) {
       setMenuOpen(false)
     }
   })
   document.addEventListener('keydown', event => {
     const toggle = document.getElementById('menu-toggle')
-    if (event.key === 'Escape' && toggle?.getAttribute('aria-expanded') === 'true') {
-      setMenuOpen(false)
+    if (event.key === 'Escape' && !event.defaultPrevented && toggle?.getAttribute('aria-expanded') === 'true') {
+      event.preventDefault()
       toggle.focus()
+      setMenuOpen(false)
     }
   })
   window.addEventListener('resize', () => setMenuOpen(false))
   document.addEventListener('focusin', event => {
-    if (window.innerWidth > 768 && event.target instanceof Element && event.target.closest('#nav')) {
+    if (!(event.target instanceof Element)) return
+    if (window.innerWidth <= 768) {
+      if (!event.target.closest('#nav, #menu-toggle')) setMenuOpen(false)
+    } else if (event.target.closest('#nav')) {
       showingNav = true
       const container = document.getElementById('scroll-container')
       if (container) container.style.transform = 'translateY(0)'

@@ -126,8 +126,8 @@
     if (restoreFocus) searchToggle?.focus();
   }
 
-  function handleClickOutside(event: MouseEvent) {
-    if (event.target instanceof Node && !searchContainer.contains(event.target)) closeSearch();
+  function closeFromOutside(event: Event) {
+    if (isSearchOpen && event.target instanceof Node && !searchContainer.contains(event.target)) closeSearch();
   }
 
   function handleSearchInput(event: Event) {
@@ -147,10 +147,11 @@
   }
 
   function handleSearchKeydown(event: KeyboardEvent) {
+    if (!isSearchOpen || event.isComposing || event.defaultPrevented) return;
     if (event.key === 'Escape') {
       event.preventDefault();
       closeSearch(true);
-    } else if (event.key === 'Enter' && !event.isComposing && !isSearchPending && searchResults.length > 0) {
+    } else if (event.key === 'Enter' && event.target === searchInput && !isSearchPending && searchResults.length > 0) {
       event.preventDefault();
       window.location.href = searchResults[0].item.url;
     }
@@ -159,11 +160,15 @@
   onMount(() => {
     mounted = true;
     fuse = new Fuse([...searchablePosts], fuseOptions);
-    document.addEventListener('click', handleClickOutside);
+    document.addEventListener('click', closeFromOutside);
+    document.addEventListener('focusin', closeFromOutside);
+    searchContainer.addEventListener('keydown', handleSearchKeydown);
     return () => {
       mounted = false;
       indexController.abort();
-      document.removeEventListener('click', handleClickOutside);
+      document.removeEventListener('click', closeFromOutside);
+      document.removeEventListener('focusin', closeFromOutside);
+      searchContainer.removeEventListener('keydown', handleSearchKeydown);
       searchWorker?.terminate();
       searchWorker = null;
     };
@@ -195,7 +200,6 @@
         placeholder={t(isIndexLoading ? 'common.search.loading' : 'common.search.placeholder')}
         value={searchQuery}
         on:input={handleSearchInput}
-        on:keydown={handleSearchKeydown}
         aria-label={t('common.search.ariaLabel.input')}
         aria-controls="search-results-list"
         aria-busy={isIndexLoading || isSearchPending}
@@ -254,7 +258,14 @@
     position: absolute;
     top: calc(100% + 12px);
     right: 0;
-    width: 360px;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    width: 24.5rem;
+    max-height: calc(100dvh - 72px - 1rem);
+    overflow-y: auto;
+    white-space: normal;
+    overflow-wrap: anywhere;
     background-color: color-mix(in srgb, var(--bg-primary) 95%, transparent);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
@@ -281,6 +292,7 @@
   }
 
   .search-input {
+    flex-shrink: 0;
     width: 100%;
     padding: 0.8rem 1.2rem;
     background-color: var(--bg-secondary);

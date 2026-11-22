@@ -22,7 +22,6 @@
   let activeDropdownIndex: number | null = null;
   let isDirectoryLoaded = false;
   let directoryError = false;
-  let breadcrumb: HTMLElement;
   let activeButton: HTMLButtonElement | null = null;
 
   const safeBuildUrl = (paths: string[] | string): string => (clientBuildUrl || buildUrl)(paths);
@@ -56,8 +55,8 @@
 
   onMount(() => {
     const controller = new AbortController();
-    const closeOutside = (event: MouseEvent) => {
-      if (event.target instanceof Node && !breadcrumb.contains(event.target)) activeDropdownIndex = null;
+    const closeOutside = (event: Event) => {
+      if (event.target instanceof Node && !activeButton?.parentElement?.contains(event.target)) activeDropdownIndex = null;
     };
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && activeDropdownIndex !== null) {
@@ -66,6 +65,7 @@
       }
     };
     document.addEventListener('click', closeOutside);
+    document.addEventListener('focusin', closeOutside);
     document.addEventListener('keydown', closeOnEscape);
     void (async () => {
       try {
@@ -85,12 +85,13 @@
     return () => {
       controller.abort();
       document.removeEventListener('click', closeOutside);
+      document.removeEventListener('focusin', closeOutside);
       document.removeEventListener('keydown', closeOnEscape);
     };
   });
 </script>
 
-<nav bind:this={breadcrumb} class="breadcrumb" aria-label={t('common.breadcrumb.label')}>
+<nav class="breadcrumb" aria-label={t('common.breadcrumb.label')}>
   <ol class="breadcrumb-list">
     {#each items as item, index (item.href)}
       <li class="breadcrumb-item">
@@ -137,8 +138,7 @@
   .breadcrumb {
     margin-bottom: 2rem;
     padding: 0.4rem 0;
-    width: fit-content;
-    max-width: 100%;
+    position: relative;
   }
 
   .breadcrumb-list {
@@ -159,12 +159,14 @@
   }
 
   .breadcrumb-item-container {
-    position: relative;
+    min-width: 0;
     display: flex;
     align-items: center;
   }
 
   .breadcrumb-link {
+    min-width: 0;
+    overflow-wrap: anywhere;
     color: var(--text-secondary);
     text-decoration: none;
     padding: 0.3rem 0.8rem;
@@ -211,6 +213,11 @@
     outline: none;
   }
 
+  .breadcrumb-dropdown-btn:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+  }
+
   .breadcrumb-dropdown-btn:hover .breadcrumb-separator {
     color: var(--primary-color);
     background-color: color-mix(in srgb, var(--primary-color) 15%, transparent);
@@ -221,13 +228,18 @@
   .breadcrumb-dropdown {
     position: absolute;
     top: calc(100% + 8px);
-    left: 50%;
-    transform: translateX(-50%) translateY(-10px) scale(0.95);
+    inset-inline-start: 0;
+    width: max-content;
+    max-width: 100%;
+    box-sizing: border-box;
+    max-height: 50dvh;
+    overflow-y: auto;
+    transform: translateY(-6px);
     background-color: var(--bg-primary);
     border: 1px solid var(--border-color);
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    min-width: 140px;
+    min-width: min(140px, 100%);
     z-index: 1000;
     opacity: 0;
     visibility: hidden;
@@ -238,7 +250,7 @@
   .breadcrumb-dropdown:not([hidden]) {
     opacity: 1;
     visibility: visible;
-    transform: translateX(-50%) translateY(0) scale(1);
+    transform: translateY(0);
   }
 
   .breadcrumb-dropdown-menu {
@@ -263,9 +275,8 @@
     font-size: 0.85rem;
     transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
     text-align: left;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal;
+    overflow-wrap: anywhere;
     font-weight: 500;
   }
 

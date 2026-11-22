@@ -16,14 +16,15 @@ const postsWithExcerpt: PostData[] = await Promise.all(
   _posts.map(async(post) => {
     const { Content } = await render(post)
     const html = await container.renderToString(Content)
+    const url = getPostUrl(post.id)
 
     return {
       id: post.id,
       title: post.data.title,
       date: post.data.date,
       tags: post.data.tags || [],
-      url: getPostUrl(post.id),
-      excerptHtml: createSafeExcerpt(html),
+      url,
+      excerptHtml: createSafeExcerpt(html, new URL(url, Astro.url)),
       pinned: post.data.pinned || false
     }
   })

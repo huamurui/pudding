@@ -79,6 +79,7 @@
   }
 
   .post-item {
+    overflow-wrap: anywhere;
     padding: 16px 20px;
     border-radius: 16px;
     margin: 8px 0;
@@ -155,6 +156,7 @@
   }
 
   .post-tag {
+    white-space: normal;
     font-size: 0.8rem;
     color: var(--text-muted);
     text-decoration: none;

@@ -1,8 +1,21 @@
 import sanitizeHtml from 'sanitize-html'
 import { extractExcerptFromHtml } from './helpers'
 
+/** Keep relative references tied to the article when its content appears on another page. */
+function resolveArticleReference(value: string, articleUrl: URL): string {
+  try {
+    const url = new URL(value, articleUrl)
+    if (url.origin === articleUrl.origin && !url.pathname.startsWith('//')) {
+      return url.pathname + url.search + url.hash
+    }
+    return url.href
+  } catch {
+    return value
+  }
+}
+
 /** Retain rich article excerpts without carrying scripts, handlers, or interactive embeds onto the home page. */
-export function sanitizePostPreviewHtml(html: string): string {
+export function sanitizePostPreviewHtml(html: string, articleUrl?: URL): string {
   return sanitizeHtml(html, {
     allowedTags: [
       ...sanitizeHtml.defaults.allowedTags,
@@ -17,7 +30,16 @@ export function sanitizePostPreviewHtml(html: string): string {
       img: ['src', 'alt', 'title', 'width', 'height', 'loading', 'decoding'],
       math: ['xmlns', 'display'],
       annotation: ['encoding'],
-      mo: ['stretchy', 'fence', 'separator', 'lspace', 'rspace', 'minsize', 'maxsize'],
+      mi: ['mathvariant'],
+      mn: ['mathvariant'],
+      mtext: ['mathvariant'],
+      mo: ['mathvariant', 'stretchy', 'fence', 'separator', 'largeop', 'lspace', 'rspace', 'minsize', 'maxsize'],
+      mfrac: ['linethickness'],
+      mover: ['accent'],
+      munder: ['accentunder'],
+      menclose: ['notation'],
+      mpadded: ['width', 'height', 'depth', 'lspace', 'voffset'],
+      mtable: ['columnalign', 'rowspacing', 'columnspacing'],
       mspace: ['width', 'height', 'depth'],
       mstyle: ['mathcolor', 'mathbackground', 'mathsize', 'mathvariant', 'displaystyle', 'scriptlevel']
     },
@@ -36,17 +58,26 @@ export function sanitizePostPreviewHtml(html: string): string {
     },
     allowedSchemes: ['http', 'https', 'mailto'],
     allowedSchemesByTag: { img: ['http', 'https'] },
+    // KaTeX's visual HTML needs SVG paths for roots and accents. Display its
+    // native MathML representation in sanitized fragments, including excerpts.
+    exclusiveFilter: frame => {
+      if (frame.tag === 'span' && frame.attribs.class === 'katex-mathml') return 'excludeTag'
+      return frame.tag === 'span' && frame.attribs.class === 'katex-html' && frame.attribs['aria-hidden'] === 'true'
+    },
     transformTags: {
-      a: (tagName, attributes) => ({
-        tagName,
-        attribs: attributes.target === '_blank'
-          ? { ...attributes, rel: 'noopener noreferrer' }
-          : attributes
-      })
+      a: (tagName, attribs) => {
+        if (articleUrl && attribs.href !== undefined) attribs.href = resolveArticleReference(attribs.href, articleUrl)
+        if (attribs.target === '_blank') attribs.rel = 'noopener noreferrer'
+        return { tagName, attribs }
+      },
+      img: (tagName, attribs) => {
+        if (articleUrl && attribs.src) attribs.src = resolveArticleReference(attribs.src, articleUrl)
+        return { tagName, attribs }
+      }
     }
   })
 }
 
-export function createSafeExcerpt(html: string): string {
-  return sanitizePostPreviewHtml(extractExcerptFromHtml(html))
+export function createSafeExcerpt(html: string, articleUrl?: URL): string {
+  return sanitizePostPreviewHtml(extractExcerptFromHtml(html), articleUrl)
 }

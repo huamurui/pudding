@@ -9,7 +9,7 @@
 
 /* 宽内容在文章栏内滚动，不撑宽整个页面。 */
 .markdown-body table,
-.markdown-body .katex-display,
+:is(.markdown-body, .post-excerpt) .katex-display,
 .markdown-body pre {
   display: block;
   max-width: 100%;
@@ -17,7 +17,7 @@
 }
 
 /* 将 KaTeX 的块间距留在滚动容器内，让积分上下限和分式完整显示。 */
-.markdown-body .katex-display {
+:is(.markdown-body, .post-excerpt) .katex-display {
   margin-block: 0;
   padding-block: 1em;
   overflow-y: hidden;
@@ -28,12 +28,6 @@
 .markdown-body svg,
 .markdown-body video {
   max-width: 100%;
-}
-
-@media (max-width: 968px) {
-  .blog-post-container :is(h1, h2, h3, h4, h5, h6)::after {
-    content: none;
-  }
 }
 
 /* 标题样式 */
@@ -433,7 +427,7 @@ article:not(.blog-post-container) a:hover:after {
 }
 
 /* 图片样式 */
-.markdown-body img {
+.markdown-body img:not(:where(.link-card__img)) {
   max-width: 100%;
   height: auto;
   border-radius: 1rem;
@@ -446,7 +440,7 @@ article:not(.blog-post-container) a:hover:after {
   /* 果冻动画 */
 }
 
-.markdown-body img:hover {
+.markdown-body img:not(:where(.link-card__img)):hover {
   transform: scale(1.02) translateY(-4px);
   /* 图片悬浮有轻微放大和上浮，非常Q弹 */
 }

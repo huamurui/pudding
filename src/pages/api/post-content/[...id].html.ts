@@ -1,7 +1,7 @@
 import { render } from 'astro:content'
 import { experimental_AstroContainer } from 'astro/container'
 import { getPublishedPosts, groupPostsByDirectory } from '@/utils/content'
-import { formatDate } from '@/utils/helpers'
+import { formatDate, getPostUrl } from '@/utils/helpers'
 import { sanitizePostPreviewHtml } from '@/utils/excerpt'
 
 function escapeHtml(text: string) {
@@ -20,7 +20,7 @@ export async function getStaticPaths() {
     .map(id => ({ params: { id } }))
 }
 
-export async function GET({ params }: { params: { id: string } }) {
+export async function GET({ params, url }: { params: { id: string }; url: URL }) {
   const posts = await getPublishedPosts()
   const cleanId = params.id
 
@@ -29,7 +29,8 @@ export async function GET({ params }: { params: { id: string } }) {
     try {
       const container = await experimental_AstroContainer.create()
       const { Content } = await render(post)
-      const html = sanitizePostPreviewHtml(await container.renderToString(Content))
+      const articleUrl = new URL(getPostUrl(post.id), url)
+      const html = sanitizePostPreviewHtml(await container.renderToString(Content), articleUrl)
 
       const wrappedHtml = `<div id="preview-wrapper" data-title="${escapeHtml(post.data.title)}" data-date="${post.data.date.toISOString()}">${html}</div>`
 
